@@ -7,12 +7,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import com.grievance.model.Grievance;
 import com.grievance.model.GrievanceHistory;
-import com.grievance.model.GrievanceStatus;
+import com.grievance.request.AssignmentRequest;
+import com.grievance.request.GrievanceCreateRequest;
+import com.grievance.request.StatusUpdateRequest;
 import com.grievance.service.GrievanceService;
 import jakarta.validation.Valid;
 import reactor.core.publisher.Flux;
@@ -29,8 +30,8 @@ public class MainController {
 	// create a grievance
 	@PostMapping("/create")
 	@ResponseStatus(HttpStatus.CREATED)
-	public Mono<Grievance> createGrievance(@Valid @RequestBody Grievance grievance) {
-		return grievanceService.createGrievance(grievance);
+	public Mono<Grievance> createGrievance(@Valid @RequestBody GrievanceCreateRequest request) {
+		return grievanceService.createGrievance(request.toGrievance());
 	}
 
 	// get grievance by id
@@ -50,18 +51,18 @@ public class MainController {
 
 	// to assign a grievance
 	@PatchMapping("/assign/{id}")
-	public Mono<Grievance> assignGrievance(@PathVariable String id, @RequestParam String assignedBy,
-			@RequestParam String assignedTo) {
+	public Mono<Grievance> assignGrievance(@PathVariable String id,
+			@Valid @RequestBody AssignmentRequest request) {
 
-		return grievanceService.assignGrievance(id, assignedBy, assignedTo);
+		return grievanceService.assignGrievance(id, request.getAssignedBy(), request.getAssignedTo());
 	}
 
 	// to update status
 	@PatchMapping("/{id}/status")
-	public Mono<Grievance> updateStatus(@PathVariable String id, @RequestParam GrievanceStatus status,
-			@RequestParam String updatedBy, @RequestParam(required = false) String remarks) {
+	public Mono<Grievance> updateStatus(@PathVariable String id,
+			@Valid @RequestBody StatusUpdateRequest request) {
 
-		return grievanceService.updateStatus(id, status, updatedBy, remarks);
+		return grievanceService.updateStatus(id, request.getStatus(), request.getUpdatedBy(), request.getRemarks());
 	}
 
 	// to get status history of grievances
