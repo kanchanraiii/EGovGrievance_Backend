@@ -24,7 +24,7 @@ public class Grievance {
 	// Assigned Later - Case Worker ID
 	private String assignedWokerId;
 	
-	@NotBlank(message="Category Code is required") // catergory code lets say is what
+	@NotBlank(message="Category Code is required") // catergory code lets say is water
 	private String categoryCode;
 	
 	@NotBlank(message="Sub Category Code is required") // then subcategory within water - sanitation, corruption etc 

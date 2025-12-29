@@ -31,7 +31,7 @@ public class GlobalErrorHandler {
                     .body(Map.of("message", ex.getMessage()));
         }
 
-        // let other RuntimeExceptions fall through
+       
         throw ex;
     }
 

@@ -54,7 +54,7 @@ public class GrievanceService {
 					assignment.setAssignedTo(assignedTo);
 					assignment.setAssignedAt(LocalDateTime.now());
 
-					// 3. save assignment → grievance → status history
+					// 3. save assignment -> grievance and status history
 					return assignmentRepository.save(assignment).then(grievanceRepository.save(grievance))
 							.flatMap(updatedGrievance -> saveStatusHistory(grievanceId, GrievanceStatus.ASSIGNED,
 									assignedBy, "Assigned to case worker").thenReturn(updatedGrievance));
