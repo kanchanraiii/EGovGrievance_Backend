@@ -16,8 +16,8 @@ public class GrievanceHistory {
     @NotBlank(message = "Grievance ID is required")
     private String grievanceId;
 
-    @NotNull(message = "Status is required")
-    private GrievanceStatus status;
+    @NotNull(message = "Status is required") // enum
+    private GrievanceStatus status; 
 
     @NotBlank(message = "Updated by user ID is required")
     private String updatedBy;   // citizen / DO / case worker

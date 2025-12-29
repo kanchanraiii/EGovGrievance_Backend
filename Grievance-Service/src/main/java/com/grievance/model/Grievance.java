@@ -18,23 +18,23 @@ public class Grievance {
 	@NotBlank(message="Citizen ID is required")
 	private String citizenId;
 	
-	@NotBlank(message="Department ID is required")
+	@NotBlank(message="Department ID is required")  // Dept ID like water, electricity etc
 	private String departmentId;
 	
-	@NotBlank(message="Assigned Worker ID is required")
+	@NotBlank(message="Assigned Worker ID is required")  // Case Worker ID
 	private String assignedWokerId;
 	
-	@NotBlank(message="Category Code is required")
+	@NotBlank(message="Category Code is required") // catergory code lets say is what
 	private String categoryCode;
 	
-	@NotBlank(message="Sub Category Code is required")
+	@NotBlank(message="Sub Category Code is required") // then subcategory within water - sanitation, corruption etc 
 	private String subCategoryCode;
 	
 	@NotBlank(message="Description is required")
 	@Size(min = 10, max = 2000, message = "Description must be between 10 and 2000 characters")
 	private String description;
     
-	@NotNull(message = "Status is required")
+	@NotNull(message = "Status is required") // enums
 	private GrievanceStatus status;
     
 	private String priority;
