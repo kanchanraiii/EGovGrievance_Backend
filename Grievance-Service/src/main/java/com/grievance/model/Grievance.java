@@ -13,15 +13,15 @@ import java.time.LocalDateTime;
 public class Grievance {
 	
 	@Id
-	private String Id;
+	private String id;
 	
 	@NotBlank(message="Citizen ID is required")
 	private String citizenId;
 	
-	@NotBlank(message="Department ID is required")  // Dept ID like water, electricity etc
+	// Dept ID like water, electricity etc - Assigned Later
 	private String departmentId;
 	
-	@NotBlank(message="Assigned Worker ID is required")  // Case Worker ID
+	// Assigned Later - Case Worker ID
 	private String assignedWokerId;
 	
 	@NotBlank(message="Category Code is required") // catergory code lets say is what
@@ -34,7 +34,7 @@ public class Grievance {
 	@Size(min = 10, max = 2000, message = "Description must be between 10 and 2000 characters")
 	private String description;
     
-	@NotNull(message = "Status is required") // enums
+	// Set in Service 
 	private GrievanceStatus status;
     
 	private String priority;
@@ -46,11 +46,11 @@ public class Grievance {
 	
 	// getters and setters
 	public String getId() {
-		return Id;
+		return id;
 	}
 
 	public void setId(String id) {
-		Id = id;
+		id = id;
 	}
 
 	public String getCitizenId() {
