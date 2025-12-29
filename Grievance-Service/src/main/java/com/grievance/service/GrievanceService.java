@@ -1,5 +1,6 @@
 package com.grievance.service;
 
+import com.grievance.exception.ServiceException;
 import com.grievance.model.*;
 import com.grievance.repository.AssignmentRepository;
 import com.grievance.repository.GrievanceRepository;
@@ -29,8 +30,10 @@ public class GrievanceService {
 		grievance.setCreatedAt(LocalDateTime.now());
 		grievance.setUpdatedAt(LocalDateTime.now());
 
-		return grievanceRepository.save(grievance).flatMap(saved -> saveStatusHistory(saved.getId(),
-				GrievanceStatus.SUBMITTED, saved.getCitizenId(), "Grievance submitted").thenReturn(saved));
+		return grievanceRepository.save(grievance)
+				.flatMap(saved -> saveStatusHistory(saved.getId(), GrievanceStatus.SUBMITTED, saved.getCitizenId(),
+						"Grievance submitted").thenReturn(saved)
+						.onErrorMap(ex -> new ServiceException("Failed to create grievance")));
 	}
 
 	// to assign a grievance - assigned by Dept Officer to a Case Worker
@@ -74,7 +77,8 @@ public class GrievanceService {
 
 	// mono to get one object of grievance - get by id
 	public Mono<Grievance> getById(String grievanceId) {
-		return grievanceRepository.findById(grievanceId);
+		return grievanceRepository.findById(grievanceId)
+				.switchIfEmpty(Mono.error(new RuntimeException("Grievance not found")));
 	}
 
 	// flux to get multiple objects - get all
@@ -84,7 +88,8 @@ public class GrievanceService {
 
 	// flux to get multiple objects - get status history
 	public Flux<GrievanceHistory> getStatusHistory(String grievanceId) {
-		return statusHistoryRepository.findByGrievanceIdOrderByUpdatedAtAsc(grievanceId);
+		return statusHistoryRepository.findByGrievanceIdOrderByUpdatedAtAsc(grievanceId)
+				.switchIfEmpty(Mono.error(new RuntimeException("Grievance not found")));
 	}
 
 	// helper function
