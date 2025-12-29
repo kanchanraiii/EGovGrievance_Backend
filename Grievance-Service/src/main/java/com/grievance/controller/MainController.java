@@ -49,7 +49,7 @@ public class MainController {
 	}
 
 	// to assign a grievance
-	@PatchMapping("/{id}/assign")
+	@PatchMapping("/assign/{id}")
 	public Mono<Grievance> assignGrievance(@PathVariable String id, @RequestParam String assignedBy,
 			@RequestParam String assignedTo) {
 
@@ -65,7 +65,7 @@ public class MainController {
 	}
 
 	// to get status history of grievances
-	@GetMapping("/{id}/history")
+	@GetMapping("/history/{id}")
 	public Flux<GrievanceHistory> getStatusHistory(@PathVariable String id) {
 
 		return grievanceService.getStatusHistory(id);
