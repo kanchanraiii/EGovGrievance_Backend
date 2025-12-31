@@ -1,63 +1,58 @@
 package com.feedback.model;
 
 import java.time.LocalDateTime;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-@Document(collection="feedback")
-public class Feedback {
+@Document(collection="ratings")
+public class Ratings {
 	
 	@Id
 	private String id;
 	
-	@NotBlank(message="Grievance Id is required")  // greivance id ref from client
-	private String grievanceId;
+	@NotBlank(message="Grievance Id is required")
+	private String grievanceId;   // grievance ref from client
 	
-	@NotBlank(message="Citizen Id is required") // citizen id ref from client
-	private String citizenId;
-	
-	@Size(min = 10, max = 2000, message = "Comment must be between 10 and 2000 characters")
-	private String comments;
+	@NotNull(message="Score is required")
+	private Integer score; // score bewteen 1-5
 	
 	private LocalDateTime submittedAt;
-	
+
 	public String getId() {
 		return id;
 	}
+
 	public void setId(String id) {
 		this.id = id;
 	}
+
 	public String getGrievanceId() {
 		return grievanceId;
 	}
+
 	public void setGrievanceId(String grievanceId) {
 		this.grievanceId = grievanceId;
 	}
-	public String getCitizenId() {
-		return citizenId;
+
+	public Integer getScore() {
+		return score;
 	}
-	public void setCitizenId(String citizenId) {
-		this.citizenId = citizenId;
+
+	public void setScore(Integer score) {
+		this.score = score;
 	}
-	public String getComments() {
-		return comments;
-	}
-	public void setComments(String comments) {
-		this.comments = comments;
-	}
+
 	public LocalDateTime getSubmittedAt() {
 		return submittedAt;
 	}
+
 	public void setSubmittedAt(LocalDateTime submittedAt) {
 		this.submittedAt = submittedAt;
 	}
-	
-	
-
+		
 }
