@@ -1,8 +1,8 @@
 package com.feedback.client;
 
 import org.springframework.web.reactive.function.client.WebClient;
-import com.grievance.exception.ResourceNotFoundException;
-import com.grievance.exception.ServiceException;
+import com.feedback.exception.ResourceNotFoundException;
+import com.feedback.exception.ServiceException;
 import org.springframework.beans.factory.annotation.Value;
 import reactor.core.publisher.Mono;
 
@@ -18,6 +18,7 @@ public class GrievanceClient {
         this.webClient = builder.baseUrl(grievanceServiceUrl).build();
     }
 	
+	// to get grievance by id
 	public Mono<GrievanceResponse> getGrievanceById(String grievanceId) {
         return webClient
                 .get()
@@ -36,16 +37,18 @@ public class GrievanceClient {
                 .bodyToMono(GrievanceResponse.class);
     }
 	
+	// to check if a grievance is resolved or not
 	public Mono<Void> validateResolvedGrievance(String grievanceId) {
         return getGrievanceById(grievanceId)
                 .flatMap(grievance -> {
                     if (!"RESOLVED".equals(grievance.getStatus())) {
                         return Mono.error(
-                                new ServiceException("Feedback allowed only for RESOLVED / CLOSED grievances"));
+                                new ServiceException("Feedback allowed only for RESOLVED"));
                     }
                     return Mono.empty();
                 });
     }
+	
 	
 
 }

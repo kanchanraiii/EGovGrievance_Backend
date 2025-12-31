@@ -12,4 +12,6 @@ public interface FeedbackRepository extends ReactiveMongoRepository<Feedback,Str
 	
 	Mono<Boolean> existsByGrievanceIdAndCitizenId(String grievanceId, String citizenId);
 	
+	Mono<Boolean> existsByGrievanceId(String grievanceId);
+	
 }

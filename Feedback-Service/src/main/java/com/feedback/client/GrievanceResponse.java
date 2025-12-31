@@ -24,6 +24,10 @@ public class GrievanceResponse {
 		this.status = status;
 	}
 	
+	public boolean isResolvedOrClosed() {
+	    return "RESOLVED".equals(status) || "CLOSED".equals(status);
+	}
+
 	
 	
 
