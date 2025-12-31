@@ -22,6 +22,7 @@ public class Feedback {
 	@NotBlank(message="Citizen Id is required") // citizen id ref from client
 	private String citizenId;
 	
+	@NotBlank(message="Comments cannot be empty")
 	@Size(min = 10, max = 2000, message = "Comment must be between 10 and 2000 characters")
 	private String comments;
 	
