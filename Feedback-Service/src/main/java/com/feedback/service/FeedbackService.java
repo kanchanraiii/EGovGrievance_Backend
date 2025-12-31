@@ -2,7 +2,9 @@ package com.feedback.service;
 
 import com.feedback.client.GrievanceClient;
 import com.feedback.exception.ServiceException;
+import com.feedback.exception.ResourceNotFoundException;
 import com.feedback.model.Feedback;
+import com.feedback.model.FeedbackStats;
 import com.feedback.model.Ratings;
 import com.feedback.model.ReopenRequest;
 import com.feedback.repository.FeedbackRepository;
@@ -11,9 +13,11 @@ import com.feedback.repository.ReopenRequestRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 @Service
 public class FeedbackService {
@@ -30,8 +34,6 @@ public class FeedbackService {
     @Autowired
     private GrievanceClient grievanceClient;
 
-    
-    // to submit a feedback 
     public Mono<Feedback> submitFeedback(Feedback feedback) {
         return grievanceClient.getGrievanceById(feedback.getGrievanceId())
                 .flatMap(grievance -> {
@@ -56,9 +58,6 @@ public class FeedbackService {
                 });
     }
 
-   
-
-    // to submit a rating
     public Mono<Ratings> submitRating(Ratings rating) {
         if (rating.getScore() < 1 || rating.getScore() > 5) {
             return Mono.error(new ServiceException("Rating must be between 1 and 5"));
@@ -87,8 +86,6 @@ public class FeedbackService {
                 });
     }
 
-   
-    // request to reopen
     public Mono<ReopenRequest> requestReopen(ReopenRequest reopenRequest) {
         return grievanceClient.getGrievanceById(reopenRequest.getGrievanceId())
                 .flatMap(grievance -> {
@@ -102,14 +99,53 @@ public class FeedbackService {
                             .existsByGrievanceId(reopenRequest.getGrievanceId())
                             .flatMap(exists -> {
                                 if (exists) {
-                                    return Mono.error(
-                                            new ServiceException("Reopen request already exists")
-                                    );
+                                    return reopenRequestRepository.findByGrievanceId(reopenRequest.getGrievanceId())
+                                            .flatMap(saved ->
+                                                    grievanceClient
+                                                            .markAsReopened(saved.getGrievanceId(), saved.getReason())
+                                                            .thenReturn(saved)
+                                            )
+                                            .switchIfEmpty(Mono.error(
+                                                    new ServiceException("Reopen request already exists")
+                                            ));
                                 }
 
                                 reopenRequest.setRequestedAt(LocalDateTime.now());
-                                return reopenRequestRepository.save(reopenRequest);
+                                return reopenRequestRepository.save(reopenRequest)
+                                        .flatMap(saved ->
+                                                grievanceClient
+                                                        .markAsReopened(saved.getGrievanceId(), saved.getReason())
+                                                        .thenReturn(saved)
+                                        );
                             });
                 });
+    }
+
+    public Mono<ReopenRequest> getReopenRequest(String grievanceId) {
+        return reopenRequestRepository.findByGrievanceId(grievanceId)
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException("Reopen request not found")));
+    }
+
+    public Flux<Feedback> getFeedbackByGrievance(String grievanceId) {
+        return feedbackRepository.findByGrievanceId(grievanceId);
+    }
+
+    public Mono<FeedbackStats> getStats() {
+
+        Mono<Long> feedbackCount = feedbackRepository.count();
+        Mono<Long> ratingCount = ratingRepository.count();
+        Mono<Double> averageRating = ratingRepository
+                .findAll()
+                .map(Ratings::getScore)
+                .collect(Collectors.averagingInt(Integer::intValue));
+        Mono<Long> reopenCount = reopenRequestRepository.count();
+
+        return Mono.zip(feedbackCount, ratingCount, averageRating, reopenCount)
+                .map(tuple -> new FeedbackStats(
+                        tuple.getT1(),
+                        tuple.getT2(),
+                        tuple.getT3(),
+                        tuple.getT4()
+                ));
     }
 }

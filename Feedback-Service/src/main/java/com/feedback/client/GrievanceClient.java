@@ -5,13 +5,13 @@ import com.feedback.exception.ResourceNotFoundException;
 import com.feedback.exception.ServiceException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.BodyInserters;
 
 import reactor.core.publisher.Mono;
 
 @Component
 public class GrievanceClient {
 	
-	// to connect to grievance service first
 	private final WebClient webClient;
 
 	public GrievanceClient(
@@ -21,7 +21,6 @@ public class GrievanceClient {
         this.webClient = builder.baseUrl(grievanceServiceUrl).build();
     }
 	
-	// to get grievance by id
 	public Mono<GrievanceResponse> getGrievanceById(String grievanceId) {
         return webClient
                 .get()
@@ -40,7 +39,6 @@ public class GrievanceClient {
                 .bodyToMono(GrievanceResponse.class);
     }
 	
-	// to check if a grievance is resolved or not
 	public Mono<Void> validateResolvedGrievance(String grievanceId) {
         return getGrievanceById(grievanceId)
                 .flatMap(grievance -> {
@@ -53,5 +51,35 @@ public class GrievanceClient {
     }
 	
 	
+    public Mono<Void> updateStatus(String grievanceId, String status, String updatedBy, String remarks) {
+        StatusUpdatePayload payload = new StatusUpdatePayload(grievanceId, status, updatedBy, remarks);
+
+        return webClient
+                .patch()
+                .uri("/api/grievances/status")
+                .body(BodyInserters.fromValue(payload))
+                .retrieve()
+                .onStatus(
+                        httpStatus -> httpStatus.is4xxClientError(),
+                        response -> Mono.error(new ResourceNotFoundException("Grievance not found"))
+                )
+                .onStatus(
+                        httpStatus -> httpStatus.is5xxServerError(),
+                        response -> Mono.error(new ServiceException("Grievance service unavailable"))
+                )
+                .bodyToMono(Void.class);
+    }
+
+    public Mono<Void> markAsReopened(String grievanceId, String remarks) {
+        return updateStatus(grievanceId, "REOPENED", "CITIZEN_REOPEN", remarks);
+    }
+
+    private record StatusUpdatePayload(
+            String grievanceId,
+            String status,
+            String updatedBy,
+            String remarks
+    ) { }
+
 
 }

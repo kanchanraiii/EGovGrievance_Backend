@@ -8,4 +8,6 @@ public interface ReopenRequestRepository extends ReactiveMongoRepository<ReopenR
 	
 	Mono<Boolean> existsByGrievanceId(String grievanceId);
 
+	Mono<ReopenRequest> findByGrievanceId(String grievanceId);
+
 }

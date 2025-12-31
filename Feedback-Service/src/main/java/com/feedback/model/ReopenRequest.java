@@ -18,15 +18,15 @@ import java.time.LocalDateTime;
 public class ReopenRequest {
 
     @Id
-    private String id;               // Request ID
+    private String id;
 
     @NotBlank(message="grievance id is required")
-    private String grievanceId;      // grievance ref
+    private String grievanceId;
 
     @Size(min=10, max=2000, message="Reason must be between 10 and 2000 chars")
-    private String reason;           // reopen reason
+    private String reason;
 
-    private LocalDateTime requestedAt; // Timestamp
+    private LocalDateTime requestedAt;
 
 	public String getId() {
 		return id;
