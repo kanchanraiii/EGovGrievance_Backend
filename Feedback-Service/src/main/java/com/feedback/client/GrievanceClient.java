@@ -4,13 +4,16 @@ import org.springframework.web.reactive.function.client.WebClient;
 import com.feedback.exception.ResourceNotFoundException;
 import com.feedback.exception.ServiceException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import reactor.core.publisher.Mono;
 
+@Component
 public class GrievanceClient {
 	
 	// to connect to grievance service first
 	private final WebClient webClient;
-	
+
 	public GrievanceClient(
             WebClient.Builder builder,
             @Value("${grievance.service.url}") String grievanceServiceUrl) {
