@@ -19,7 +19,14 @@ public class GlobalErrorHandler {
                 .body(Map.of("message", "Validation Error, Check Payload"));
     }
 
-    // 404 - business rule: resource not found
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleResourceNotFound(ResourceNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(Map.of("message", ex.getMessage()));
+    }
+
+    // 404 - business rule - resource not found
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, String>> handleNotFound(RuntimeException ex) {
 
@@ -39,7 +46,7 @@ public class GlobalErrorHandler {
     @ExceptionHandler(ServiceException.class)
     public ResponseEntity<Map<String, String>> handleService(ServiceException ex) {
         return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
                 .body(Map.of("message", ex.getMessage()));
     }
 

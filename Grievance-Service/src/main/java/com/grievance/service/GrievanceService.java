@@ -1,10 +1,11 @@
 package com.grievance.service;
 
-import com.grievance.exception.ServiceException;
 import com.grievance.model.*;
 import com.grievance.repository.AssignmentRepository;
 import com.grievance.repository.GrievanceRepository;
 import com.grievance.repository.StatusHistoryRepository;
+import com.grievance.request.GrievanceCreateRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -23,18 +24,43 @@ public class GrievanceService {
 
 	@Autowired
 	private StatusHistoryRepository statusHistoryRepository;
+	
+	@Autowired
+	private DepartmentValidationService departmentValidationService;
 
 	// to create a grievance
-	public Mono<Grievance> createGrievance(Grievance grievance) {
-		grievance.setStatus(GrievanceStatus.SUBMITTED);
-		grievance.setCreatedAt(LocalDateTime.now());
-		grievance.setUpdatedAt(LocalDateTime.now());
+	public Mono<Grievance> createGrievance(GrievanceCreateRequest request) {
 
-		return grievanceRepository.save(grievance)
-				.flatMap(saved -> saveStatusHistory(saved.getId(), GrievanceStatus.SUBMITTED, saved.getCitizenId(),
-						"Grievance submitted").thenReturn(saved)
-						.onErrorMap(ex -> new ServiceException("Failed to create grievance")));
+	    return departmentValidationService
+	            .validateDepartment(
+	                    request.getDepartmentId(),    
+	                    request.getCategoryCode(),
+	                    request.getSubCategoryCode()
+	            )
+	            .then(Mono.defer(() -> {
+
+	                Grievance grievance = new Grievance();
+	                grievance.setCitizenId(request.getCitizenId());
+	                grievance.setDepartmentId(request.getDepartmentId());
+	                grievance.setCategoryCode(request.getCategoryCode());
+	                grievance.setSubCategoryCode(request.getSubCategoryCode());
+	                grievance.setDescription(request.getDescription());
+	                grievance.setStatus(GrievanceStatus.SUBMITTED);
+	                grievance.setCreatedAt(LocalDateTime.now());
+	                grievance.setUpdatedAt(LocalDateTime.now());
+
+	                return grievanceRepository.save(grievance)
+	                        .flatMap(saved ->
+	                                saveStatusHistory(
+	                                        saved.getId(),
+	                                        GrievanceStatus.SUBMITTED,
+	                                        saved.getCitizenId(),
+	                                        "Grievance submitted"
+	                                ).thenReturn(saved)
+	                        );
+	            }));
 	}
+
 
 	// to assign a grievance - assigned by Dept Officer to a Case Worker
 	public Mono<Grievance> assignGrievance(String grievanceId, String assignedBy, String assignedTo) {

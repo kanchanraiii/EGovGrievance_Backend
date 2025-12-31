@@ -31,7 +31,7 @@ public class MainController {
 	@PostMapping("/create")
 	@ResponseStatus(HttpStatus.CREATED)
 	public Mono<Grievance> createGrievance(@Valid @RequestBody GrievanceCreateRequest request) {
-		return grievanceService.createGrievance(request.toGrievance());
+		return grievanceService.createGrievance(request);
 	}
 
 	// get grievance by id
@@ -50,19 +50,15 @@ public class MainController {
 	}
 
 	// to assign a grievance
-	@PatchMapping("/assign/{id}")
-	public Mono<Grievance> assignGrievance(@PathVariable String id,
-			@Valid @RequestBody AssignmentRequest request) {
-
-		return grievanceService.assignGrievance(id, request.getAssignedBy(), request.getAssignedTo());
+	@PatchMapping("/assign")
+	public Mono<Grievance> assignGrievance(@Valid @RequestBody AssignmentRequest request) {
+		return grievanceService.assignGrievance(request.getGrievanceId(), request.getAssignedBy(), request.getAssignedTo());
 	}
 
 	// to update status
-	@PatchMapping("/{id}/status")
-	public Mono<Grievance> updateStatus(@PathVariable String id,
-			@Valid @RequestBody StatusUpdateRequest request) {
-
-		return grievanceService.updateStatus(id, request.getStatus(), request.getUpdatedBy(), request.getRemarks());
+	@PatchMapping("/status")
+	public Mono<Grievance> updateStatus(@Valid @RequestBody StatusUpdateRequest request) {
+		return grievanceService.updateStatus(request.getGrievanceId(), request.getStatus(), request.getUpdatedBy(), request.getRemarks());
 	}
 
 	// to get status history of grievances

@@ -8,6 +8,9 @@ import lombok.Data;
 @Data
 public class StatusUpdateRequest {
 
+    @NotBlank(message = "Grievance ID is required")
+    private String grievanceId;
+
     @NotNull(message = "Status is required") // enum
     private GrievanceStatus status;
 
@@ -15,6 +18,14 @@ public class StatusUpdateRequest {
     private String updatedBy;   // citizen / DO / case worker
 
     private String remarks;
+
+	public String getGrievanceId() {
+		return grievanceId;
+	}
+
+	public void setGrievanceId(String grievanceId) {
+		this.grievanceId = grievanceId;
+	}
 
 	public GrievanceStatus getStatus() {
 		return status;

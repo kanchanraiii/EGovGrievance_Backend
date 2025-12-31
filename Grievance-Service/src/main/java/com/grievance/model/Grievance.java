@@ -4,7 +4,6 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 
@@ -36,8 +35,6 @@ public class Grievance {
     
 	// Set in Service 
 	private GrievanceStatus status;
-    
-	private String priority;
     
 	private LocalDateTime createdAt;
     
@@ -107,14 +104,6 @@ public class Grievance {
 
 	public void setStatus(GrievanceStatus status) {
 		this.status = status;
-	}
-
-	public String getPriority() {
-		return priority;
-	}
-
-	public void setPriority(String priority) {
-		this.priority = priority;
 	}
 
 	public LocalDateTime getCreatedAt() {

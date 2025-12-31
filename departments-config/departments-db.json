@@ -9,12 +9,30 @@
           "code": "ELECTRICITY",
           "name": "Electricity Services",
           "subCategories": [
-            { "code": "POWER_OUTAGE", "name": "Power Outage" },
-            { "code": "LOW_VOLTAGE", "name": "Low Voltage" },
-            { "code": "BILLING_DISPUTE", "name": "Billing Dispute" },
-            { "code": "CORRUTION", "name": "Corruption Complaint" },
-            { "code": "HARASSMENT", "name": "Harassment Complaint" },
-            { "code": "OTHER", "name": "Other" }
+            {
+              "code": "POWER_OUTAGE",
+              "name": "Power Outage"
+            },
+            {
+              "code": "LOW_VOLTAGE",
+              "name": "Low Voltage"
+            },
+            {
+              "code": "BILLING_DISPUTE",
+              "name": "Billing Dispute"
+            },
+            {
+              "code": "CORRUTION",
+              "name": "Corruption Complaint"
+            },
+            {
+              "code": "HARASSMENT",
+              "name": "Harassment Complaint"
+            },
+            {
+              "code": "OTHER",
+              "name": "Other"
+            }
           ]
         }
       ]
@@ -28,12 +46,30 @@
           "code": "INTERNAL_SECURITY",
           "name": "Internal Security",
           "subCategories": [
-            { "code": "POLICE_INACTION", "name": "Police Inaction" },
-            { "code": "PASSPORT_DELAY", "name": "Passport Delay" },
-            { "code": "SECURITY_THREAT", "name": "Security Threat" },
-            { "code": "CORRUTION", "name": "Corruption Complaint" },
-            { "code": "HARASSMENT", "name": "Harassment Complaint" },
-            { "code": "OTHER", "name": "Other" }
+            {
+              "code": "POLICE_INACTION",
+              "name": "Police Inaction"
+            },
+            {
+              "code": "PASSPORT_DELAY",
+              "name": "Passport Delay"
+            },
+            {
+              "code": "SECURITY_THREAT",
+              "name": "Security Threat"
+            },
+            {
+              "code": "CORRUTION",
+              "name": "Corruption Complaint"
+            },
+            {
+              "code": "HARASSMENT",
+              "name": "Harassment Complaint"
+            },
+            {
+              "code": "OTHER",
+              "name": "Other"
+            }
           ]
         }
       ]
@@ -47,12 +83,30 @@
           "code": "TAXATION",
           "name": "Taxation & Finance",
           "subCategories": [
-            { "code": "IT_REFUND_DELAY", "name": "Income Tax Refund Delay" },
-            { "code": "GST_ISSUE", "name": "GST Issue" },
-            { "code": "PENSION_DELAY", "name": "Pension Delay" },
-            { "code": "CORRUTION", "name": "Corruption Complaint" },
-            { "code": "HARASSMENT", "name": "Harassment Complaint" },
-            { "code": "OTHER", "name": "Other" }
+            {
+              "code": "IT_REFUND_DELAY",
+              "name": "Income Tax Refund Delay"
+            },
+            {
+              "code": "GST_ISSUE",
+              "name": "GST Issue"
+            },
+            {
+              "code": "PENSION_DELAY",
+              "name": "Pension Delay"
+            },
+            {
+              "code": "CORRUTION",
+              "name": "Corruption Complaint"
+            },
+            {
+              "code": "HARASSMENT",
+              "name": "Harassment Complaint"
+            },
+            {
+              "code": "OTHER",
+              "name": "Other"
+            }
           ]
         }
       ]
@@ -66,12 +120,30 @@
           "code": "PUBLIC_HEALTH",
           "name": "Public Health Services",
           "subCategories": [
-            { "code": "HOSPITAL_SERVICE", "name": "Hospital Services" },
-            { "code": "MEDICINE_SHORTAGE", "name": "Medicine Shortage" },
-            { "code": "STAFF_MISCONDUCT", "name": "Staff Misconduct" },
-            { "code": "CORRUTION", "name": "Corruption Complaint" },
-            { "code": "HARASSMENT", "name": "Harassment Complaint" },
-            { "code": "OTHER", "name": "Other" }
+            {
+              "code": "HOSPITAL_SERVICE",
+              "name": "Hospital Services"
+            },
+            {
+              "code": "MEDICINE_SHORTAGE",
+              "name": "Medicine Shortage"
+            },
+            {
+              "code": "STAFF_MISCONDUCT",
+              "name": "Staff Misconduct"
+            },
+            {
+              "code": "CORRUTION",
+              "name": "Corruption Complaint"
+            },
+            {
+              "code": "HARASSMENT",
+              "name": "Harassment Complaint"
+            },
+            {
+              "code": "OTHER",
+              "name": "Other"
+            }
           ]
         }
       ]
@@ -85,12 +157,30 @@
           "code": "EDUCATION_SERVICES",
           "name": "Education Services",
           "subCategories": [
-            { "code": "SCHOLARSHIP_DELAY", "name": "Scholarship Delay" },
-            { "code": "ADMISSION_ISSUE", "name": "Admission Issue" },
-            { "code": "EXAM_PROBLEM", "name": "Examination Problem" },
-            { "code": "CORRUTION", "name": "Corruption Complaint" },
-            { "code": "HARASSMENT", "name": "Harassment Complaint" },
-            { "code": "OTHER", "name": "Other" }
+            {
+              "code": "SCHOLARSHIP_DELAY",
+              "name": "Scholarship Delay"
+            },
+            {
+              "code": "ADMISSION_ISSUE",
+              "name": "Admission Issue"
+            },
+            {
+              "code": "EXAM_PROBLEM",
+              "name": "Examination Problem"
+            },
+            {
+              "code": "CORRUTION",
+              "name": "Corruption Complaint"
+            },
+            {
+              "code": "HARASSMENT",
+              "name": "Harassment Complaint"
+            },
+            {
+              "code": "OTHER",
+              "name": "Other"
+            }
           ]
         }
       ]
@@ -104,12 +194,30 @@
           "code": "RAIL_SERVICES",
           "name": "Railway Services",
           "subCategories": [
-            { "code": "TRAIN_DELAY", "name": "Train Delay" },
-            { "code": "CLEANLINESS", "name": "Cleanliness Issue" },
-            { "code": "TICKET_REFUND", "name": "Ticket Refund Issue" },
-            { "code": "CORRUTION", "name": "Corruption Complaint" },
-            { "code": "HARASSMENT", "name": "Harassment Complaint" },
-            { "code": "OTHER", "name": "Other" }
+            {
+              "code": "TRAIN_DELAY",
+              "name": "Train Delay"
+            },
+            {
+              "code": "CLEANLINESS",
+              "name": "Cleanliness Issue"
+            },
+            {
+              "code": "TICKET_REFUND",
+              "name": "Ticket Refund Issue"
+            },
+            {
+              "code": "CORRUTION",
+              "name": "Corruption Complaint"
+            },
+            {
+              "code": "HARASSMENT",
+              "name": "Harassment Complaint"
+            },
+            {
+              "code": "OTHER",
+              "name": "Other"
+            }
           ]
         }
       ]
@@ -123,12 +231,30 @@
           "code": "HIGHWAYS",
           "name": "Highway Infrastructure",
           "subCategories": [
-            { "code": "POTHOLES", "name": "Potholes" },
-            { "code": "TOLL_PROBLEM", "name": "Toll Plaza Problem" },
-            { "code": "ACCIDENT_ZONE", "name": "Accident Prone Area" },
-            { "code": "CORRUTION", "name": "Corruption Complaint" },
-            { "code": "HARASSMENT", "name": "Harassment Complaint" },
-            { "code": "OTHER", "name": "Other" }
+            {
+              "code": "POTHOLES",
+              "name": "Potholes"
+            },
+            {
+              "code": "TOLL_PROBLEM",
+              "name": "Toll Plaza Problem"
+            },
+            {
+              "code": "ACCIDENT_ZONE",
+              "name": "Accident Prone Area"
+            },
+            {
+              "code": "CORRUTION",
+              "name": "Corruption Complaint"
+            },
+            {
+              "code": "HARASSMENT",
+              "name": "Harassment Complaint"
+            },
+            {
+              "code": "OTHER",
+              "name": "Other"
+            }
           ]
         }
       ]
@@ -142,12 +268,30 @@
           "code": "WATER",
           "name": "Water Resources",
           "subCategories": [
-            { "code": "NO_WATER", "name": "No Water Supply" },
-            { "code": "WATER_QUALITY", "name": "Poor Water Quality" },
-            { "code": "PIPE_DAMAGE", "name": "Pipeline Damage" },
-            { "code": "CORRUTION", "name": "Corruption Complaint" },
-            { "code": "HARASSMENT", "name": "Harassment Complaint" },
-            { "code": "OTHER", "name": "Other" }
+            {
+              "code": "NO_WATER",
+              "name": "No Water Supply"
+            },
+            {
+              "code": "WATER_QUALITY",
+              "name": "Poor Water Quality"
+            },
+            {
+              "code": "PIPE_DAMAGE",
+              "name": "Pipeline Damage"
+            },
+            {
+              "code": "CORRUTION",
+              "name": "Corruption Complaint"
+            },
+            {
+              "code": "HARASSMENT",
+              "name": "Harassment Complaint"
+            },
+            {
+              "code": "OTHER",
+              "name": "Other"
+            }
           ]
         }
       ]
@@ -161,12 +305,30 @@
           "code": "FARMER_SCHEMES",
           "name": "Farmer Welfare Schemes",
           "subCategories": [
-            { "code": "PMKISAN_DELAY", "name": "PM-KISAN Delay" },
-            { "code": "CROP_INSURANCE", "name": "Crop Insurance Issue" },
-            { "code": "SEED_QUALITY", "name": "Seed Quality Issue" },
-            { "code": "CORRUTION", "name": "Corruption Complaint" },
-            { "code": "HARASSMENT", "name": "Harassment Complaint" },
-            { "code": "OTHER", "name": "Other" }
+            {
+              "code": "PMKISAN_DELAY",
+              "name": "PM-KISAN Delay"
+            },
+            {
+              "code": "CROP_INSURANCE",
+              "name": "Crop Insurance Issue"
+            },
+            {
+              "code": "SEED_QUALITY",
+              "name": "Seed Quality Issue"
+            },
+            {
+              "code": "CORRUTION",
+              "name": "Corruption Complaint"
+            },
+            {
+              "code": "HARASSMENT",
+              "name": "Harassment Complaint"
+            },
+            {
+              "code": "OTHER",
+              "name": "Other"
+            }
           ]
         }
       ]
@@ -180,17 +342,34 @@
           "code": "EMPLOYMENT",
           "name": "Employment Services",
           "subCategories": [
-            { "code": "EPFO_DELAY", "name": "EPFO Settlement Delay" },
-            { "code": "ESIC_ISSUE", "name": "ESIC Issue" },
-            { "code": "WAGE_DISPUTE", "name": "Wage Dispute" },
-            { "code": "CORRUTION", "name": "Corruption Complaint" },
-            { "code": "HARASSMENT", "name": "Harassment Complaint" },
-            { "code": "OTHER", "name": "Other" }
+            {
+              "code": "EPFO_DELAY",
+              "name": "EPFO Settlement Delay"
+            },
+            {
+              "code": "ESIC_ISSUE",
+              "name": "ESIC Issue"
+            },
+            {
+              "code": "WAGE_DISPUTE",
+              "name": "Wage Dispute"
+            },
+            {
+              "code": "CORRUTION",
+              "name": "Corruption Complaint"
+            },
+            {
+              "code": "HARASSMENT",
+              "name": "Harassment Complaint"
+            },
+            {
+              "code": "OTHER",
+              "name": "Other"
+            }
           ]
         }
       ]
     },
-
     {
       "id": "DEFENCE",
       "name": "Ministry of Defence",
@@ -200,12 +379,30 @@
           "code": "DEFENCE_WELFARE",
           "name": "Defence Welfare",
           "subCategories": [
-            { "code": "PENSION", "name": "Defence Pension Issue" },
-            { "code": "CSD", "name": "CSD Canteen Issue" },
-            { "code": "SERVICE_RECORD", "name": "Service Record Issue" },
-            { "code": "CORRUTION", "name": "Corruption Complaint" },
-            { "code": "HARASSMENT", "name": "Harassment Complaint" },
-            { "code": "OTHER", "name": "Other" }
+            {
+              "code": "PENSION",
+              "name": "Defence Pension Issue"
+            },
+            {
+              "code": "CSD",
+              "name": "CSD Canteen Issue"
+            },
+            {
+              "code": "SERVICE_RECORD",
+              "name": "Service Record Issue"
+            },
+            {
+              "code": "CORRUTION",
+              "name": "Corruption Complaint"
+            },
+            {
+              "code": "HARASSMENT",
+              "name": "Harassment Complaint"
+            },
+            {
+              "code": "OTHER",
+              "name": "Other"
+            }
           ]
         }
       ]
@@ -219,12 +416,30 @@
           "code": "CONSULAR",
           "name": "Consular Services",
           "subCategories": [
-            { "code": "VISA_DELAY", "name": "Visa Delay" },
-            { "code": "OCI_CARD", "name": "OCI Card Issue" },
-            { "code": "ATTESTATION", "name": "Document Attestation Issue" },
-            { "code": "CORRUTION", "name": "Corruption Complaint" },
-            { "code": "HARASSMENT", "name": "Harassment Complaint" },
-            { "code": "OTHER", "name": "Other" }
+            {
+              "code": "VISA_DELAY",
+              "name": "Visa Delay"
+            },
+            {
+              "code": "OCI_CARD",
+              "name": "OCI Card Issue"
+            },
+            {
+              "code": "ATTESTATION",
+              "name": "Document Attestation Issue"
+            },
+            {
+              "code": "CORRUTION",
+              "name": "Corruption Complaint"
+            },
+            {
+              "code": "HARASSMENT",
+              "name": "Harassment Complaint"
+            },
+            {
+              "code": "OTHER",
+              "name": "Other"
+            }
           ]
         }
       ]
@@ -238,17 +453,34 @@
           "code": "DIGITAL",
           "name": "Digital Services",
           "subCategories": [
-            { "code": "AADHAAR", "name": "Aadhaar Issue" },
-            { "code": "CYBER_CRIME", "name": "Cyber Crime" },
-            { "code": "DIGITAL_SIGN", "name": "Digital Signature Issue" },
-            { "code": "CORRUTION", "name": "Corruption Complaint" },
-            { "code": "HARASSMENT", "name": "Harassment Complaint" },
-            { "code": "OTHER", "name": "Other" }
+            {
+              "code": "AADHAAR",
+              "name": "Aadhaar Issue"
+            },
+            {
+              "code": "CYBER_CRIME",
+              "name": "Cyber Crime"
+            },
+            {
+              "code": "DIGITAL_SIGN",
+              "name": "Digital Signature Issue"
+            },
+            {
+              "code": "CORRUTION",
+              "name": "Corruption Complaint"
+            },
+            {
+              "code": "HARASSMENT",
+              "name": "Harassment Complaint"
+            },
+            {
+              "code": "OTHER",
+              "name": "Other"
+            }
           ]
         }
       ]
     },
-
     {
       "id": "ENVIRONMENT",
       "name": "Ministry of Environment, Forest and Climate Change",
@@ -258,17 +490,34 @@
           "code": "ENVIRONMENT",
           "name": "Environmental Issues",
           "subCategories": [
-            { "code": "POLLUTION", "name": "Pollution Issue" },
-            { "code": "TREE_CUTTING", "name": "Illegal Tree Cutting" },
-            { "code": "WILDLIFE", "name": "Wildlife Protection Issue" },
-            { "code": "CORRUTION", "name": "Corruption Complaint" },
-            { "code": "HARASSMENT", "name": "Harassment Complaint" },
-            { "code": "OTHER", "name": "Other" }
+            {
+              "code": "POLLUTION",
+              "name": "Pollution Issue"
+            },
+            {
+              "code": "TREE_CUTTING",
+              "name": "Illegal Tree Cutting"
+            },
+            {
+              "code": "WILDLIFE",
+              "name": "Wildlife Protection Issue"
+            },
+            {
+              "code": "CORRUTION",
+              "name": "Corruption Complaint"
+            },
+            {
+              "code": "HARASSMENT",
+              "name": "Harassment Complaint"
+            },
+            {
+              "code": "OTHER",
+              "name": "Other"
+            }
           ]
         }
       ]
     },
-
     {
       "id": "PETROLEUM",
       "name": "Ministry of Petroleum and Natural Gas",
@@ -278,17 +527,34 @@
           "code": "FUEL",
           "name": "Fuel Services",
           "subCategories": [
-            { "code": "LPG_DELAY", "name": "LPG Delivery Delay" },
-            { "code": "PETROL_OVERCHARGE", "name": "Overcharging" },
-            { "code": "SUBSIDY", "name": "Subsidy Issue" },
-            { "code": "CORRUTION", "name": "Corruption Complaint" },
-            { "code": "HARASSMENT", "name": "Harassment Complaint" },
-            { "code": "OTHER", "name": "Other" }
+            {
+              "code": "LPG_DELAY",
+              "name": "LPG Delivery Delay"
+            },
+            {
+              "code": "PETROL_OVERCHARGE",
+              "name": "Overcharging"
+            },
+            {
+              "code": "SUBSIDY",
+              "name": "Subsidy Issue"
+            },
+            {
+              "code": "CORRUTION",
+              "name": "Corruption Complaint"
+            },
+            {
+              "code": "HARASSMENT",
+              "name": "Harassment Complaint"
+            },
+            {
+              "code": "OTHER",
+              "name": "Other"
+            }
           ]
         }
       ]
     },
-
     {
       "id": "HOUSING",
       "name": "Ministry of Housing and Urban Affairs",
@@ -298,18 +564,35 @@
           "code": "URBAN",
           "name": "Urban Development",
           "subCategories": [
-            { "code": "HOUSING_DELAY", "name": "Housing Delay" },
-            { "code": "SEWERAGE", "name": "Sewerage Problem" },
-            { "code": "SMART_CITY", "name": "Smart City Project Issue" },
-            { "code": "CORRUTION", "name": "Corruption Complaint" },
-            { "code": "HARASSMENT", "name": "Harassment Complaint" },
-            { "code": "OTHER", "name": "Other" }
+            {
+              "code": "HOUSING_DELAY",
+              "name": "Housing Delay"
+            },
+            {
+              "code": "SEWERAGE",
+              "name": "Sewerage Problem"
+            },
+            {
+              "code": "SMART_CITY",
+              "name": "Smart City Project Issue"
+            },
+            {
+              "code": "CORRUTION",
+              "name": "Corruption Complaint"
+            },
+            {
+              "code": "HARASSMENT",
+              "name": "Harassment Complaint"
+            },
+            {
+              "code": "OTHER",
+              "name": "Other"
+            }
           ]
         }
       ]
     }
   ],
-
   "stateGovernmentDepartments": [
     {
       "id": "STATE_ELECTRICITY",
@@ -320,9 +603,18 @@
           "code": "POWER_SUPPLY",
           "name": "Power Supply Issues",
           "subCategories": [
-            { "code": "NO_POWER", "name": "No Power Supply" },
-            { "code": "LOW_VOLTAGE", "name": "Low Voltage" },
-            { "code": "METER_FAULT", "name": "Faulty Meter" }
+            {
+              "code": "NO_POWER",
+              "name": "No Power Supply"
+            },
+            {
+              "code": "LOW_VOLTAGE",
+              "name": "Low Voltage"
+            },
+            {
+              "code": "METER_FAULT",
+              "name": "Faulty Meter"
+            }
           ]
         }
       ]
@@ -336,9 +628,18 @@
           "code": "ROAD_INFRASTRUCTURE",
           "name": "Road Infrastructure",
           "subCategories": [
-            { "code": "POTHOLES", "name": "Potholes" },
-            { "code": "ROAD_DAMAGE", "name": "Damaged Roads" },
-            { "code": "BRIDGE_REPAIR", "name": "Bridge Repair Issue" }
+            {
+              "code": "POTHOLES",
+              "name": "Potholes"
+            },
+            {
+              "code": "ROAD_DAMAGE",
+              "name": "Damaged Roads"
+            },
+            {
+              "code": "BRIDGE_REPAIR",
+              "name": "Bridge Repair Issue"
+            }
           ]
         }
       ]
@@ -352,9 +653,18 @@
           "code": "HOSPITAL_SERVICES",
           "name": "Hospital Services",
           "subCategories": [
-            { "code": "DOCTOR_ABSENT", "name": "Doctor Absent" },
-            { "code": "MEDICINE_SHORTAGE", "name": "Medicine Shortage" },
-            { "code": "STAFF_BEHAVIOR", "name": "Staff Misbehavior" }
+            {
+              "code": "DOCTOR_ABSENT",
+              "name": "Doctor Absent"
+            },
+            {
+              "code": "MEDICINE_SHORTAGE",
+              "name": "Medicine Shortage"
+            },
+            {
+              "code": "STAFF_BEHAVIOR",
+              "name": "Staff Misbehavior"
+            }
           ]
         }
       ]
@@ -368,9 +678,18 @@
           "code": "SCHOOL_EDUCATION",
           "name": "School Education Issues",
           "subCategories": [
-            { "code": "TEACHER_ABSENT", "name": "Teacher Absent" },
-            { "code": "INFRASTRUCTURE", "name": "Poor Infrastructure" },
-            { "code": "MIDDAY_MEAL", "name": "Midday Meal Issue" }
+            {
+              "code": "TEACHER_ABSENT",
+              "name": "Teacher Absent"
+            },
+            {
+              "code": "INFRASTRUCTURE",
+              "name": "Poor Infrastructure"
+            },
+            {
+              "code": "MIDDAY_MEAL",
+              "name": "Midday Meal Issue"
+            }
           ]
         }
       ]
@@ -384,9 +703,18 @@
           "code": "TRANSPORT_SERVICES",
           "name": "Transport Services",
           "subCategories": [
-            { "code": "DL_DELAY", "name": "Driving Licence Delay" },
-            { "code": "RC_ISSUE", "name": "Registration Certificate Issue" },
-            { "code": "BUS_SERVICE", "name": "Public Bus Service Issue" }
+            {
+              "code": "DL_DELAY",
+              "name": "Driving Licence Delay"
+            },
+            {
+              "code": "RC_ISSUE",
+              "name": "Registration Certificate Issue"
+            },
+            {
+              "code": "BUS_SERVICE",
+              "name": "Public Bus Service Issue"
+            }
           ]
         }
       ]
@@ -400,8 +728,14 @@
           "code": "LAND_RECORDS",
           "name": "Land & Revenue Records",
           "subCategories": [
-            { "code": "LAND_MUTATION", "name": "Land Mutation Delay" },
-            { "code": "RECORD_CORRECTION", "name": "Record Correction Issue" },
+            {
+              "code": "LAND_MUTATION",
+              "name": "Land Mutation Delay"
+            },
+            {
+              "code": "RECORD_CORRECTION",
+              "name": "Record Correction Issue"
+            },
             {
               "code": "CERTIFICATE_DELAY",
               "name": "Certificate Issuance Delay"
@@ -419,9 +753,18 @@
           "code": "URBAN_SERVICES",
           "name": "Urban Civic Services",
           "subCategories": [
-            { "code": "WATER_SUPPLY", "name": "Water Supply Issue" },
-            { "code": "GARBAGE", "name": "Garbage Not Collected" },
-            { "code": "STREET_LIGHT", "name": "Street Light Not Working" }
+            {
+              "code": "WATER_SUPPLY",
+              "name": "Water Supply Issue"
+            },
+            {
+              "code": "GARBAGE",
+              "name": "Garbage Not Collected"
+            },
+            {
+              "code": "STREET_LIGHT",
+              "name": "Street Light Not Working"
+            }
           ]
         }
       ]
@@ -435,9 +778,18 @@
           "code": "RURAL_SCHEMES",
           "name": "Rural Development Schemes",
           "subCategories": [
-            { "code": "MNREGA_PAYMENT", "name": "MNREGA Payment Delay" },
-            { "code": "RURAL_ROADS", "name": "Rural Road Issue" },
-            { "code": "SCHEME_DELAY", "name": "Scheme Implementation Delay" }
+            {
+              "code": "MNREGA_PAYMENT",
+              "name": "MNREGA Payment Delay"
+            },
+            {
+              "code": "RURAL_ROADS",
+              "name": "Rural Road Issue"
+            },
+            {
+              "code": "SCHEME_DELAY",
+              "name": "Scheme Implementation Delay"
+            }
           ]
         }
       ]
@@ -451,9 +803,18 @@
           "code": "LAW_AND_ORDER",
           "name": "Law and Order",
           "subCategories": [
-            { "code": "FIR_DELAY", "name": "Delay in FIR Registration" },
-            { "code": "POLICE_MISCONDUCT", "name": "Police Misconduct" },
-            { "code": "NO_ACTION", "name": "No Action Taken" }
+            {
+              "code": "FIR_DELAY",
+              "name": "Delay in FIR Registration"
+            },
+            {
+              "code": "POLICE_MISCONDUCT",
+              "name": "Police Misconduct"
+            },
+            {
+              "code": "NO_ACTION",
+              "name": "No Action Taken"
+            }
           ]
         }
       ]
@@ -467,9 +828,44 @@
           "code": "PUBLIC_DISTRIBUTION",
           "name": "Public Distribution System",
           "subCategories": [
-            { "code": "RATION_CARD", "name": "Ration Card Issue" },
-            { "code": "FAIR_PRICE_SHOP", "name": "Fair Price Shop Issue" },
-            { "code": "GRAIN_QUALITY", "name": "Poor Quality Grains" }
+            {
+              "code": "RATION_CARD",
+              "name": "Ration Card Issue"
+            },
+            {
+              "code": "FAIR_PRICE_SHOP",
+              "name": "Fair Price Shop Issue"
+            },
+            {
+              "code": "GRAIN_QUALITY",
+              "name": "Poor Quality Grains"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ST-TN-WATER-001",
+      "state": "Tamil Nadu",
+      "name": "Tamil Nadu Water Supply Department",
+      "level": "STATE",
+      "categories": [
+        {
+          "code": "WATER",
+          "name": "Water Supply",
+          "subCategories": [
+            {
+              "code": "NO_SUPPLY",
+              "name": "No Water Supply"
+            },
+            {
+              "code": "LOW_PRESSURE",
+              "name": "Low Pressure"
+            },
+            {
+              "code": "PIPE_DAMAGE",
+              "name": "Pipe Damage"
+            }
           ]
         }
       ]
