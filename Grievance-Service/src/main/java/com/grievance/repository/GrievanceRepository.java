@@ -1,8 +1,13 @@
 package com.grievance.repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import com.grievance.model.Grievance;
+import com.grievance.model.GrievanceStatus;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -15,5 +20,11 @@ public interface GrievanceRepository  extends ReactiveMongoRepository<Grievance,
     Flux<Grievance> findByStatus(String status);
 
 	Mono<Grievance> findById(ObjectId objectId);
+	
+	// for SLA
+	Flux<Grievance> findByStatusInAndAssignedAtBeforeAndEscalatedFalse(
+	        List<GrievanceStatus> statuses,
+	        LocalDateTime time
+	    );
 
 }

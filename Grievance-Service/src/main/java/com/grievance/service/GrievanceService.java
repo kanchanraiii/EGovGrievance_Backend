@@ -46,6 +46,7 @@ public class GrievanceService {
 	                grievance.setSubCategoryCode(request.getSubCategoryCode());
 	                grievance.setDescription(request.getDescription());
 	                grievance.setStatus(GrievanceStatus.SUBMITTED);
+	                grievance.setEscalated(false);
 	                grievance.setCreatedAt(LocalDateTime.now());
 	                grievance.setUpdatedAt(LocalDateTime.now());
 
@@ -71,6 +72,7 @@ public class GrievanceService {
 					// 1️. update grievance state
 					grievance.setAssignedWokerId(assignedTo);
 					grievance.setStatus(GrievanceStatus.ASSIGNED);
+					grievance.setAssignedAt(LocalDateTime.now());
 					grievance.setUpdatedAt(LocalDateTime.now());
 
 					// 2️. create assignment record
@@ -131,5 +133,38 @@ public class GrievanceService {
 
 		return statusHistoryRepository.save(history);
 	}
+	
+	// function to check if SLA is breached
+	private boolean isSLABreached(Grievance grievance, int slaDays) {
+		return grievance.getAssignedAt() != null &&
+		           grievance.getAssignedAt().isBefore(LocalDateTime.now().minusDays(slaDays));
+	}
+	
+	// escalation method
+	public Mono<Grievance> escalateGrievance(String grievanceId, String escalatedBy) {
+
+	    return grievanceRepository.findById(grievanceId)
+	        .flatMap(grievance -> {
+
+	            if (grievance.isEscalated()) {
+	                return Mono.just(grievance);
+	            }
+
+	            grievance.setStatus(GrievanceStatus.ESCALATED);
+	            grievance.setEscalated(true);
+	            grievance.setUpdatedAt(LocalDateTime.now());
+
+	        return grievanceRepository.save(grievance)
+	                .flatMap(updated ->
+	                    saveStatusHistory(
+	                        grievanceId,
+	                        GrievanceStatus.ESCALATED,
+	                        escalatedBy,
+	                        "SLA breached escalated to supervisory officer"
+	                    ).thenReturn(updated)
+	                );
+	        });
+	}
+
 
 }

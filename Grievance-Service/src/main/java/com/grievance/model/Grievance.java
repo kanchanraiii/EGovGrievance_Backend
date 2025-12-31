@@ -39,8 +39,29 @@ public class Grievance {
 	private LocalDateTime createdAt;
     
 	private LocalDateTime updatedAt;
+	
+	// SLA reated
+	private LocalDateTime assignedAt;
+	private boolean escalated;
+
 
 	
+	public LocalDateTime getAssignedAt() {
+		return assignedAt;
+	}
+
+	public void setAssignedAt(LocalDateTime assignedAt) {
+		this.assignedAt = assignedAt;
+	}
+
+	public boolean isEscalated() {
+		return escalated;
+	}
+
+	public void setEscalated(boolean escalated) {
+		this.escalated = escalated;
+	}
+
 	// getters and setters
 	public String getId() {
 		return id;
