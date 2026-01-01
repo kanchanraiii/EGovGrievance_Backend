@@ -25,7 +25,7 @@ class GlobalErrorHandlerTest {
 
     @Test
     void handleResourceNotFoundReturns404() {
-        var response = handler.handleResourceNotFound(new ResourceNotFoundException("not found"));
+        var response = handler.handleNotFound(new ResourceNotFoundException("not found"));
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).containsEntry("message", "not found");
     }
