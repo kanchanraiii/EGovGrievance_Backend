@@ -4,6 +4,7 @@ import com.storage.model.FileMetadata;
 import com.storage.service.StorageService;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.multipart.FilePart;
@@ -11,6 +12,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/files")
@@ -25,12 +28,13 @@ public class MainController {
 
     // to upload a file
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Mono<String> upload(
+    public Mono<Map<String, String>> upload(
             @RequestPart("file") FilePart file,
             @RequestPart("grievanceId") @NotBlank String grievanceId,
             @RequestPart("uploadedBy") @NotBlank String uploadedBy) {
 
-        return storageService.upload(file, grievanceId, uploadedBy);
+        return storageService.upload(file, grievanceId, uploadedBy)
+                .map(id -> Map.of("fileId", id));
     }
 
     
