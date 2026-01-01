@@ -25,8 +25,11 @@ public class GrievanceService {
 	@Autowired
 	private StatusHistoryRepository statusHistoryRepository;
 	
+    @Autowired
+    private DepartmentValidationService departmentValidationService;
+
 	@Autowired
-	private DepartmentValidationService departmentValidationService;
+	private GrievanceEventPublisher grievanceEventPublisher;
 
 	// to create a grievance
 	public Mono<Grievance> createGrievance(GrievanceCreateRequest request) {
@@ -57,8 +60,11 @@ public class GrievanceService {
 	                                        GrievanceStatus.SUBMITTED,
 	                                        saved.getCitizenId(),
 	                                        "Grievance submitted"
-	                                ).thenReturn(saved)
-	                        );
+	                                ).thenReturn(saved))
+	                        .flatMap(saved ->
+	                                grievanceEventPublisher
+	                                        .publishStatusChange(saved, GrievanceStatus.SUBMITTED, "Grievance submitted")
+	                                        .thenReturn(saved));
 	            }));
 	}
 
@@ -85,7 +91,11 @@ public class GrievanceService {
 					// 3. save assignment -> grievance and status history
 					return assignmentRepository.save(assignment).then(grievanceRepository.save(grievance))
 							.flatMap(updatedGrievance -> saveStatusHistory(grievanceId, GrievanceStatus.ASSIGNED,
-									assignedBy, "Assigned to case worker").thenReturn(updatedGrievance));
+									assignedBy, "Assigned to case worker").thenReturn(updatedGrievance))
+							.flatMap(updatedGrievance -> grievanceEventPublisher
+									.publishStatusChange(updatedGrievance, GrievanceStatus.ASSIGNED,
+											"Assigned to case worker " + assignedTo)
+									.thenReturn(updatedGrievance));
 				});
 	}
 
@@ -99,7 +109,10 @@ public class GrievanceService {
 					grievance.setUpdatedAt(LocalDateTime.now());
 
 					return grievanceRepository.save(grievance).flatMap(
-							updated -> saveStatusHistory(grievanceId, status, updatedBy, remarks).thenReturn(updated));
+							updated -> saveStatusHistory(grievanceId, status, updatedBy, remarks).thenReturn(updated))
+							.flatMap(updated -> grievanceEventPublisher
+									.publishStatusChange(updated, status, remarks)
+									.thenReturn(updated));
 				});
 	}
 
@@ -162,7 +175,11 @@ public class GrievanceService {
 	                        escalatedBy,
 	                        "SLA breached escalated to supervisory officer"
 	                    ).thenReturn(updated)
-	                );
+	                )
+	                .flatMap(updated -> grievanceEventPublisher
+	                        .publishStatusChange(updated, GrievanceStatus.ESCALATED,
+	                                "We escalated your grievance for quicker attention")
+	                        .thenReturn(updated));
 	        });
 	}
 
