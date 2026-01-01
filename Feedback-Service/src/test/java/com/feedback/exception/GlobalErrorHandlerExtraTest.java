@@ -18,8 +18,10 @@ class GlobalErrorHandlerExtraTest {
     }
 
     @Test
-    void handleNotFoundRethrowsWhenMessageNotMatching() {
+    void handleNotFoundReturns404() {
         RuntimeException ex = new RuntimeException("other error");
-        assertThatThrownBy(() -> handler.handleNotFound(ex)).isSameAs(ex);
+        var response = handler.handleNotFound(ex);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).containsEntry("message", "other error");
     }
 }

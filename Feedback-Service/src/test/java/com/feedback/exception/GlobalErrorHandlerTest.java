@@ -20,7 +20,8 @@ class GlobalErrorHandlerTest {
 
         var response = handler.handleValidation(ex);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).containsEntry("message", "Validation Error, Check Payload");
+        assertThat(response.getBody()).containsEntry("message", "Validation failed");
+        assertThat(response.getBody()).containsKey("details");
     }
 
     @Test
