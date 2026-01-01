@@ -26,36 +26,44 @@ public class MainController {
 	@Autowired
 	private FeedbackService feedbackService;
 
+	
+	// to add a feedback
 	@PostMapping("/add-feedback")
 	@ResponseStatus(HttpStatus.CREATED)
 	public Mono<Feedback> submitFeedback(@Valid @RequestBody Feedback feedback) {
 		return feedbackService.submitFeedback(feedback);
 	}
 
+	
+	// to get feedback by grievance id
 	@GetMapping("/grievance/{grievanceId}")
 	@ResponseStatus(HttpStatus.OK)
 	public Flux<Feedback> getFeedbackByGrievance(@PathVariable String grievanceId) {
 		return feedbackService.getFeedbackByGrievance(grievanceId);
 	}
 
+	// to add ratings
 	@PostMapping("/ratings")
 	@ResponseStatus(HttpStatus.CREATED)
 	public Mono<Ratings> submitRating(@Valid @RequestBody Ratings rating) {
 		return feedbackService.submitRating(rating);
 	}
 
+	// to reopen a request
 	@PostMapping("/reopen-requests")
 	@ResponseStatus(HttpStatus.CREATED)
 	public Mono<ReopenRequest> requestReopen(@Valid @RequestBody ReopenRequest reopenRequest) {
 		return feedbackService.requestReopen(reopenRequest);
 	}
 
+	// to get reopen request by grievance id
 	@GetMapping("/reopen-requests/{grievanceId}")
 	@ResponseStatus(HttpStatus.OK)
 	public Mono<ReopenRequest> getReopenRequest(@PathVariable String grievanceId) {
 		return feedbackService.getReopenRequest(grievanceId);
 	}
 
+	// to get analysis of all feedbacks
 	@GetMapping("/stats")
 	@ResponseStatus(HttpStatus.OK)
 	public Mono<FeedbackStats> getStats() {

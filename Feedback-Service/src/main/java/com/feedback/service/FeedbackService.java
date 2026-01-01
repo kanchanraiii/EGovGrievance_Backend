@@ -34,6 +34,7 @@ public class FeedbackService {
     @Autowired
     private GrievanceClient grievanceClient;
 
+    // to submit a feedback only when a grievance is resolved 
     public Mono<Feedback> submitFeedback(Feedback feedback) {
         return grievanceClient.getGrievanceById(feedback.getGrievanceId())
                 .flatMap(grievance -> {
@@ -58,6 +59,7 @@ public class FeedbackService {
                 });
     }
 
+    // to submit ratings
     public Mono<Ratings> submitRating(Ratings rating) {
         if (rating.getScore() < 1 || rating.getScore() > 5) {
             return Mono.error(new ServiceException("Rating must be between 1 and 5"));
@@ -86,6 +88,7 @@ public class FeedbackService {
                 });
     }
 
+    // to reopen requests
     public Mono<ReopenRequest> requestReopen(ReopenRequest reopenRequest) {
         return grievanceClient.getGrievanceById(reopenRequest.getGrievanceId())
                 .flatMap(grievance -> {
@@ -121,6 +124,7 @@ public class FeedbackService {
                 });
     }
 
+   // to get reopened request
     public Mono<ReopenRequest> getReopenRequest(String grievanceId) {
         return reopenRequestRepository.findByGrievanceId(grievanceId)
                 .switchIfEmpty(Mono.error(new ResourceNotFoundException("Reopen request not found")));
@@ -130,6 +134,7 @@ public class FeedbackService {
         return feedbackRepository.findByGrievanceId(grievanceId);
     }
 
+    // to get the analysis
     public Mono<FeedbackStats> getStats() {
 
         Mono<Long> feedbackCount = feedbackRepository.count();
