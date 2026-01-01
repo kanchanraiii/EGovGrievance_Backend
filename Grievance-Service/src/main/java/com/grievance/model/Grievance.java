@@ -43,6 +43,8 @@ public class Grievance {
 	// SLA reated
 	private LocalDateTime assignedAt;
 	private boolean escalated;
+	
+	// getters and setters
 	public String getId() {
 		return id;
 	}
