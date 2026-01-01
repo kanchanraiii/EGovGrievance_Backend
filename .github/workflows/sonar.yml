@@ -9,9 +9,6 @@ on:
 jobs:
   sonar:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        module: [ "Eureka-Server", "Grievance-Service", "Feedback-Service" ]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,14 +20,21 @@ jobs:
           java-version: 17
           cache: maven
 
-      - name: Sonar scan
-        working-directory: ${{ matrix.module }}
+      - name: Build all services (skip tests)
+        run: |
+          for m in Eureka-Server Grievance-Service Feedback-Service; do
+            mvn -B -DskipTests package -f "$m/pom.xml"
+          done
+
+      - name: Sonar scan (single project)
+        uses: sonarsource/sonarcloud-github-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          PROJECT_KEY="kanchanraiii_EGovGrievance_Backend_${{ matrix.module }}"
-          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-            -Dsonar.projectKey=$PROJECT_KEY \
-            -Dsonar.projectName=$PROJECT_KEY \
-            -Dsonar.organization=kanchanraiii \
+        with:
+          args: >
+            -Dsonar.projectKey=kanchanraiii_EGovGrievance_Backend
+            -Dsonar.projectName=kanchanraiii_EGovGrievance_Backend
+            -Dsonar.organization=kanchanraiii
             -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.sources=Eureka-Server/src/main/java,Grievance-Service/src/main/java,Feedback-Service/src/main/java
+            -Dsonar.java.binaries=Eureka-Server/target/classes,Grievance-Service/target/classes,Feedback-Service/target/classes
