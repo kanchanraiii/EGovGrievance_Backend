@@ -28,7 +28,9 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
+          PROJECT_KEY="kanchanraiii_EGovGrievance_Backend_${{ matrix.module }}"
           mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-            -Dsonar.projectKey=kanchanraiii_EGovGrievance_Backend \
+            -Dsonar.projectKey=$PROJECT_KEY \
+            -Dsonar.projectName=$PROJECT_KEY \
             -Dsonar.organization=kanchanraiii \
             -Dsonar.host.url=https://sonarcloud.io
