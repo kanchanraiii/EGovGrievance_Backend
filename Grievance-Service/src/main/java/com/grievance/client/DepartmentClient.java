@@ -1,6 +1,6 @@
 package com.grievance.client;
 
-import com.grievance.exception.ServiceException;
+import com.egov.common.exception.ServiceException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;

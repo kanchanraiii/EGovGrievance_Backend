@@ -1,8 +1,8 @@
 package com.feedback.client;
 
 import org.springframework.web.reactive.function.client.WebClient;
-import com.feedback.exception.ResourceNotFoundException;
-import com.feedback.exception.ServiceException;
+import com.egov.common.exception.ResourceNotFoundException;
+import com.egov.common.exception.ServiceException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;

@@ -14,30 +14,4 @@ public class AssignmentRequest {
 
     @NotBlank(message = "Assigned To is required")
     private String assignedTo;  // Case Worker ID
-
-	public String getGrievanceId() {
-		return grievanceId;
-	}
-
-	public void setGrievanceId(String grievanceId) {
-		this.grievanceId = grievanceId;
-	}
-
-	public String getAssignedBy() {
-		return assignedBy;
-	}
-
-	public void setAssignedBy(String assignedBy) {
-		this.assignedBy = assignedBy;
-	}
-
-	public String getAssignedTo() {
-		return assignedTo;
-	}
-
-	public void setAssignedTo(String assignedTo) {
-		this.assignedTo = assignedTo;
-	}
-
-	
 }

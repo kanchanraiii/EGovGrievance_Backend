@@ -1,8 +1,8 @@
 package com.feedback.service;
 
 import com.feedback.client.GrievanceClient;
-import com.feedback.exception.ServiceException;
-import com.feedback.exception.ResourceNotFoundException;
+import com.egov.common.exception.ServiceException;
+import com.egov.common.exception.ResourceNotFoundException;
 import com.feedback.model.Feedback;
 import com.feedback.model.FeedbackStats;
 import com.feedback.model.Ratings;

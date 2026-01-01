@@ -24,46 +24,6 @@ public class GrievanceCreateRequest {
     @Size(min = 10, max = 2000, message = "Description must be between 10 and 2000 characters")
     private String description;
 
-    public String getCitizenId() {
-		return citizenId;
-	}
-
-	public void setCitizenId(String citizenId) {
-		this.citizenId = citizenId;
-	}
-
-	public String getDepartmentId() {
-		return departmentId;
-	}
-
-	public void setDepartmentId(String departmentId) {
-		this.departmentId = departmentId;
-	}
-
-	public String getCategoryCode() {
-		return categoryCode;
-	}
-
-	public void setCategoryCode(String categoryCode) {
-		this.categoryCode = categoryCode;
-	}
-
-	public String getSubCategoryCode() {
-		return subCategoryCode;
-	}
-
-	public void setSubCategoryCode(String subCategoryCode) {
-		this.subCategoryCode = subCategoryCode;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
 	public Grievance toGrievance() {
         Grievance grievance = new Grievance();
         grievance.setCitizenId(citizenId);

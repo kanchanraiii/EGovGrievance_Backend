@@ -1,7 +1,7 @@
 package com.grievance.service;
 
 import com.grievance.client.DepartmentClient;
-import com.grievance.exception.ResourceNotFoundException;
+import com.egov.common.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 

@@ -1,0 +1,3 @@
+com\egov\common\exception\ServiceException.class
+com\egov\common\exception\ResourceNotFoundException.class
+com\egov\common\exception\CommonErrorHandler.class
