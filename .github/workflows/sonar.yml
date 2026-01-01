@@ -20,10 +20,10 @@ jobs:
           java-version: 17
           cache: maven
 
-      - name: Build all services (skip tests)
+      - name: Build all services with tests
         run: |
           for m in Eureka-Server Grievance-Service Feedback-Service; do
-            mvn -B -DskipTests package -f "$m/pom.xml"
+            mvn -B test -f "$m/pom.xml"
           done
 
       - name: Sonar scan (single project)
@@ -38,3 +38,4 @@ jobs:
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.sources=Eureka-Server/src/main/java,Grievance-Service/src/main/java,Feedback-Service/src/main/java
             -Dsonar.java.binaries=Eureka-Server/target/classes,Grievance-Service/target/classes,Feedback-Service/target/classes
+            -Dsonar.coverage.jacoco.xmlReportPaths=Eureka-Server/target/site/jacoco/jacoco.xml,Grievance-Service/target/site/jacoco/jacoco.xml,Feedback-Service/target/site/jacoco/jacoco.xml
