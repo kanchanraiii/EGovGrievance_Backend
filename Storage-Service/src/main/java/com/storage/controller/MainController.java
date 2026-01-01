@@ -2,17 +2,19 @@ package com.storage.controller;
 
 import com.storage.model.FileMetadata;
 import com.storage.service.StorageService;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.data.mongodb.gridfs.GridFsResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/files")
+@Validated
 public class MainController {
 
     private final StorageService storageService;
@@ -25,8 +27,8 @@ public class MainController {
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Mono<String> upload(
             @RequestPart("file") FilePart file,
-            @RequestPart("grievanceId") String grievanceId,
-            @RequestPart("uploadedBy") String uploadedBy) {
+            @RequestPart("grievanceId") @NotBlank String grievanceId,
+            @RequestPart("uploadedBy") @NotBlank String uploadedBy) {
 
         return storageService.upload(file, grievanceId, uploadedBy);
     }
@@ -38,13 +40,15 @@ public class MainController {
             @PathVariable String fileId) {
 
         return storageService.download(fileId)
-                .map(resource ->
-                        org.springframework.http.ResponseEntity.ok()
-                                .header(HttpHeaders.CONTENT_DISPOSITION,
-                                        "attachment; filename=\"" + resource.getFilename() + "\"")
-                                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                                .body(resource.getDownloadStream())
-                );
+                .map(resource -> {
+                    Flux<DataBuffer> fileContent = resource.getDownloadStream();
+
+                    return org.springframework.http.ResponseEntity.ok()
+                            .header(HttpHeaders.CONTENT_DISPOSITION,
+                                    "attachment; filename=\"" + resource.getFilename() + "\"")
+                            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                            .body(fileContent);
+                });
     }
 
      
