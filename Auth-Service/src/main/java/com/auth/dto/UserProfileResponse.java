@@ -58,4 +58,46 @@ public class UserProfileResponse {
     public void setRole(String role) {
         this.role = role;
     }
+
+    // Manual builder to satisfy code that expects UserProfileResponse.builder()
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private String userId;
+        private String email;
+        private String fullName;
+        private String phone;
+        private String role;
+
+        public Builder userId(String userId) {
+            this.userId = userId;
+            return this;
+        }
+
+        public Builder email(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public Builder fullName(String fullName) {
+            this.fullName = fullName;
+            return this;
+        }
+
+        public Builder phone(String phone) {
+            this.phone = phone;
+            return this;
+        }
+
+        public Builder role(String role) {
+            this.role = role;
+            return this;
+        }
+
+        public UserProfileResponse build() {
+            return new UserProfileResponse(userId, email, fullName, phone, role);
+        }
+    }
 }

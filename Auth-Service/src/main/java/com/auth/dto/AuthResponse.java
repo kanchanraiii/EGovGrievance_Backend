@@ -80,4 +80,58 @@ public class AuthResponse {
     public void setRole(String role) {
         this.role = role;
     }
+
+    // Manual builder to satisfy code that expects AuthResponse.builder()
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private String token;
+        private Instant expiresAt;
+        private String userId;
+        private String email;
+        private String fullName;
+        private String phone;
+        private String role;
+
+        public Builder token(String token) {
+            this.token = token;
+            return this;
+        }
+
+        public Builder expiresAt(Instant expiresAt) {
+            this.expiresAt = expiresAt;
+            return this;
+        }
+
+        public Builder userId(String userId) {
+            this.userId = userId;
+            return this;
+        }
+
+        public Builder email(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public Builder fullName(String fullName) {
+            this.fullName = fullName;
+            return this;
+        }
+
+        public Builder phone(String phone) {
+            this.phone = phone;
+            return this;
+        }
+
+        public Builder role(String role) {
+            this.role = role;
+            return this;
+        }
+
+        public AuthResponse build() {
+            return new AuthResponse(token, expiresAt, userId, email, fullName, phone, role);
+        }
+    }
 }
