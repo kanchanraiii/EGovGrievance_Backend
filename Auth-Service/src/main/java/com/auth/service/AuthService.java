@@ -32,7 +32,7 @@ public class AuthService {
     }
 
     public Mono<AuthResponse> register(RegisterRequest request) {
-        String email = request.getEmail().toLowerCase();
+        String email = request.getEmail().trim().toLowerCase();
         String fullName = request.getFullName().trim();
         String phone = request.getPhone().trim();
         return userRepository.findByEmail(email)
@@ -53,7 +53,7 @@ public class AuthService {
     }
 
     public Mono<AuthResponse> login(AuthRequest request) {
-        String email = request.getEmail().toLowerCase();
+        String email = request.getEmail().trim().toLowerCase();
         return userRepository.findByEmail(email)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(
                         HttpStatus.UNAUTHORIZED, "Invalid credentials")))
@@ -69,26 +69,24 @@ public class AuthService {
     public Mono<UserProfileResponse> currentUser(String userId) {
         return userRepository.findById(userId)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")))
-                .map(user -> UserProfileResponse.builder()
-                        .userId(user.getId())
-                        .email(user.getEmail())
-                        .fullName(user.getFullName())
-                        .phone(user.getPhone())
-                        .role(user.getRole())
-                        .build());
+                .map(user -> new UserProfileResponse(
+                        user.getId(),
+                        user.getEmail(),
+                        user.getFullName(),
+                        user.getPhone(),
+                        user.getRole()));
     }
 
     private Mono<AuthResponse> toAuthResponse(User user) {
         Instant expiresAt = jwtService.buildExpiry();
         return jwtService.generateToken(user, expiresAt)
-                .map(token -> AuthResponse.builder()
-                        .token(token)
-                        .expiresAt(expiresAt)
-                        .userId(user.getId())
-                        .email(user.getEmail())
-                        .fullName(user.getFullName())
-                        .phone(user.getPhone())
-                        .role(user.getRole())
-                        .build());
+                .map(token -> new AuthResponse(
+                        token,
+                        expiresAt,
+                        user.getId(),
+                        user.getEmail(),
+                        user.getFullName(),
+                        user.getPhone(),
+                        user.getRole()));
     }
 }
