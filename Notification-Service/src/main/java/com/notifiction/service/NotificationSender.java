@@ -4,6 +4,7 @@ import com.notifiction.event.GrievanceEvent;
 import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -32,6 +33,7 @@ public class NotificationSender {
     private final boolean smsEnabled;
     private final boolean emailEnabled;
 
+    @Autowired
     public NotificationSender(
             JavaMailSender mailSender,
             @Value("${twilio.account-sid}") String accountSid,
