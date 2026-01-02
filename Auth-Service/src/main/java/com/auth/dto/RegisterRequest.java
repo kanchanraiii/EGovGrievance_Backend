@@ -22,15 +22,19 @@ public class RegisterRequest {
     @Size(min = 8, message = "Password must be at least 8 characters long")
     private String password;
 
+    // Optional for SO, Admin, Citizen required for case-worker and department-officer endpoints
+    private String departmentId;
+
     public RegisterRequest() {
         // default
     }
 
-    public RegisterRequest(String fullName, String email, String phone, String password) {
+    public RegisterRequest(String fullName, String email, String phone, String password, String departmentId) {
         this.fullName = fullName;
         this.email = email;
         this.phone = phone;
         this.password = password;
+        this.departmentId = departmentId;
     }
 
     public static Builder builder() {
@@ -42,6 +46,7 @@ public class RegisterRequest {
         private String email;
         private String phone;
         private String password;
+        private String departmentId;
 
         public Builder fullName(String fullName) {
             this.fullName = fullName;
@@ -63,8 +68,13 @@ public class RegisterRequest {
             return this;
         }
 
+        public Builder departmentId(String departmentId) {
+            this.departmentId = departmentId;
+            return this;
+        }
+
         public RegisterRequest build() {
-            return new RegisterRequest(fullName, email, phone, password);
+            return new RegisterRequest(fullName, email, phone, password, departmentId);
         }
     }
 
@@ -98,5 +108,13 @@ public class RegisterRequest {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getDepartmentId() {
+        return departmentId;
+    }
+
+    public void setDepartmentId(String departmentId) {
+        this.departmentId = departmentId;
     }
 }

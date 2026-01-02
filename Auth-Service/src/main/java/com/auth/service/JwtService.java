@@ -10,8 +10,10 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.auth.model.User;
+import com.auth.model.UserRole;
 
 import reactor.core.publisher.Mono;
 
@@ -38,16 +40,30 @@ public class JwtService {
     public Mono<String> generateToken(User user, Instant expiresAt) {
         Instant now = Instant.now();
 
-        JwtClaimsSet claims = JwtClaimsSet.builder()
+        String role = StringUtils.hasText(user.getRole()) ? user.getRole() : UserRole.CITIZEN.value();
+        String email = user.getEmail();
+        String fullName = user.getFullName();
+        String phone = user.getPhone();
+
+        if (!StringUtils.hasText(email) || !StringUtils.hasText(fullName) || !StringUtils.hasText(phone)) {
+            return Mono.error(new IllegalArgumentException("Missing required user fields for token"));
+        }
+
+        JwtClaimsSet.Builder claimsBuilder = JwtClaimsSet.builder()
                 .issuer(issuer)
                 .issuedAt(now)
                 .expiresAt(expiresAt)
                 .subject(user.getId())
-                .claim("email", user.getEmail())
-                .claim("name", user.getFullName())
-                .claim("phone", user.getPhone())
-                .claim("role", user.getRole())
-                .build();
+                .claim("email", email)
+                .claim("name", fullName)
+                .claim("phone", phone)
+                .claim("role", role);
+
+        if (user.getDepartmentId() != null) {
+            claimsBuilder.claim("departmentId", user.getDepartmentId());
+        }
+
+        JwtClaimsSet claims = claimsBuilder.build();
 
         JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();
 

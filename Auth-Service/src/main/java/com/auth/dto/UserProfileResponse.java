@@ -6,17 +6,19 @@ public class UserProfileResponse {
     private String fullName;
     private String phone;
     private String role;
+    private String departmentId;
 
     public UserProfileResponse() {
         // default constructor
     }
 
-    public UserProfileResponse(String userId, String email, String fullName, String phone, String role) {
+    public UserProfileResponse(String userId, String email, String fullName, String phone, String role, String departmentId) {
         this.userId = userId;
         this.email = email;
         this.fullName = fullName;
         this.phone = phone;
         this.role = role;
+        this.departmentId = departmentId;
     }
 
     public String getUserId() {
@@ -59,6 +61,14 @@ public class UserProfileResponse {
         this.role = role;
     }
 
+    public String getDepartmentId() {
+        return departmentId;
+    }
+
+    public void setDepartmentId(String departmentId) {
+        this.departmentId = departmentId;
+    }
+
     // Manual builder to satisfy code that expects UserProfileResponse.builder()
     public static Builder builder() {
         return new Builder();
@@ -70,6 +80,7 @@ public class UserProfileResponse {
         private String fullName;
         private String phone;
         private String role;
+        private String departmentId;
 
         public Builder userId(String userId) {
             this.userId = userId;
@@ -96,8 +107,13 @@ public class UserProfileResponse {
             return this;
         }
 
+        public Builder departmentId(String departmentId) {
+            this.departmentId = departmentId;
+            return this;
+        }
+
         public UserProfileResponse build() {
-            return new UserProfileResponse(userId, email, fullName, phone, role);
+            return new UserProfileResponse(userId, email, fullName, phone, role, departmentId);
         }
     }
 }

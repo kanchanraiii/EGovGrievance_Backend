@@ -32,6 +32,16 @@ public class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchange -> exchange
                         .pathMatchers("/actuator/**").permitAll()
+                        .pathMatchers("/api/departments/**").permitAll()
+                        .pathMatchers("/api/grievances/create").hasRole("CITIZEN")
+                        .pathMatchers("/api/grievances/history/**")
+                        .hasAnyRole("CITIZEN", "CASE_WORKER", "DEPARTMENT_OFFICER", "SUPERVISORY_OFFICER", "ADMIN")
+                        .pathMatchers("/api/grievances/getAll", "/api/grievances/assign")
+                        .hasAnyRole("DEPARTMENT_OFFICER", "SUPERVISORY_OFFICER", "ADMIN")
+                        .pathMatchers("/api/grievances/status")
+                        .hasAnyRole("CASE_WORKER", "DEPARTMENT_OFFICER", "SUPERVISORY_OFFICER", "ADMIN")
+                        .pathMatchers("/api/grievances/department/**")
+                        .hasAnyRole("DEPARTMENT_OFFICER", "CASE_WORKER", "ADMIN")
                         .anyExchange().authenticated())
                 .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
                 .build();

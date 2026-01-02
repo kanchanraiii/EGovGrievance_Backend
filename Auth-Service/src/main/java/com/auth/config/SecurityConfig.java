@@ -38,7 +38,21 @@ public class SecurityConfig {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchange -> exchange
-                        .pathMatchers("/api/auth/login", "/api/auth/register", "/api/auth/citizen/register", "/actuator/**").permitAll()
+                        .pathMatchers(
+                                "/api/auth/login",
+                                "/api/auth/register",
+                                "/api/auth/citizen/register",
+                                "/api/auth/citizen/login",
+                                "/api/auth/case-worker/register",
+                                "/api/auth/case-worker/login",
+                                "/api/auth/admin/register",
+                                "/api/auth/admin/login",
+                                "/api/auth/supervisory-officer/register",
+                                "/api/auth/supervisory-officer/login",
+                                "/api/auth/department-officer/register",
+                                "/api/auth/department-officer/login",
+                                "/actuator/**")
+                        .permitAll()
                         .anyExchange().authenticated())
                 .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
                 .build();

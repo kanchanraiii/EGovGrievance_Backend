@@ -10,12 +10,13 @@ public class AuthResponse {
     private String fullName;
     private String phone;
     private String role;
+    private String departmentId;
 
     public AuthResponse() {
         // default constructor for serializers
     }
 
-    public AuthResponse(String token, Instant expiresAt, String userId, String email, String fullName, String phone, String role) {
+    public AuthResponse(String token, Instant expiresAt, String userId, String email, String fullName, String phone, String role, String departmentId) {
         this.token = token;
         this.expiresAt = expiresAt;
         this.userId = userId;
@@ -23,6 +24,7 @@ public class AuthResponse {
         this.fullName = fullName;
         this.phone = phone;
         this.role = role;
+        this.departmentId = departmentId;
     }
 
     public String getToken() {
@@ -81,6 +83,14 @@ public class AuthResponse {
         this.role = role;
     }
 
+    public String getDepartmentId() {
+        return departmentId;
+    }
+
+    public void setDepartmentId(String departmentId) {
+        this.departmentId = departmentId;
+    }
+
     // Manual builder to satisfy code that expects AuthResponse.builder()
     public static Builder builder() {
         return new Builder();
@@ -94,6 +104,7 @@ public class AuthResponse {
         private String fullName;
         private String phone;
         private String role;
+        private String departmentId;
 
         public Builder token(String token) {
             this.token = token;
@@ -130,8 +141,13 @@ public class AuthResponse {
             return this;
         }
 
+        public Builder departmentId(String departmentId) {
+            this.departmentId = departmentId;
+            return this;
+        }
+
         public AuthResponse build() {
-            return new AuthResponse(token, expiresAt, userId, email, fullName, phone, role);
+            return new AuthResponse(token, expiresAt, userId, email, fullName, phone, role, departmentId);
         }
     }
 }

@@ -32,6 +32,11 @@ public class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchange -> exchange
                         .pathMatchers("/actuator/**").permitAll()
+                        .pathMatchers(
+                                "/api/files/upload",
+                                "/api/files/grievance/**")
+                        .hasRole("DEPARTMENT_OFFICER")
+                        .pathMatchers("/api/departments/**").permitAll()
                         .anyExchange().authenticated())
                 .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
                 .build();

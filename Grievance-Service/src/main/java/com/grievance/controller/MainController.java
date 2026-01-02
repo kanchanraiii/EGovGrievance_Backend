@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import java.util.Map;
 import com.grievance.model.Grievance;
 import com.grievance.model.GrievanceHistory;
@@ -31,8 +33,8 @@ public class MainController {
 	// create a grievance
 	@PostMapping("/create")
 	@ResponseStatus(HttpStatus.CREATED)
-	public Mono<Map<String, String>> createGrievance(@Valid @RequestBody GrievanceCreateRequest request) {
-		return grievanceService.createGrievance(request)
+	public Mono<Map<String, String>> createGrievance(@Valid @RequestBody GrievanceCreateRequest request, @AuthenticationPrincipal Jwt jwt) {
+		return grievanceService.createGrievance(request, jwt.getSubject())
 				.map(saved -> Map.of("grievanceId", saved.getId()));
 	}
 
@@ -47,15 +49,16 @@ public class MainController {
 	// get all grievances
 	@GetMapping("/getAll")
 	@ResponseStatus(HttpStatus.OK)
-	public Flux<Grievance> getAllGrievances() {
-		return grievanceService.getAll();
+	public Flux<Grievance> getAllGrievances(@AuthenticationPrincipal Jwt jwt) {
+		return grievanceService.getAllForRole(jwt.getClaim("role"), jwt.getClaim("departmentId"));
 	}
 
 	// to assign a grievance
 	@PatchMapping("/assign")
-	public Mono<Map<String, String>> assignGrievance(@Valid @RequestBody AssignmentRequest request) {
+	public Mono<Map<String, String>> assignGrievance(@Valid @RequestBody AssignmentRequest request, @AuthenticationPrincipal Jwt jwt) {
+		String actorId = jwt.getSubject();
 		return grievanceService
-				.assignGrievance(request.getGrievanceId(), request.getAssignedBy(), request.getAssignedTo())
+				.assignGrievance(request.getGrievanceId(), actorId, request.getAssignedTo(), jwt.getClaim("role"), jwt.getClaim("departmentId"))
 				.map(updated -> Map.of(
 						"status", updated.getStatus().name(),
 						"assignedTo", updated.getAssignedWokerId()));
@@ -63,15 +66,28 @@ public class MainController {
 
 	// to update status
 	@PatchMapping("/status")
-	public Mono<Grievance> updateStatus(@Valid @RequestBody StatusUpdateRequest request) {
-		return null;
+	public Mono<Grievance> updateStatus(@Valid @RequestBody StatusUpdateRequest request, @AuthenticationPrincipal Jwt jwt) {
+		String actorId = jwt.getSubject();
+		return grievanceService.updateStatus(
+				request.getGrievanceId(),
+				request.getStatus(),
+				actorId,
+				request.getRemarks(),
+				jwt.getClaim("role"),
+				jwt.getClaim("departmentId"));
 	}
 
 	// to get status history of grievances
 	@GetMapping("/history/{id}")
-	public Flux<GrievanceHistory> getStatusHistory(@PathVariable String id) {
+	public Flux<GrievanceHistory> getStatusHistory(@PathVariable String id, @AuthenticationPrincipal Jwt jwt) {
+		return grievanceService.getStatusHistory(id, jwt.getClaim("role"), jwt.getClaim("departmentId"));
+	}
 
-		return grievanceService.getStatusHistory(id);
+	// view grievances by department (department officer / case worker / admin)
+	@GetMapping("/department/{departmentId}")
+	@ResponseStatus(HttpStatus.OK)
+	public Flux<Grievance> getByDepartment(@PathVariable String departmentId, @AuthenticationPrincipal Jwt jwt) {
+		return grievanceService.getByDepartment(departmentId, jwt.getClaim("role"), jwt.getClaim("departmentId"));
 	}
 
 }

@@ -8,9 +8,6 @@ import lombok.Data;
 @Data
 public class GrievanceCreateRequest {
 
-    @NotBlank(message = "Citizen ID is required")
-    private String citizenId;
-
     // Dept ID like water, electricity etc - Assigned Later
     private String departmentId;
 
@@ -26,7 +23,6 @@ public class GrievanceCreateRequest {
 
 	public Grievance toGrievance() {
         Grievance grievance = new Grievance();
-        grievance.setCitizenId(citizenId);
         grievance.setDepartmentId(departmentId);
         grievance.setCategoryCode(categoryCode);
         grievance.setSubCategoryCode(subCategoryCode);
@@ -35,14 +31,6 @@ public class GrievanceCreateRequest {
     }
 
 	// getters and setters
-	public String getCitizenId() {
-		return citizenId;
-	}
-
-	public void setCitizenId(String citizenId) {
-		this.citizenId = citizenId;
-	}
-
 	public String getDepartmentId() {
 		return departmentId;
 	}

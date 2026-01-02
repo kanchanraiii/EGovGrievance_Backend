@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.auth.dto.AuthRequest;
 import com.auth.dto.AuthResponse;
 import com.auth.dto.RegisterRequest;
+import com.auth.dto.DepartmentRegisterRequest;
 import com.auth.dto.UserProfileResponse;
 import com.auth.service.AuthService;
 
@@ -29,22 +30,74 @@ public class AuthController {
         this.authService = authService;
     }
 
+    // register
     @PostMapping("/register")
     public Mono<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
         return authService.register(request);
     }
 
+    // register as citizen
     @PostMapping("/citizen/register")
     public Mono<AuthResponse> registerCitizen(@Valid @RequestBody RegisterRequest request) {
-        return authService.register(request);
+        return authService.registerCitizen(request);
     }
 
+    // register as case-worker
+    @PostMapping("/case-worker/register")
+    public Mono<AuthResponse> registerCaseWorker(@Valid @RequestBody DepartmentRegisterRequest request) {
+        return authService.registerCaseWorker(request);
+    }
+
+    // register as admin
+    @PostMapping("/admin/register")
+    public Mono<AuthResponse> registerAdmin(@Valid @RequestBody RegisterRequest request) {
+        return authService.registerAdmin(request);
+    }
+
+    // register as supervisory-officer
+    @PostMapping("/supervisory-officer/register")
+    public Mono<AuthResponse> registerSupervisoryOfficer(@Valid @RequestBody RegisterRequest request) {
+        return authService.registerSupervisoryOfficer(request);
+    }
+
+    // register as department-officer
+    @PostMapping("/department-officer/register")
+    public Mono<AuthResponse> registerDepartmentOfficer(@Valid @RequestBody DepartmentRegisterRequest request) {
+        return authService.registerDepartmentOfficer(request);
+    }
+
+    // login endpoints
     @PostMapping("/login")
     public Mono<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
         return authService.login(request);
     }
 
-    @GetMapping("/me")
+    @PostMapping("/citizen/login")
+    public Mono<AuthResponse> loginCitizen(@Valid @RequestBody AuthRequest request) {
+        return authService.loginCitizen(request);
+    }
+
+    @PostMapping("/case-worker/login")
+    public Mono<AuthResponse> loginCaseWorker(@Valid @RequestBody AuthRequest request) {
+        return authService.loginCaseWorker(request);
+    }
+
+    @PostMapping("/admin/login")
+    public Mono<AuthResponse> loginAdmin(@Valid @RequestBody AuthRequest request) {
+        return authService.loginAdmin(request);
+    }
+
+    @PostMapping("/supervisory-officer/login")
+    public Mono<AuthResponse> loginSupervisoryOfficer(@Valid @RequestBody AuthRequest request) {
+        return authService.loginSupervisoryOfficer(request);
+    }
+
+    @PostMapping("/department-officer/login")
+    public Mono<AuthResponse> loginDepartmentOfficer(@Valid @RequestBody AuthRequest request) {
+        return authService.loginDepartmentOfficer(request);
+    }
+
+    @GetMapping("/profile")
     public Mono<UserProfileResponse> me(@AuthenticationPrincipal Jwt jwt) {
         return authService.currentUser(jwt.getSubject());
     }

@@ -32,6 +32,17 @@ public class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchange -> exchange
                         .pathMatchers("/actuator/**").permitAll()
+                        .pathMatchers("/api/departments/**").permitAll()
+                        .pathMatchers(
+                                "/api/feedback/add-feedback",
+                                "/api/feedback/ratings",
+                                "/api/feedback/reopen-requests")
+                        .hasRole("CITIZEN")
+                        .pathMatchers("/api/feedback/grievance/**")
+                        .hasAnyRole("CITIZEN", "DEPARTMENT_OFFICER", "SUPERVISORY_OFFICER", "ADMIN")
+                        .pathMatchers("/api/feedback/stats")
+                        .hasAnyRole("DEPARTMENT_OFFICER", "SUPERVISORY_OFFICER", "ADMIN")
+                        .pathMatchers("/api/departments/**").permitAll()
                         .anyExchange().authenticated())
                 .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
                 .build();
