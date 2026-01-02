@@ -1,5 +1,7 @@
 package com.feedback.controller;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -52,8 +54,9 @@ public class MainController {
 	// to reopen a request
 	@PostMapping("/reopen-requests")
 	@ResponseStatus(HttpStatus.CREATED)
-	public Mono<ReopenRequest> requestReopen(@Valid @RequestBody ReopenRequest reopenRequest) {
-		return feedbackService.requestReopen(reopenRequest);
+	public Mono<Map<String, String>> requestReopen(@Valid @RequestBody ReopenRequest reopenRequest) {
+		return feedbackService.requestReopen(reopenRequest)
+				.map(saved -> Map.of("reopenRequestId", saved.getId()));
 	}
 
 	// to get reopen request by grievance id

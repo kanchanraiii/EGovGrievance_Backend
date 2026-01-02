@@ -1,6 +1,7 @@
 package com.feedback.service;
 
 import com.feedback.client.GrievanceClient;
+import com.feedback.exception.ConflictException;
 import com.feedback.exception.ServiceException;
 import com.feedback.exception.ResourceNotFoundException;
 import com.feedback.model.Feedback;
@@ -48,9 +49,7 @@ public class FeedbackService {
                             .existsByGrievanceId(feedback.getGrievanceId())
                             .flatMap(exists -> {
                                 if (exists) {
-                                    return Mono.error(
-                                            new ServiceException("Feedback already submitted for this grievance")
-                                    );
+                                    return Mono.error(new ConflictException("Feedback already submitted for this grievance"));
                                 }
 
                                 feedback.setSubmittedAt(LocalDateTime.now());
@@ -77,9 +76,7 @@ public class FeedbackService {
                             .existsByGrievanceId(rating.getGrievanceId())
                             .flatMap(exists -> {
                                 if (exists) {
-                                    return Mono.error(
-                                            new ServiceException("Rating already submitted for this grievance")
-                                    );
+                                    return Mono.error(new ConflictException("Rating already submitted for this grievance"));
                                 }
 
                                 rating.setSubmittedAt(LocalDateTime.now());
@@ -109,7 +106,7 @@ public class FeedbackService {
                                                             .thenReturn(saved)
                                             )
                                             .switchIfEmpty(Mono.error(
-                                                    new ServiceException("Reopen request already exists")
+                                                    new ConflictException("Reopen request already exists")
                                             ));
                                 }
 

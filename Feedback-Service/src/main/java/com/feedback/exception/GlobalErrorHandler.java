@@ -29,6 +29,11 @@ public class GlobalErrorHandler {
         return build(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<Map<String, Object>> handleConflict(ConflictException ex) {
+        return build(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
     @ExceptionHandler(ServiceException.class)
     public ResponseEntity<Map<String, Object>> handleService(ServiceException ex) {
         return build(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage());
@@ -52,10 +57,7 @@ public class GlobalErrorHandler {
         return ResponseEntity.status(status)
                 .body(
                         Map.of(
-                                "status", status.value(),
-                                "message", message,
-                                "details", details,
-                                "timestamp", Instant.now().toString()
+                                "message", message
                         )
                 );
     }
