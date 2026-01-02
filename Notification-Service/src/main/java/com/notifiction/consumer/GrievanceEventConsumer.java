@@ -2,13 +2,13 @@ package com.notifiction.consumer;
 
 import java.time.LocalDateTime;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 import com.notifiction.event.GrievanceEvent;
 import com.notifiction.model.*;
 import com.notifiction.repository.*;
+import com.notifiction.service.NotificationSender;
 
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
@@ -17,10 +17,9 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class GrievanceEventConsumer {
 
-    @Autowired
-	private NotificationRepository notificationRepository;
-    @Autowired
-    private NotificationLogRepository logRepository;
+    private final NotificationRepository notificationRepository;
+    private final NotificationLogRepository logRepository;
+    private final NotificationSender notificationSender;
 
     @KafkaListener(
         topics = "grievance-events",
@@ -41,8 +40,12 @@ public class GrievanceEventConsumer {
                 log.setNotificationId(saved.getId());
                 log.setResponse("Delivered via IN_APP");
                 log.setLoggedAt(LocalDateTime.now());
-                return logRepository.save(log);
+                return logRepository.save(log).thenReturn(saved);
             })
+            .flatMap(saved -> notificationSender.sendSms(event)
+                    .then(notificationSender.sendEmail(event))
+                    .onErrorResume(ex -> Mono.empty())
+                    .thenReturn(saved))
             .onErrorResume(ex -> Mono.empty())
             .subscribe();
     }
