@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.Map;
 import com.grievance.model.Grievance;
 import com.grievance.model.GrievanceHistory;
 import com.grievance.request.AssignmentRequest;
@@ -30,8 +31,9 @@ public class MainController {
 	// create a grievance
 	@PostMapping("/create")
 	@ResponseStatus(HttpStatus.CREATED)
-	public Mono<Grievance> createGrievance(@Valid @RequestBody GrievanceCreateRequest request) {
-		return grievanceService.createGrievance(request);
+	public Mono<Map<String, String>> createGrievance(@Valid @RequestBody GrievanceCreateRequest request) {
+		return grievanceService.createGrievance(request)
+				.map(saved -> Map.of("grievanceId", saved.getId()));
 	}
 
 	// get grievance by id
@@ -51,14 +53,18 @@ public class MainController {
 
 	// to assign a grievance
 	@PatchMapping("/assign")
-	public Mono<Grievance> assignGrievance(@Valid @RequestBody AssignmentRequest request) {
-		return grievanceService.assignGrievance(request.getGrievanceId(), request.getAssignedBy(), request.getAssignedTo());
+	public Mono<Map<String, String>> assignGrievance(@Valid @RequestBody AssignmentRequest request) {
+		return grievanceService
+				.assignGrievance(request.getGrievanceId(), request.getAssignedBy(), request.getAssignedTo())
+				.map(updated -> Map.of(
+						"status", updated.getStatus().name(),
+						"assignedTo", updated.getAssignedWokerId()));
 	}
 
 	// to update status
 	@PatchMapping("/status")
 	public Mono<Grievance> updateStatus(@Valid @RequestBody StatusUpdateRequest request) {
-		return grievanceService.updateStatus(request.getGrievanceId(), request.getStatus(), request.getUpdatedBy(), request.getRemarks());
+		return null;
 	}
 
 	// to get status history of grievances

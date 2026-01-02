@@ -7,7 +7,9 @@ import com.grievance.repository.StatusHistoryRepository;
 import com.grievance.request.GrievanceCreateRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -73,29 +75,33 @@ public class GrievanceService {
 	public Mono<Grievance> assignGrievance(String grievanceId, String assignedBy, String assignedTo) {
 
 		return grievanceRepository.findById(grievanceId)
-				.switchIfEmpty(Mono.error(new RuntimeException("Grievance not found"))).flatMap(grievance -> {
+				.switchIfEmpty(Mono.error(new RuntimeException("Grievance not found")))
+				.flatMap(grievance -> {
 
-					// 1️. update grievance state
+					if (grievance.getAssignedWokerId() != null) {
+						return Mono.error(new ResponseStatusException(HttpStatus.CONFLICT,
+								"Grievance already assigned to " + grievance.getAssignedWokerId()));
+					}
+
 					grievance.setAssignedWokerId(assignedTo);
 					grievance.setStatus(GrievanceStatus.ASSIGNED);
 					grievance.setAssignedAt(LocalDateTime.now());
 					grievance.setUpdatedAt(LocalDateTime.now());
 
-					// 2️. create assignment record
 					Assignment assignment = new Assignment();
 					assignment.setGrievanceId(grievanceId);
 					assignment.setAssignedBy(assignedBy);
 					assignment.setAssignedTo(assignedTo);
 					assignment.setAssignedAt(LocalDateTime.now());
 
-					// 3. save assignment -> grievance and status history
-					return assignmentRepository.save(assignment).then(grievanceRepository.save(grievance))
+					return assignmentRepository.save(assignment)
+							.then(grievanceRepository.save(grievance))
 							.flatMap(updatedGrievance -> saveStatusHistory(grievanceId, GrievanceStatus.ASSIGNED,
-									assignedBy, "Assigned to case worker").thenReturn(updatedGrievance))
+											assignedBy, "Assigned to case worker").thenReturn(updatedGrievance))
 							.flatMap(updatedGrievance -> grievanceEventPublisher
-									.publishStatusChange(updatedGrievance, GrievanceStatus.ASSIGNED,
-											"Assigned to case worker " + assignedTo)
-									.thenReturn(updatedGrievance));
+											.publishStatusChange(updatedGrievance, GrievanceStatus.ASSIGNED,
+													"Assigned to case worker " + assignedTo)
+											.thenReturn(updatedGrievance));
 				});
 	}
 

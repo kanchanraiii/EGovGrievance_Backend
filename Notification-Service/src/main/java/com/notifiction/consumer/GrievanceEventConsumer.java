@@ -2,6 +2,7 @@ package com.notifiction.consumer;
 
 import java.time.LocalDateTime;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
@@ -17,9 +18,12 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class GrievanceEventConsumer {
 
-    private final NotificationRepository notificationRepository;
-    private final NotificationLogRepository logRepository;
-    private final NotificationSender notificationSender;
+    @Autowired
+	private NotificationRepository notificationRepository;
+    @Autowired
+    private NotificationLogRepository logRepository;
+    @Autowired
+    private NotificationSender notificationSender;
 
     @KafkaListener(
         topics = "grievance-events",
