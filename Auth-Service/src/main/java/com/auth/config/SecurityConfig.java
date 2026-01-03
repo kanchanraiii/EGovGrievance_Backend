@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
@@ -31,6 +32,7 @@ import reactor.core.publisher.Mono;
 
 @Configuration
 @EnableWebFluxSecurity
+@EnableReactiveMethodSecurity
 public class SecurityConfig {
 
     @Bean
@@ -47,12 +49,16 @@ public class SecurityConfig {
                                 "/api/auth/case-worker/login",
                                 "/api/auth/admin/register",
                                 "/api/auth/admin/login",
-                                "/api/auth/supervisory-officer/register",
                                 "/api/auth/supervisory-officer/login",
-                                "/api/auth/department-officer/register",
                                 "/api/auth/department-officer/login",
+                                "/api/auth/departments/**",
                                 "/actuator/**")
                         .permitAll()
+                        .pathMatchers(
+                                "/api/auth/supervisory-officer/register",
+                                "/api/auth/department-officer/register",
+                                "/api/auth/admin/**")
+                        .hasRole("ADMIN")
                         .anyExchange().authenticated())
                 .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
                 .build();

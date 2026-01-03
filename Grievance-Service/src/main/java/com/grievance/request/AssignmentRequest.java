@@ -9,9 +9,6 @@ public class AssignmentRequest {
     @NotBlank(message = "Grievance ID is required")
     private String grievanceId;
 
-    @NotBlank(message = "Assigned By is required")
-    private String assignedBy;  // Department Officer ID
-
     @NotBlank(message = "Assigned To is required")
     private String assignedTo;  // Case Worker ID
 
@@ -21,14 +18,6 @@ public class AssignmentRequest {
 
 	public void setGrievanceId(String grievanceId) {
 		this.grievanceId = grievanceId;
-	}
-
-	public String getAssignedBy() {
-		return assignedBy;
-	}
-
-	public void setAssignedBy(String assignedBy) {
-		this.assignedBy = assignedBy;
 	}
 
 	public String getAssignedTo() {

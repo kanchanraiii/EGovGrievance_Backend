@@ -18,8 +18,10 @@ public interface GrievanceRepository  extends ReactiveMongoRepository<Grievance,
     Flux<Grievance> findByCitizenId(String citizenId);
 
     Flux<Grievance> findByStatus(String status);
-
+	
 	Mono<Grievance> findById(ObjectId objectId);
+
+	Flux<Grievance> findByAssignedWokerId(String assignedWokerId);
 	
 	// for SLA
 	Flux<Grievance> findByStatusInAndAssignedAtBeforeAndEscalatedFalse(

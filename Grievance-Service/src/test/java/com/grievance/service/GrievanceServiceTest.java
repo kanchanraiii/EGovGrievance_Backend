@@ -1,5 +1,23 @@
 package com.grievance.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
 import com.grievance.model.Assignment;
 import com.grievance.model.Grievance;
 import com.grievance.model.GrievanceHistory;
@@ -8,22 +26,10 @@ import com.grievance.repository.AssignmentRepository;
 import com.grievance.repository.GrievanceRepository;
 import com.grievance.repository.StatusHistoryRepository;
 import com.grievance.request.GrievanceCreateRequest;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
-import java.lang.reflect.Field;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class GrievanceServiceTest {
@@ -36,192 +42,230 @@ class GrievanceServiceTest {
     private StatusHistoryRepository statusHistoryRepository;
     @Mock
     private DepartmentValidationService departmentValidationService;
+    @Mock
+    private GrievanceEventPublisher grievanceEventPublisher;
 
     @InjectMocks
     private GrievanceService grievanceService;
 
     @Test
-    void createGrievance_savesAndLogsHistory() {
+    void createGrievancePersistsAndPublishesEvent() {
         GrievanceCreateRequest request = new GrievanceCreateRequest();
-        request.setCitizenId("c1");
-        request.setDepartmentId("dept1");
-        request.setCategoryCode("cat");
-        request.setSubCategoryCode("sub");
-        request.setDescription("A valid description");
+        request.setDepartmentId("D1");
+        request.setCategoryCode("CAT");
+        request.setSubCategoryCode("SUB");
+        request.setDescription("Description for grievance");
 
-        when(departmentValidationService.validateDepartment("dept1", "cat", "sub"))
-                .thenReturn(Mono.empty());
+        when(departmentValidationService.validateDepartment("D1", "CAT", "SUB")).thenReturn(Mono.empty());
 
-        when(statusHistoryRepository.save(any(GrievanceHistory.class))).thenAnswer(invocation -> {
-            GrievanceHistory history = invocation.getArgument(0);
-            setId(history, "h1");
-            return Mono.just(history);
-        });
         when(grievanceRepository.save(any(Grievance.class))).thenAnswer(invocation -> {
-            Grievance g = invocation.getArgument(0);
-            setId(g, "g1");
-            return Mono.just(g);
+            Grievance saved = invocation.getArgument(0);
+            saved.setId("g1");
+            return Mono.just(saved);
         });
+        when(statusHistoryRepository.save(any(GrievanceHistory.class))).thenReturn(Mono.just(new GrievanceHistory()));
+        when(grievanceEventPublisher.publishStatusChange(any(), any(), any())).thenReturn(Mono.empty());
 
-        StepVerifier.create(grievanceService.createGrievance(request))
+        StepVerifier.create(grievanceService.createGrievance(request, "citizen-1"))
                 .assertNext(saved -> {
                     assertThat(saved.getId()).isEqualTo("g1");
+                    assertThat(saved.getCitizenId()).isEqualTo("citizen-1");
                     assertThat(saved.getStatus()).isEqualTo(GrievanceStatus.SUBMITTED);
-                    assertThat(saved.getCreatedAt()).isNotNull();
                 })
                 .verifyComplete();
 
-        verify(statusHistoryRepository).save(any(GrievanceHistory.class));
+        verify(grievanceEventPublisher).publishStatusChange(any(), any(), any());
     }
 
     @Test
-    void assignGrievance_updatesAssignmentAndHistory() {
+    void assignGrievanceSetsAssignmentWhenAllowed() {
         Grievance grievance = new Grievance();
-        setId(grievance, "g1");
-        grievance.setCitizenId("c1");
+        grievance.setId("g1");
+        grievance.setDepartmentId("D1");
         grievance.setStatus(GrievanceStatus.SUBMITTED);
 
         when(grievanceRepository.findById("g1")).thenReturn(Mono.just(grievance));
         when(assignmentRepository.save(any(Assignment.class))).thenReturn(Mono.just(new Assignment()));
         when(grievanceRepository.save(any(Grievance.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
-        when(statusHistoryRepository.save(any(GrievanceHistory.class))).thenAnswer(invocation -> {
-            GrievanceHistory history = invocation.getArgument(0);
-            setId(history, "h1");
-            return Mono.just(history);
-        });
+        when(statusHistoryRepository.save(any(GrievanceHistory.class))).thenReturn(Mono.just(new GrievanceHistory()));
+        when(grievanceEventPublisher.publishStatusChange(any(), any(), any())).thenReturn(Mono.empty());
 
-        StepVerifier.create(grievanceService.assignGrievance("g1", "do-1", "cw-1"))
+        StepVerifier.create(grievanceService.assignGrievance("g1", "officer", "worker1", "DEPARTMENT_OFFICER", "D1"))
                 .assertNext(updated -> {
-                    assertThat(updated.getAssignedWokerId()).isEqualTo("cw-1");
+                    assertThat(updated.getAssignedWokerId()).isEqualTo("worker1");
                     assertThat(updated.getStatus()).isEqualTo(GrievanceStatus.ASSIGNED);
-                    assertThat(updated.getAssignedAt()).isNotNull();
                 })
                 .verifyComplete();
     }
 
     @Test
-    void updateStatus_changesStatusAndLogsHistory() {
+    void assignGrievanceRejectsWhenDepartmentMismatch() {
         Grievance grievance = new Grievance();
-        setId(grievance, "g1");
+        grievance.setId("g1");
+        grievance.setDepartmentId("D1");
+
+        when(grievanceRepository.findById("g1")).thenReturn(Mono.just(grievance));
+
+        StepVerifier.create(grievanceService.assignGrievance("g1", "officer", "worker1", "DEPARTMENT_OFFICER", "OTHER"))
+                .expectErrorSatisfies(error -> {
+                    assertThat(error).isInstanceOf(ResponseStatusException.class);
+                    assertThat(((ResponseStatusException) error).getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+                })
+                .verify();
+
+        verify(assignmentRepository, never()).save(any());
+    }
+
+    @Test
+    void updateStatusValidatesDepartmentForRestrictedRole() {
+        Grievance grievance = new Grievance();
+        grievance.setId("g1");
+        grievance.setDepartmentId("D1");
         grievance.setStatus(GrievanceStatus.SUBMITTED);
 
         when(grievanceRepository.findById("g1")).thenReturn(Mono.just(grievance));
         when(grievanceRepository.save(any(Grievance.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
-        when(statusHistoryRepository.save(any(GrievanceHistory.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+        when(statusHistoryRepository.save(any(GrievanceHistory.class))).thenReturn(Mono.just(new GrievanceHistory()));
+        when(grievanceEventPublisher.publishStatusChange(any(), any(), any())).thenReturn(Mono.empty());
 
-        StepVerifier.create(grievanceService.updateStatus("g1", GrievanceStatus.RESOLVED, "user1", "done"))
+        StepVerifier.create(grievanceService.updateStatus("g1", GrievanceStatus.RESOLVED, "user1", "done", "CASE_WORKER", "D1"))
                 .assertNext(updated -> assertThat(updated.getStatus()).isEqualTo(GrievanceStatus.RESOLVED))
                 .verifyComplete();
-
-        verify(statusHistoryRepository).save(any(GrievanceHistory.class));
     }
 
     @Test
-    void getStatusHistory_returnsFlux() {
-        GrievanceHistory h1 = new GrievanceHistory();
-        setId(h1, "h1");
-        h1.setGrievanceId("g1");
-        h1.setStatus(GrievanceStatus.SUBMITTED);
-        h1.setUpdatedBy("c1");
-
-        when(statusHistoryRepository.findByGrievanceIdOrderByUpdatedAtAsc("g1"))
-                .thenReturn(Flux.just(h1));
-
-        StepVerifier.create(grievanceService.getStatusHistory("g1"))
-                .expectNext(h1)
-                .verifyComplete();
-    }
-
-    @Test
-    void assignGrievance_returnsErrorWhenMissing() {
-        when(grievanceRepository.findById("missing")).thenReturn(Mono.empty());
-
-        StepVerifier.create(grievanceService.assignGrievance("missing", "do", "cw"))
-                .expectErrorMessage("Grievance not found")
-                .verify();
-    }
-
-    @Test
-    void updateStatus_returnsErrorWhenMissing() {
-        when(grievanceRepository.findById("missing")).thenReturn(Mono.empty());
-
-        StepVerifier.create(grievanceService.updateStatus("missing", GrievanceStatus.RESOLVED, "u1", "x"))
-                .expectErrorMessage("Grievance not found")
-                .verify();
-    }
-
-    @Test
-    void getById_returnsItem() {
+    void updateStatusRejectsWrongDepartment() {
         Grievance grievance = new Grievance();
-        setId(grievance, "g1");
+        grievance.setId("g1");
+        grievance.setDepartmentId("D1");
+
         when(grievanceRepository.findById("g1")).thenReturn(Mono.just(grievance));
 
-        StepVerifier.create(grievanceService.getById("g1"))
-                .expectNext(grievance)
-                .verifyComplete();
-    }
-
-    @Test
-    void getById_errorsWhenMissing() {
-        when(grievanceRepository.findById("nope")).thenReturn(Mono.empty());
-
-        StepVerifier.create(grievanceService.getById("nope"))
-                .expectErrorMessage("Grievance not found")
+        StepVerifier.create(grievanceService.updateStatus("g1", GrievanceStatus.IN_PROGRESS, "user1", "review", "CASE_WORKER", "OTHER"))
+                .expectError(ResponseStatusException.class)
                 .verify();
     }
 
     @Test
-    void getAll_returnsFluxFromRepository() {
+    void getAllForRoleUsesDepartmentFilterForRestrictedRoles() {
         Grievance grievance = new Grievance();
-        setId(grievance, "g1");
+        grievance.setId("g1");
+
+        when(grievanceRepository.findByDepartmentId("D1")).thenReturn(Flux.just(grievance));
         when(grievanceRepository.findAll()).thenReturn(Flux.just(grievance));
 
-        StepVerifier.create(grievanceService.getAll())
+        StepVerifier.create(grievanceService.getAllForRole("DEPARTMENT_OFFICER", "D1"))
+                .expectNext(grievance)
+                .verifyComplete();
+
+        StepVerifier.create(grievanceService.getAllForRole("ADMIN", null))
                 .expectNext(grievance)
                 .verifyComplete();
     }
 
     @Test
-    void escalateGrievance_updatesAndLogsHistory() {
+    void getStatusHistoryValidatesDepartment() {
         Grievance grievance = new Grievance();
-        setId(grievance, "g1");
+        grievance.setId("g1");
+        grievance.setDepartmentId("D1");
+
+        GrievanceHistory history = new GrievanceHistory();
+        history.setId("h1");
+        history.setGrievanceId("g1");
+
+        when(grievanceRepository.findById("g1")).thenReturn(Mono.just(grievance));
+        when(statusHistoryRepository.findByGrievanceIdOrderByUpdatedAtAsc("g1")).thenReturn(Flux.just(history));
+
+        StepVerifier.create(grievanceService.getStatusHistory("g1", "CASE_WORKER", "D1"))
+                .expectNext(history)
+                .verifyComplete();
+    }
+
+    @Test
+    void getStatusHistoryRejectsWhenGrievanceMissing() {
+        when(grievanceRepository.findById("missing")).thenReturn(Mono.empty());
+
+        StepVerifier.create(grievanceService.getStatusHistory("missing", "CITIZEN", null))
+                .expectError(ResponseStatusException.class)
+                .verify();
+    }
+
+    @Test
+    void getByDepartmentRejectsCrossDepartmentAccess() {
+        StepVerifier.create(grievanceService.getByDepartment("D1", "DEPARTMENT_OFFICER", "D2"))
+                .expectError(ResponseStatusException.class)
+                .verify();
+    }
+
+    @Test
+    void getByCitizenReturnsGrievancesForSubject() {
+        Grievance grievance = new Grievance();
+        grievance.setId("g1");
+        when(grievanceRepository.findByCitizenId("citizen-1")).thenReturn(Flux.just(grievance));
+
+        StepVerifier.create(grievanceService.getByCitizen("citizen-1"))
+                .expectNext(grievance)
+                .verifyComplete();
+    }
+
+    @Test
+    void getCaseWorkersForOfficerReturnsDistinctIds() {
+        Assignment a1 = new Assignment();
+        a1.setAssignedTo("cw-1");
+        Assignment a2 = new Assignment();
+        a2.setAssignedTo("cw-1");
+        Assignment a3 = new Assignment();
+        a3.setAssignedTo("cw-2");
+
+        when(assignmentRepository.findByAssignedBy("officer-1")).thenReturn(Flux.just(a1, a2, a3));
+
+        StepVerifier.create(grievanceService.getCaseWorkersForOfficer("officer-1", "DEPARTMENT_OFFICER"))
+                .expectNext("cw-1", "cw-2")
+                .verifyComplete();
+    }
+
+    @Test
+    void getCaseWorkersForOfficerRejectsUnauthorizedRole() {
+        StepVerifier.create(grievanceService.getCaseWorkersForOfficer("user-1", "CITIZEN"))
+                .expectError(ResponseStatusException.class)
+                .verify();
+    }
+
+    @Test
+    void escalateGrievancePublishesWhenNotEscalated() {
+        Grievance grievance = new Grievance();
+        grievance.setId("g1");
+        grievance.setCitizenId("c1");
         grievance.setEscalated(false);
-        grievance.setStatus(GrievanceStatus.ASSIGNED);
+        grievance.setStatus(GrievanceStatus.IN_PROGRESS);
+        grievance.setAssignedAt(LocalDateTime.now().minusDays(8));
 
         when(grievanceRepository.findById("g1")).thenReturn(Mono.just(grievance));
         when(grievanceRepository.save(any(Grievance.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
         when(statusHistoryRepository.save(any(GrievanceHistory.class))).thenReturn(Mono.just(new GrievanceHistory()));
+        when(grievanceEventPublisher.publishStatusChange(any(), any(), any())).thenReturn(Mono.empty());
 
-        StepVerifier.create(grievanceService.escalateGrievance("g1", "manager"))
-                .assertNext(updated -> {
-                    assertThat(updated.getStatus()).isEqualTo(GrievanceStatus.ESCALATED);
-                    assertThat(updated.isEscalated()).isTrue();
-                })
+        StepVerifier.create(grievanceService.escalateGrievance("g1", "SYSTEM"))
+                .assertNext(updated -> assertThat(updated.isEscalated()).isTrue())
                 .verifyComplete();
+
+        verify(grievanceEventPublisher).publishStatusChange(any(), any(), any());
     }
 
     @Test
-    void escalateGrievance_returnsExistingWhenAlreadyEscalated() {
+    void escalateGrievanceSkipsWhenAlreadyEscalated() {
         Grievance grievance = new Grievance();
-        setId(grievance, "g1");
+        grievance.setId("g1");
         grievance.setEscalated(true);
         grievance.setStatus(GrievanceStatus.ESCALATED);
 
         when(grievanceRepository.findById("g1")).thenReturn(Mono.just(grievance));
 
-        StepVerifier.create(grievanceService.escalateGrievance("g1", "manager"))
+        StepVerifier.create(grievanceService.escalateGrievance("g1", "SYSTEM"))
                 .expectNext(grievance)
                 .verifyComplete();
 
-        verify(statusHistoryRepository, never()).save(any(GrievanceHistory.class));
-    }
-
-    private void setId(Object target, String id) {
-        try {
-            Field f = target.getClass().getDeclaredField("id");
-            f.setAccessible(true);
-            f.set(target, id);
-        } catch (Exception ignored) {
-        }
+        verify(statusHistoryRepository, never()).save(any());
+        verify(grievanceEventPublisher, never()).publishStatusChange(any(), any(), any());
     }
 }

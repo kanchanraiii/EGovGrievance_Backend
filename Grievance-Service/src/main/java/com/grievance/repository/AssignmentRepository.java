@@ -7,4 +7,6 @@ import reactor.core.publisher.Flux;
 public interface AssignmentRepository  extends ReactiveMongoRepository<Assignment, String> {
 	 Flux<Assignment> findByGrievanceId(String grievanceId);
 
+	 Flux<Assignment> findByAssignedBy(String assignedBy);
+
 }

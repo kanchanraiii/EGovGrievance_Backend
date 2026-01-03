@@ -11,6 +11,7 @@ public class FileMetadata {
     private String contentType;
     private String uploadedBy;
 	
+    // getters and setters
     public String getId() {
 		return id;
 	}
@@ -42,6 +43,5 @@ public class FileMetadata {
 		this.uploadedBy = uploadedBy;
 	} 
     
-    // getters and setters
     
 }

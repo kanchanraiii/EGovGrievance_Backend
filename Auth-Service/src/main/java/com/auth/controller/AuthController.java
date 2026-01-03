@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import com.auth.dto.AuthRequest;
 import com.auth.dto.AuthResponse;
@@ -56,12 +57,14 @@ public class AuthController {
 
     // register as supervisory-officer
     @PostMapping("/supervisory-officer/register")
+    @PreAuthorize("hasRole('ADMIN')")
     public Mono<AuthResponse> registerSupervisoryOfficer(@Valid @RequestBody RegisterRequest request) {
         return authService.registerSupervisoryOfficer(request);
     }
 
     // register as department-officer
     @PostMapping("/department-officer/register")
+    @PreAuthorize("hasRole('ADMIN')")
     public Mono<AuthResponse> registerDepartmentOfficer(@Valid @RequestBody DepartmentRegisterRequest request) {
         return authService.registerDepartmentOfficer(request);
     }

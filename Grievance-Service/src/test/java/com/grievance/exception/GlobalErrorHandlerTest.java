@@ -1,13 +1,18 @@
 package com.grievance.exception;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.support.WebExchangeBindException;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
+@ExtendWith(MockitoExtension.class)
 class GlobalErrorHandlerTest {
 
     private final GlobalErrorHandler handler = new GlobalErrorHandler();
@@ -25,7 +30,9 @@ class GlobalErrorHandlerTest {
 
     @Test
     void handleNotFoundReturns404() {
-        var response = handler.handleNotFound(new ResourceNotFoundException("missing"));
+        ResourceNotFoundException ex = mock(ResourceNotFoundException.class);
+        when(ex.getMessage()).thenReturn("missing");
+        var response = handler.handleNotFound(ex);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).containsEntry("message", "missing");
     }

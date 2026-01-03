@@ -74,7 +74,8 @@ public class GrievanceService {
 	// to assign a grievance - assigned by Dept Officer to a Case Worker
 	public Mono<Grievance> assignGrievance(String grievanceId, String assignedBy, String assignedTo, String requesterRole, String requesterDepartmentId) {
 
-		return grievanceRepository.findById(grievanceId)
+		return ensureCaseWorkerAvailable(assignedTo)
+				.then(grievanceRepository.findById(grievanceId))
 				.switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Grievance not found")))
 				.flatMap(grievance -> ensureSameDepartmentForRestrictedRole(requesterRole, requesterDepartmentId, grievance))
 				.flatMap(grievance -> {
@@ -153,10 +154,57 @@ public class GrievanceService {
 
 	// list grievances by department with access control
 	public Flux<Grievance> getByDepartment(String departmentId, String role, String requesterDepartmentId) {
-		if (isDepartmentRestrictedRole(role) && !isSameDepartment(requesterDepartmentId, departmentId)) {
-			return Flux.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized for this department"));
+		if (!isSupervisoryOfficer(role)) {
+			return Flux.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Only supervisory officers can view department grievances"));
 		}
 		return grievanceRepository.findByDepartmentId(departmentId);
+	}
+
+	// list grievances assigned to a case worker (department officer / supervisory officer / admin)
+	public Flux<Grievance> getByCaseWorker(String caseWorkerId, String role, String requesterDepartmentId) {
+		if (caseWorkerId == null) {
+			return Flux.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "caseWorkerId is required"));
+		}
+		boolean allowedRole = role != null && (role.equalsIgnoreCase("DEPARTMENT_OFFICER")
+				|| role.equalsIgnoreCase("SUPERVISORY_OFFICER")
+				|| role.equalsIgnoreCase("ADMIN"));
+		if (!allowedRole) {
+			return Flux.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized"));
+		}
+
+		if (isDepartmentRestrictedRole(role)) {
+			if (requesterDepartmentId == null) {
+				return Flux.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized for this department"));
+			}
+			return grievanceRepository.findByAssignedWokerId(caseWorkerId)
+					.filter(grievance -> isSameDepartment(requesterDepartmentId, grievance.getDepartmentId()));
+		}
+		return grievanceRepository.findByAssignedWokerId(caseWorkerId);
+	}
+
+	// list grievances for the authenticated citizen
+	public Flux<Grievance> getByCitizen(String citizenId) {
+		if (citizenId == null) {
+			return Flux.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized"));
+		}
+		return grievanceRepository.findByCitizenId(citizenId);
+	}
+
+	// list distinct case workers assigned by the current department officer
+	public Flux<String> getCaseWorkersForOfficer(String officerId, String role) {
+		if (officerId == null) {
+			return Flux.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized"));
+		}
+		boolean allowedRole = role != null && (role.equalsIgnoreCase("DEPARTMENT_OFFICER")
+				|| role.equalsIgnoreCase("SUPERVISORY_OFFICER")
+				|| role.equalsIgnoreCase("ADMIN"));
+		if (!allowedRole) {
+			return Flux.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized"));
+		}
+		return assignmentRepository.findByAssignedBy(officerId)
+				.map(Assignment::getAssignedTo)
+				.filter(id -> id != null)
+				.distinct();
 	}
 
 	// helper function
@@ -189,6 +237,29 @@ public class GrievanceService {
 	private boolean isDepartmentRestrictedRole(String role) {
 		return role != null &&
 				(role.equalsIgnoreCase("DEPARTMENT_OFFICER") || role.equalsIgnoreCase("CASE_WORKER"));
+	}
+
+	private boolean isSupervisoryOfficer(String role) {
+		return role != null && role.equalsIgnoreCase("SUPERVISORY_OFFICER");
+	}
+
+	private boolean isCompletedStatus(GrievanceStatus status) {
+		return status == GrievanceStatus.RESOLVED ||
+				status == GrievanceStatus.CLOSED ||
+				status == GrievanceStatus.WORK_DONE;
+	}
+
+	private Mono<Void> ensureCaseWorkerAvailable(String caseWorkerId) {
+		return grievanceRepository.findByAssignedWokerId(caseWorkerId)
+				.filter(grievance -> !isCompletedStatus(grievance.getStatus()))
+				.hasElements()
+				.flatMap(hasActive -> {
+					if (hasActive) {
+						return Mono.error(new ResponseStatusException(HttpStatus.CONFLICT,
+								"Case worker already has an active assignment"));
+					}
+					return Mono.empty();
+				});
 	}
 
 	private boolean isSameDepartment(String requesterDepartmentId, String targetDepartmentId) {

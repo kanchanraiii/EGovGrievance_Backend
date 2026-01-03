@@ -22,14 +22,20 @@ public class DepartmentCatalog {
 
     private static final Logger log = LoggerFactory.getLogger(DepartmentCatalog.class);
 
-    private final Set<String> departmentIds;
-    private final boolean hasDepartmentData;
+    private volatile Set<String> departmentIds;
+    private volatile boolean hasDepartmentData;
+    private final String departmentsFilePath;
+    private final ResourceLoader resourceLoader;
+    private final ObjectMapper objectMapper;
 
     public DepartmentCatalog(
             @Value("${departments.file:../departments-config/departments-db.json}") String departmentsFilePath,
             ResourceLoader resourceLoader,
             ObjectMapper objectMapper) {
-        this.departmentIds = loadDepartmentIds(departmentsFilePath, resourceLoader, objectMapper);
+        this.departmentsFilePath = departmentsFilePath;
+        this.resourceLoader = resourceLoader;
+        this.objectMapper = objectMapper;
+        this.departmentIds = loadDepartmentIds(this.departmentsFilePath, this.resourceLoader, this.objectMapper);
         this.hasDepartmentData = !this.departmentIds.isEmpty();
     }
 
@@ -41,6 +47,11 @@ public class DepartmentCatalog {
             return false;
         }
         return departmentIds.contains(departmentId.trim().toUpperCase(Locale.ROOT));
+    }
+
+    public synchronized void refresh() {
+        this.departmentIds = loadDepartmentIds(this.departmentsFilePath, this.resourceLoader, this.objectMapper);
+        this.hasDepartmentData = !this.departmentIds.isEmpty();
     }
 
     private Set<String> loadDepartmentIds(String path, ResourceLoader loader, ObjectMapper mapper) {

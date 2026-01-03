@@ -17,6 +17,8 @@ class DepartmentClientTest {
         ));
     }
 
+   
+    // 
     @Test
     void isValidDepartment_returnsTrueWhenCategoryAndSubCategoryExist() {
         String payload = """
