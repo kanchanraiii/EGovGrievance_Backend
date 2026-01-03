@@ -78,4 +78,21 @@ class GrievanceEventPublisherTest {
         GrievanceEvent sent = eventCaptor.getValue();
         assertThat(sent.getMessage()).contains("grievance g1 is now closed").contains("keep you posted");
     }
+
+    @Test
+    void publishStatusChangeHandlesNullRemarksBranch() {
+        Grievance grievance = new Grievance();
+        grievance.setId("g1");
+        grievance.setCitizenId("user1");
+
+        CompletableFuture<SendResult<String, Object>> future = CompletableFuture.completedFuture(null);
+        ArgumentCaptor<GrievanceEvent> eventCaptor = ArgumentCaptor.forClass(GrievanceEvent.class);
+
+        when(kafkaTemplate.send(any(String.class), eventCaptor.capture())).thenReturn(future);
+
+        StepVerifier.create(publisher.publishStatusChange(grievance, GrievanceStatus.WORK_DONE, null))
+                .verifyComplete();
+
+        assertThat(eventCaptor.getValue().getMessage()).contains("keep you posted");
+    }
 }

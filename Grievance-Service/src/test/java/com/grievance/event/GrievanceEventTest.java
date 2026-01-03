@@ -48,5 +48,28 @@ class GrievanceEventTest {
         assertThat(e1).isEqualTo(e1);
         assertThat(e1).isNotEqualTo(null);
         assertThat(e1.canEqual(new Object())).isFalse();
+
+        GrievanceEvent nullId = new GrievanceEvent();
+        nullId.setUserId("u1");
+        assertThat(e1).isNotEqualTo(nullId);
+
+        GrievanceEvent empty1 = new GrievanceEvent();
+        GrievanceEvent empty2 = new GrievanceEvent();
+        assertThat(empty1).isEqualTo(empty2);
+        assertThat(empty1.hashCode()).isNotZero();
+
+        GrievanceEvent nullBase = new GrievanceEvent();
+        nullBase.setUserId("u1");
+        assertThat(nullBase).isNotEqualTo(e1);
+
+        GrievanceEvent refusingEquality = new GrievanceEvent() {
+            @Override
+            protected boolean canEqual(Object other) {
+                return false;
+            }
+        };
+        refusingEquality.setGrievanceId("g1");
+        assertThat(e1.equals(refusingEquality)).isFalse();
+        assertThat(e1.equals("other")).isFalse();
     }
 }

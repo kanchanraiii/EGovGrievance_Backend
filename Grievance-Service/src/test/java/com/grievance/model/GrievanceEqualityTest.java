@@ -61,4 +61,41 @@ class GrievanceEqualityTest {
         differentCitizen.setCitizenId("other");
         assertThat(g1).isNotEqualTo(differentCitizen);
     }
+
+    @Test
+    void equalsHandlesIdNullCombinations() {
+        Grievance base = new Grievance();
+        base.setId("g1");
+
+        Grievance sameId = new Grievance();
+        sameId.setId("g1");
+        assertThat(base).isEqualTo(sameId);
+
+        Grievance differentId = new Grievance();
+        differentId.setId("g2");
+        assertThat(base).isNotEqualTo(differentId);
+
+        Grievance nullId = new Grievance();
+        assertThat(base).isNotEqualTo(nullId);
+
+        Grievance nullBase = new Grievance();
+        Grievance withId = new Grievance();
+        withId.setId("g1");
+        assertThat(nullBase).isNotEqualTo(withId);
+
+        Grievance empty1 = new Grievance();
+        Grievance empty2 = new Grievance();
+        assertThat(empty1).isEqualTo(empty2);
+        assertThat(empty1.hashCode()).isNotZero();
+
+        Grievance refusingEquality = new Grievance() {
+            @Override
+            protected boolean canEqual(Object other) {
+                return false;
+            }
+        };
+        refusingEquality.setId("g1");
+        assertThat(base.equals(refusingEquality)).isFalse();
+        assertThat(base.equals("other")).isFalse();
+    }
 }

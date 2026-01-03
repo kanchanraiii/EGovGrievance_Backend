@@ -37,6 +37,73 @@ class RequestEqualityTest {
         assertThat(r1).isEqualTo(r1);
         assertThat(r1).isNotEqualTo(null);
         assertThat(r1.canEqual(new Object())).isFalse();
+
+        GrievanceCreateRequest empty1 = new GrievanceCreateRequest();
+        GrievanceCreateRequest empty2 = new GrievanceCreateRequest();
+        assertThat(empty1).isEqualTo(empty2);
+        assertThat(empty1.hashCode()).isEqualTo(empty2.hashCode());
+
+        GrievanceCreateRequest missingDepartment = new GrievanceCreateRequest();
+        missingDepartment.setCategoryCode("CAT");
+        missingDepartment.setSubCategoryCode("SUB");
+        missingDepartment.setDescription("description");
+        assertThat(r1).isNotEqualTo(missingDepartment);
+
+        GrievanceCreateRequest missingCategory = new GrievanceCreateRequest();
+        missingCategory.setDepartmentId("D1");
+        missingCategory.setSubCategoryCode("SUB");
+        missingCategory.setDescription("description");
+        assertThat(r1).isNotEqualTo(missingCategory);
+
+        GrievanceCreateRequest missingSubCategory = new GrievanceCreateRequest();
+        missingSubCategory.setDepartmentId("D1");
+        missingSubCategory.setCategoryCode("CAT");
+        missingSubCategory.setDescription("description");
+        assertThat(r1).isNotEqualTo(missingSubCategory);
+
+        GrievanceCreateRequest missingDescription = new GrievanceCreateRequest();
+        missingDescription.setDepartmentId("D1");
+        missingDescription.setCategoryCode("CAT");
+        missingDescription.setSubCategoryCode("SUB");
+        assertThat(r1).isNotEqualTo(missingDescription);
+
+        GrievanceCreateRequest nullDepartmentBase = new GrievanceCreateRequest();
+        nullDepartmentBase.setCategoryCode("CAT");
+        nullDepartmentBase.setSubCategoryCode("SUB");
+        nullDepartmentBase.setDescription("description");
+        assertThat(nullDepartmentBase).isNotEqualTo(r1);
+
+        GrievanceCreateRequest nullCategoryBase = new GrievanceCreateRequest();
+        nullCategoryBase.setDepartmentId("D1");
+        nullCategoryBase.setSubCategoryCode("SUB");
+        nullCategoryBase.setDescription("description");
+        assertThat(nullCategoryBase).isNotEqualTo(r1);
+
+        GrievanceCreateRequest nullSubCategoryBase = new GrievanceCreateRequest();
+        nullSubCategoryBase.setDepartmentId("D1");
+        nullSubCategoryBase.setCategoryCode("CAT");
+        nullSubCategoryBase.setDescription("description");
+        assertThat(nullSubCategoryBase).isNotEqualTo(r1);
+
+        GrievanceCreateRequest nullDescriptionBase = new GrievanceCreateRequest();
+        nullDescriptionBase.setDepartmentId("D1");
+        nullDescriptionBase.setCategoryCode("CAT");
+        nullDescriptionBase.setSubCategoryCode("SUB");
+        assertThat(nullDescriptionBase).isNotEqualTo(r1);
+
+        GrievanceCreateRequest refusingEquality = new GrievanceCreateRequest() {
+            @Override
+            protected boolean canEqual(Object other) {
+                return false;
+            }
+        };
+        refusingEquality.setDepartmentId("D1");
+        refusingEquality.setCategoryCode("CAT");
+        refusingEquality.setSubCategoryCode("SUB");
+        refusingEquality.setDescription("description");
+        assertThat(r1.equals(refusingEquality)).isFalse();
+
+        assertThat(r1.equals("other")).isFalse();
     }
 
     @Test

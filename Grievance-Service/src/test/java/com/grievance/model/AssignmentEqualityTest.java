@@ -52,4 +52,41 @@ class AssignmentEqualityTest {
         different.setId("a2");
         assertThat(a1).isNotEqualTo(different);
     }
+
+    @Test
+    void equalsHandlesIdNullCombinations() {
+        Assignment base = new Assignment();
+        base.setId("a1");
+
+        Assignment sameId = new Assignment();
+        sameId.setId("a1");
+        assertThat(base).isEqualTo(sameId);
+
+        Assignment differentId = new Assignment();
+        differentId.setId("a2");
+        assertThat(base).isNotEqualTo(differentId);
+
+        Assignment nullId = new Assignment();
+        assertThat(base).isNotEqualTo(nullId);
+
+        Assignment nullBase = new Assignment();
+        Assignment withId = new Assignment();
+        withId.setId("a1");
+        assertThat(nullBase).isNotEqualTo(withId);
+
+        Assignment empty1 = new Assignment();
+        Assignment empty2 = new Assignment();
+        assertThat(empty1).isEqualTo(empty2);
+        assertThat(empty1.hashCode()).isNotZero();
+
+        Assignment refusingEquality = new Assignment() {
+            @Override
+            protected boolean canEqual(Object other) {
+                return false;
+            }
+        };
+        refusingEquality.setId("a1");
+        assertThat(base.equals(refusingEquality)).isFalse();
+        assertThat(base.equals("other")).isFalse();
+    }
 }

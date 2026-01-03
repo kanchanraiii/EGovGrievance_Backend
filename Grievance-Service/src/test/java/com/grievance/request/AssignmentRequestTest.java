@@ -31,6 +31,16 @@ class AssignmentRequestTest {
         assertThat(request).isNotEqualTo(different);
         assertThat(request.hashCode()).isNotEqualTo(different.hashCode());
 
+        AssignmentRequest missingAssignee = new AssignmentRequest();
+        missingAssignee.setGrievanceId("g1");
+        missingAssignee.setAssignedTo(null);
+        assertThat(request).isNotEqualTo(missingAssignee);
+
+        AssignmentRequest empty1 = new AssignmentRequest();
+        AssignmentRequest empty2 = new AssignmentRequest();
+        assertThat(empty1).isEqualTo(empty2);
+        assertThat(request.equals(null)).isFalse();
+
         AssignmentRequest nullFields = new AssignmentRequest();
         assertThat(nullFields.hashCode()).isNotZero();
         assertThat(nullFields).isNotEqualTo(request);
@@ -45,5 +55,10 @@ class AssignmentRequestTest {
         refusingEquality.setAssignedTo("worker-1");
 
         assertThat(request.equals(refusingEquality)).isFalse();
+        assertThat(request.toString()).contains("grievanceId");
+
+        AssignmentRequest missingId = new AssignmentRequest();
+        missingId.setAssignedTo("worker-1");
+        assertThat(missingId).isNotEqualTo(request);
     }
 }

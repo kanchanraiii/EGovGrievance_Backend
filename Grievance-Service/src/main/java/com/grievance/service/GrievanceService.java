@@ -202,8 +202,7 @@ public class GrievanceService {
 			return Flux.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized"));
 		}
 		return assignmentRepository.findByAssignedBy(officerId)
-				.map(Assignment::getAssignedTo)
-				.filter(id -> id != null)
+				.flatMap(assignment -> Mono.justOrEmpty(assignment.getAssignedTo()))
 				.distinct();
 	}
 

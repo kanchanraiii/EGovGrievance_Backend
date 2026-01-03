@@ -65,4 +65,12 @@ class GlobalErrorHandlerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(response.getBody()).containsEntry("message", "conflict");
     }
+
+    @Test
+    void handleResponseStatusFallsBackToMessageWhenReasonMissing() {
+        ResponseStatusException ex = new ResponseStatusException(HttpStatus.CONFLICT, null, null);
+        var response = handler.handleResponseStatus(ex);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).containsEntry("message", ex.getMessage());
+    }
 }
