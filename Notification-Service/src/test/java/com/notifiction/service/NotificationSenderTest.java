@@ -126,4 +126,168 @@ class NotificationSenderTest {
         assertThat(mimeMessage.getFrom()[0].toString()).isEqualTo("no-reply@example.com");
         assertThat(mimeMessage.getSubject()).contains("SUBMITTED");
     }
+
+    @Test
+    void sendSmsCompletesWhenGatewayErrors() {
+        JavaMailSender mailSender = mock(JavaMailSender.class);
+        NotificationSender sender = new NotificationSender(
+                mailSender,
+                "AC123",
+                "auth",
+                "+100000",
+                "+200000",
+                "no-reply@example.com",
+                "default@example.com"
+        );
+
+        ExchangeFunction exchangeFunction = request -> Mono.error(new RuntimeException("gateway down"));
+        WebClient stubClient = WebClient.builder().exchangeFunction(exchangeFunction).build();
+        ReflectionTestUtils.setField(sender, "webClient", stubClient);
+
+        StepVerifier.create(sender.sendSms(sampleEvent()))
+                .verifyComplete();
+    }
+
+    @Test
+    void smsEnabledIsFalseWhenCredentialsIncomplete() {
+        JavaMailSender mailSender = mock(JavaMailSender.class);
+        NotificationSender sender = new NotificationSender(
+                mailSender,
+                "AC123",
+                "",              // missing auth token
+                "+100000",
+                "",
+                "",
+                "default@example.com"
+        );
+
+        Object smsEnabled = ReflectionTestUtils.getField(sender, "smsEnabled");
+        assertThat(smsEnabled).isEqualTo(false);
+        Object emailEnabled = ReflectionTestUtils.getField(sender, "emailEnabled");
+        assertThat(emailEnabled).isEqualTo(false);
+    }
+
+    @Test
+    void sendEmailUsesDefaultRecipientWhenUserEmailMissingAndHandlesException() throws Exception {
+        JavaMailSender mailSender = mock(JavaMailSender.class);
+        MimeMessage mimeMessage = new MimeMessage((Session) null);
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+        // assert recipient and throw to hit catch block
+        org.mockito.Mockito.doAnswer(invocation -> {
+            MimeMessage msg = invocation.getArgument(0);
+            assertThat(msg.getAllRecipients()[0].toString()).isEqualTo("default@example.com");
+            throw new RuntimeException("fail");
+        }).when(mailSender).send(any(MimeMessage.class));
+
+        NotificationSender sender = new NotificationSender(
+                mailSender,
+                "disabled",
+                "",
+                "",
+                "",
+                "no-reply@example.com",
+                "default@example.com"
+        );
+
+        GrievanceEvent event = sampleEvent();
+        event.setUserId("not-an-email");
+
+        StepVerifier.create(sender.sendEmail(event))
+                .verifyComplete();
+    }
+
+    @Test
+    void sendEmailDefaultsToConfiguredAddressWhenUserIdNull() throws Exception {
+        JavaMailSender mailSender = mock(JavaMailSender.class);
+        MimeMessage mimeMessage = new MimeMessage((Session) null);
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+        org.mockito.Mockito.doNothing().when(mailSender).send(any(MimeMessage.class));
+
+        NotificationSender sender = new NotificationSender(
+                mailSender,
+                "disabled",
+                "",
+                "",
+                "",
+                "no-reply@example.com",
+                "fallback@example.com"
+        );
+
+        GrievanceEvent event = sampleEvent();
+        event.setUserId(null);
+
+        StepVerifier.create(sender.sendEmail(event))
+                .verifyComplete();
+
+        assertThat(mimeMessage.getAllRecipients()[0].toString()).isEqualTo("fallback@example.com");
+    }
+
+    @Test
+    void smsDisabledWhenAccountSidMissing() {
+        JavaMailSender mailSender = mock(JavaMailSender.class);
+
+        NotificationSender sender = new NotificationSender(
+                mailSender,
+                "",
+                "auth-token",
+                "+111",
+                "+222",
+                "no-reply@example.com",
+                "default@example.com"
+        );
+
+        assertThat(ReflectionTestUtils.getField(sender, "smsEnabled")).isEqualTo(false);
+        assertThat(ReflectionTestUtils.getField(sender, "emailEnabled")).isEqualTo(true);
+    }
+
+    @Test
+    void smsDisabledWhenTwilioFromMissing() {
+        JavaMailSender mailSender = mock(JavaMailSender.class);
+
+        NotificationSender sender = new NotificationSender(
+                mailSender,
+                "AC123",
+                "auth-token",
+                "",
+                "+222",
+                "no-reply@example.com",
+                "default@example.com"
+        );
+
+        assertThat(ReflectionTestUtils.getField(sender, "smsEnabled")).isEqualTo(false);
+    }
+
+    @Test
+    void smsDisabledWhenTwilioToMissing() {
+        JavaMailSender mailSender = mock(JavaMailSender.class);
+
+        NotificationSender sender = new NotificationSender(
+                mailSender,
+                "AC123",
+                "auth-token",
+                "+111",
+                "",
+                "no-reply@example.com",
+                "default@example.com"
+        );
+
+        assertThat(ReflectionTestUtils.getField(sender, "smsEnabled")).isEqualTo(false);
+    }
+
+    @Test
+    void smsDisabledWhenAccountSidExplicitlyMarkedDisabled() {
+        JavaMailSender mailSender = mock(JavaMailSender.class);
+
+        NotificationSender sender = new NotificationSender(
+                mailSender,
+                "disabled",
+                "auth-token",
+                "+111",
+                "+222",
+                "no-reply@example.com",
+                "default@example.com"
+        );
+
+        assertThat(ReflectionTestUtils.getField(sender, "smsEnabled")).isEqualTo(false);
+    }
 }
