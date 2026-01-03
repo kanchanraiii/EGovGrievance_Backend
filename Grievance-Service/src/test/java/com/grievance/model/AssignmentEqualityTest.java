@@ -35,7 +35,7 @@ class AssignmentEqualityTest {
         assertThat(a1.hashCode()).isEqualTo(a2.hashCode());
         assertThat(a1.toString()).contains("Assignment").contains("g1");
 
-        a2.setAssignedTo("other");
+        a2.setId("a2");
         assertThat(a1).isNotEqualTo(a2);
     }
 

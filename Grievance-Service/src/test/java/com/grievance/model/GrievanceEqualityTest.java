@@ -57,7 +57,7 @@ class GrievanceEqualityTest {
         assertThat(g1.canEqual(new Object())).isFalse();
 
         Grievance differentCitizen = new Grievance();
-        differentCitizen.setId("g1");
+        differentCitizen.setId("g2");
         differentCitizen.setCitizenId("other");
         assertThat(g1).isNotEqualTo(differentCitizen);
     }

@@ -154,7 +154,7 @@ class MainControllerTest {
                 .thenReturn(Flux.just("cw-1", "cw-2"));
 
         StepVerifier.create(controller.getMyCaseWorkers(officerJwt))
-                .expectNext("cw-1", "cw-2")
+                .assertNext(map -> assertThat(map.get("caseWorkers")).containsExactly("cw-1", "cw-2"))
                 .verifyComplete();
     }
 

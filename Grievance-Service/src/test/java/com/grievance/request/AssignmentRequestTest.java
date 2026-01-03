@@ -1,26 +1,49 @@
 package com.grievance.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(MockitoExtension.class)
 class AssignmentRequestTest {
 
     @Test
-    void settersAndGettersWork() {
-        AssignmentRequest request = spy(new AssignmentRequest());
+    void gettersEqualsAndHashCodeCoverBranches() {
+        AssignmentRequest request = new AssignmentRequest();
         request.setGrievanceId("g1");
-        request.setAssignedTo("worker");
+        request.setAssignedTo("worker-1");
 
         assertThat(request.getGrievanceId()).isEqualTo("g1");
-        assertThat(request.getAssignedTo()).isEqualTo("worker");
+        assertThat(request.getAssignedTo()).isEqualTo("worker-1");
+        assertThat(request).isEqualTo(request);
+        assertThat(request).isNotEqualTo("other");
 
-        verify(request).setGrievanceId("g1");
-        verify(request).setAssignedTo("worker");
+        AssignmentRequest same = new AssignmentRequest();
+        same.setGrievanceId("g1");
+        same.setAssignedTo("worker-1");
+
+        assertThat(request).isEqualTo(same);
+        assertThat(request.hashCode()).isEqualTo(same.hashCode());
+
+        AssignmentRequest different = new AssignmentRequest();
+        different.setGrievanceId("g1");
+        different.setAssignedTo("worker-2");
+
+        assertThat(request).isNotEqualTo(different);
+        assertThat(request.hashCode()).isNotEqualTo(different.hashCode());
+
+        AssignmentRequest nullFields = new AssignmentRequest();
+        assertThat(nullFields.hashCode()).isNotZero();
+        assertThat(nullFields).isNotEqualTo(request);
+
+        AssignmentRequest refusingEquality = new AssignmentRequest() {
+            @Override
+            protected boolean canEqual(Object other) {
+                return false;
+            }
+        };
+        refusingEquality.setGrievanceId("g1");
+        refusingEquality.setAssignedTo("worker-1");
+
+        assertThat(request.equals(refusingEquality)).isFalse();
     }
 }

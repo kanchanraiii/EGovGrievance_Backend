@@ -221,12 +221,6 @@ public class GrievanceService {
 		return statusHistoryRepository.save(history);
 	}
 	
-	// function to check if SLA is breached
-	private boolean isSLABreached(Grievance grievance, int slaDays) {
-		return grievance.getAssignedAt() != null &&
-		           grievance.getAssignedAt().isBefore(LocalDateTime.now().minusDays(slaDays));
-	}
-
 	private Mono<Grievance> ensureSameDepartmentForRestrictedRole(String role, String requesterDepartmentId, Grievance grievance) {
 		if (isDepartmentRestrictedRole(role) && !isSameDepartment(requesterDepartmentId, grievance.getDepartmentId())) {
 			return Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized for this department"));

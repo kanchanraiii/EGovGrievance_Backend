@@ -1,32 +1,59 @@
 package com.grievance.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.grievance.model.GrievanceStatus;
 
-@ExtendWith(MockitoExtension.class)
 class StatusUpdateRequestTest {
 
     @Test
-    void settersAndGettersWork() {
-        StatusUpdateRequest request = spy(new StatusUpdateRequest());
+    void gettersEqualsAndHashCodeCoverBranches() {
+        StatusUpdateRequest request = new StatusUpdateRequest();
         request.setGrievanceId("g1");
-        request.setStatus(GrievanceStatus.IN_PROGRESS);
-        request.setUpdatedBy("worker");
-        request.setRemarks("working");
+        request.setStatus(GrievanceStatus.ASSIGNED);
+        request.setUpdatedBy("officer-1");
+        request.setRemarks("in review");
 
         assertThat(request.getGrievanceId()).isEqualTo("g1");
-        assertThat(request.getStatus()).isEqualTo(GrievanceStatus.IN_PROGRESS);
-        assertThat(request.getUpdatedBy()).isEqualTo("worker");
-        assertThat(request.getRemarks()).isEqualTo("working");
+        assertThat(request.getStatus()).isEqualTo(GrievanceStatus.ASSIGNED);
+        assertThat(request.getUpdatedBy()).isEqualTo("officer-1");
+        assertThat(request.getRemarks()).isEqualTo("in review");
+        assertThat(request).isEqualTo(request);
+        assertThat(request).isNotEqualTo("other");
 
-        verify(request).setStatus(GrievanceStatus.IN_PROGRESS);
-        verify(request).setRemarks("working");
+        StatusUpdateRequest same = new StatusUpdateRequest();
+        same.setGrievanceId("g1");
+        same.setStatus(GrievanceStatus.ASSIGNED);
+        same.setUpdatedBy("officer-1");
+        same.setRemarks("in review");
+
+        assertThat(request).isEqualTo(same);
+        assertThat(request.hashCode()).isEqualTo(same.hashCode());
+
+        StatusUpdateRequest differentStatus = new StatusUpdateRequest();
+        differentStatus.setGrievanceId("g1");
+        differentStatus.setStatus(GrievanceStatus.RESOLVED);
+        differentStatus.setUpdatedBy("officer-1");
+        differentStatus.setRemarks("resolved");
+
+        assertThat(request).isNotEqualTo(differentStatus);
+
+        StatusUpdateRequest nullFields = new StatusUpdateRequest();
+        assertThat(nullFields.hashCode()).isNotZero();
+        assertThat(nullFields).isNotEqualTo(request);
+
+        StatusUpdateRequest refusingEquality = new StatusUpdateRequest() {
+            @Override
+            protected boolean canEqual(Object other) {
+                return false;
+            }
+        };
+        refusingEquality.setGrievanceId("g1");
+        refusingEquality.setStatus(GrievanceStatus.ASSIGNED);
+        refusingEquality.setUpdatedBy("officer-1");
+
+        assertThat(request.equals(refusingEquality)).isFalse();
     }
 }

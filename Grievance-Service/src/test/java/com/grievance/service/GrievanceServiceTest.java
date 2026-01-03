@@ -48,6 +48,13 @@ class GrievanceServiceTest {
     @InjectMocks
     private GrievanceService grievanceService;
 
+    private Grievance grievanceWithDept(String departmentId) {
+        Grievance grievance = new Grievance();
+        grievance.setId("g1");
+        grievance.setDepartmentId(departmentId);
+        return grievance;
+    }
+
     @Test
     void createGrievancePersistsAndPublishesEvent() {
         GrievanceCreateRequest request = new GrievanceCreateRequest();
@@ -84,6 +91,7 @@ class GrievanceServiceTest {
         grievance.setDepartmentId("D1");
         grievance.setStatus(GrievanceStatus.SUBMITTED);
 
+        when(grievanceRepository.findByAssignedWokerId("worker1")).thenReturn(Flux.empty());
         when(grievanceRepository.findById("g1")).thenReturn(Mono.just(grievance));
         when(assignmentRepository.save(any(Assignment.class))).thenReturn(Mono.just(new Assignment()));
         when(grievanceRepository.save(any(Grievance.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
@@ -99,11 +107,45 @@ class GrievanceServiceTest {
     }
 
     @Test
+    void assignGrievanceRejectsWhenAlreadyAssigned() {
+        Grievance grievance = grievanceWithDept("D1");
+        grievance.setAssignedWokerId("existing");
+        grievance.setStatus(GrievanceStatus.ASSIGNED);
+
+        when(grievanceRepository.findByAssignedWokerId("worker1")).thenReturn(Flux.empty());
+        when(grievanceRepository.findById("g1")).thenReturn(Mono.just(grievance));
+
+        StepVerifier.create(grievanceService.assignGrievance("g1", "officer", "worker1", "DEPARTMENT_OFFICER", "D1"))
+                .expectErrorSatisfies(error -> {
+                    assertThat(error).isInstanceOf(ResponseStatusException.class);
+                    assertThat(((ResponseStatusException) error).getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+                })
+                .verify();
+    }
+
+    @Test
+    void assignGrievanceRejectsWhenCaseWorkerBusy() {
+        Grievance activeAssignment = grievanceWithDept("D1");
+        activeAssignment.setStatus(GrievanceStatus.IN_PROGRESS);
+
+        when(grievanceRepository.findByAssignedWokerId("worker1")).thenReturn(Flux.just(activeAssignment));
+        when(grievanceRepository.findById("g1")).thenReturn(Mono.just(grievanceWithDept("D1")));
+
+        StepVerifier.create(grievanceService.assignGrievance("g1", "officer", "worker1", "DEPARTMENT_OFFICER", "D1"))
+                .expectErrorSatisfies(error -> {
+                    assertThat(error).isInstanceOf(ResponseStatusException.class);
+                    assertThat(((ResponseStatusException) error).getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+                })
+                .verify();
+    }
+
+    @Test
     void assignGrievanceRejectsWhenDepartmentMismatch() {
         Grievance grievance = new Grievance();
         grievance.setId("g1");
         grievance.setDepartmentId("D1");
 
+        when(grievanceRepository.findByAssignedWokerId("worker1")).thenReturn(Flux.empty());
         when(grievanceRepository.findById("g1")).thenReturn(Mono.just(grievance));
 
         StepVerifier.create(grievanceService.assignGrievance("g1", "officer", "worker1", "DEPARTMENT_OFFICER", "OTHER"))
@@ -164,6 +206,13 @@ class GrievanceServiceTest {
     }
 
     @Test
+    void getAllForRoleRequiresDepartmentForRestrictedRole() {
+        StepVerifier.create(grievanceService.getAllForRole("DEPARTMENT_OFFICER", null))
+                .expectError(ResponseStatusException.class)
+                .verify();
+    }
+
+    @Test
     void getStatusHistoryValidatesDepartment() {
         Grievance grievance = new Grievance();
         grievance.setId("g1");
@@ -182,10 +231,31 @@ class GrievanceServiceTest {
     }
 
     @Test
+    void getStatusHistoryRejectsWhenDifferentDepartment() {
+        Grievance grievance = grievanceWithDept("D1");
+        when(grievanceRepository.findById("g1")).thenReturn(Mono.just(grievance));
+
+        StepVerifier.create(grievanceService.getStatusHistory("g1", "CASE_WORKER", "D2"))
+                .expectError(ResponseStatusException.class)
+                .verify();
+    }
+
+    @Test
     void getStatusHistoryRejectsWhenGrievanceMissing() {
         when(grievanceRepository.findById("missing")).thenReturn(Mono.empty());
 
         StepVerifier.create(grievanceService.getStatusHistory("missing", "CITIZEN", null))
+                .expectError(ResponseStatusException.class)
+                .verify();
+    }
+
+    @Test
+    void getStatusHistoryRejectsWhenHistoryMissing() {
+        Grievance grievance = grievanceWithDept("D1");
+        when(grievanceRepository.findById("g1")).thenReturn(Mono.just(grievance));
+        when(statusHistoryRepository.findByGrievanceIdOrderByUpdatedAtAsc("g1")).thenReturn(Flux.empty());
+
+        StepVerifier.create(grievanceService.getStatusHistory("g1", "CITIZEN", null))
                 .expectError(ResponseStatusException.class)
                 .verify();
     }
@@ -198,6 +268,16 @@ class GrievanceServiceTest {
     }
 
     @Test
+    void getByDepartmentAllowsSupervisoryOfficer() {
+        Grievance grievance = grievanceWithDept("D1");
+        when(grievanceRepository.findByDepartmentId("D1")).thenReturn(Flux.just(grievance));
+
+        StepVerifier.create(grievanceService.getByDepartment("D1", "SUPERVISORY_OFFICER", "IGNORED"))
+                .expectNext(grievance)
+                .verifyComplete();
+    }
+
+    @Test
     void getByCitizenReturnsGrievancesForSubject() {
         Grievance grievance = new Grievance();
         grievance.setId("g1");
@@ -206,6 +286,22 @@ class GrievanceServiceTest {
         StepVerifier.create(grievanceService.getByCitizen("citizen-1"))
                 .expectNext(grievance)
                 .verifyComplete();
+    }
+
+    @Test
+    void getByCitizenRejectsNull() {
+        StepVerifier.create(grievanceService.getByCitizen(null))
+                .expectError(ResponseStatusException.class)
+                .verify();
+    }
+
+    @Test
+    void getByIdRejectsWhenMissing() {
+        when(grievanceRepository.findById("missing")).thenReturn(Mono.empty());
+
+        StepVerifier.create(grievanceService.getById("missing"))
+                .expectError(RuntimeException.class)
+                .verify();
     }
 
     @Test
@@ -227,6 +323,65 @@ class GrievanceServiceTest {
     @Test
     void getCaseWorkersForOfficerRejectsUnauthorizedRole() {
         StepVerifier.create(grievanceService.getCaseWorkersForOfficer("user-1", "CITIZEN"))
+                .expectError(ResponseStatusException.class)
+                .verify();
+    }
+
+    @Test
+    void getByCaseWorkerRequiresIdentifier() {
+        StepVerifier.create(grievanceService.getByCaseWorker(null, "DEPARTMENT_OFFICER", "D1"))
+                .expectErrorSatisfies(error -> {
+                    assertThat(error).isInstanceOf(ResponseStatusException.class);
+                    assertThat(((ResponseStatusException) error).getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+                })
+                .verify();
+    }
+
+    @Test
+    void getByCaseWorkerFiltersByDepartmentForRestrictedRoles() {
+        Grievance deptMatch = grievanceWithDept("D1");
+        deptMatch.setAssignedWokerId("cw-1");
+        Grievance deptOther = grievanceWithDept("D2");
+        deptOther.setAssignedWokerId("cw-1");
+
+        when(grievanceRepository.findByAssignedWokerId("cw-1")).thenReturn(Flux.just(deptMatch, deptOther));
+
+        StepVerifier.create(grievanceService.getByCaseWorker("cw-1", "DEPARTMENT_OFFICER", "D1"))
+                .expectNext(deptMatch)
+                .verifyComplete();
+    }
+
+    @Test
+    void getByCaseWorkerReturnsAllForAdmin() {
+        Grievance deptMatch = grievanceWithDept("D1");
+        deptMatch.setAssignedWokerId("cw-1");
+        Grievance deptOther = grievanceWithDept("D2");
+        deptOther.setAssignedWokerId("cw-1");
+
+        when(grievanceRepository.findByAssignedWokerId("cw-1")).thenReturn(Flux.just(deptMatch, deptOther));
+
+        StepVerifier.create(grievanceService.getByCaseWorker("cw-1", "ADMIN", null))
+                .expectNext(deptMatch, deptOther)
+                .verifyComplete();
+    }
+
+    @Test
+    void getByCaseWorkerRejectsUnauthorizedRole() {
+        StepVerifier.create(grievanceService.getByCaseWorker("cw-1", "CITIZEN", "D1"))
+                .expectError(ResponseStatusException.class)
+                .verify();
+    }
+
+    @Test
+    void getByCaseWorkerRequiresDepartmentForRestrictedRole() {
+        StepVerifier.create(grievanceService.getByCaseWorker("cw-1", "DEPARTMENT_OFFICER", null))
+                .expectError(ResponseStatusException.class)
+                .verify();
+    }
+
+    @Test
+    void getCaseWorkersForOfficerRejectsNullOfficer() {
+        StepVerifier.create(grievanceService.getCaseWorkersForOfficer(null, "ADMIN"))
                 .expectError(ResponseStatusException.class)
                 .verify();
     }

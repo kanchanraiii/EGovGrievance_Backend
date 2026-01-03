@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.support.WebExchangeBindException;
+import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
 class GlobalErrorHandlerTest {
@@ -55,5 +56,13 @@ class GlobalErrorHandlerTest {
         var response = handler.handleGeneric(new Exception("err"));
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertThat(response.getBody()).containsEntry("message", "Internal server error");
+    }
+
+    @Test
+    void handleResponseStatusUsesProvidedReason() {
+        ResponseStatusException ex = new ResponseStatusException(HttpStatus.CONFLICT, "conflict");
+        var response = handler.handleResponseStatus(ex);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).containsEntry("message", "conflict");
     }
 }

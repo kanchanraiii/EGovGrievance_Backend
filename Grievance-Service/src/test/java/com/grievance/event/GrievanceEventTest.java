@@ -42,7 +42,7 @@ class GrievanceEventTest {
         assertThat(e1.hashCode()).isEqualTo(e2.hashCode());
         assertThat(e1.toString()).contains("g1").contains("SUBMITTED");
 
-        e2.setEventType("ASSIGNED");
+        e2.setGrievanceId("other-id");
         assertThat(e1).isNotEqualTo(e2);
 
         assertThat(e1).isEqualTo(e1);

@@ -1,6 +1,8 @@
 package com.grievance.model;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import jakarta.validation.constraints.NotBlank;
@@ -8,10 +10,13 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString
 @Document(collection="grievance")
 public class Grievance {
 	
 	@Id
+	@EqualsAndHashCode.Include
 	private String id;
 	
 	@NotBlank(message="Citizen ID is required")

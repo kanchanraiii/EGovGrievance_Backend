@@ -37,7 +37,7 @@ class GrievanceHistoryEqualityTest {
         assertThat(h1.hashCode()).isEqualTo(h2.hashCode());
         assertThat(h1.toString()).contains("GrievanceHistory").contains("g1");
 
-        h2.setUpdatedBy("user2");
+        h2.setId("other");
         assertThat(h1).isNotEqualTo(h2);
     }
 
@@ -52,7 +52,7 @@ class GrievanceHistoryEqualityTest {
         assertThat(h1.canEqual(new Object())).isFalse();
 
         GrievanceHistory different = new GrievanceHistory();
-        different.setId("h1");
+        different.setId("h2");
         different.setGrievanceId("other");
         assertThat(h1).isNotEqualTo(different);
     }

@@ -2,6 +2,7 @@ package com.feedback.service;
 
 import com.feedback.client.GrievanceClient;
 import com.feedback.client.GrievanceResponse;
+import com.feedback.exception.ConflictException;
 import com.feedback.exception.ServiceException;
 import com.feedback.exception.ResourceNotFoundException;
 import com.feedback.model.Feedback;
@@ -105,7 +106,7 @@ class FeedbackServiceTest {
         when(feedbackRepository.existsByGrievanceId("g1")).thenReturn(Mono.just(true));
 
         StepVerifier.create(feedbackService.submitFeedback(feedback))
-                .expectError(ServiceException.class)
+                .expectError(ConflictException.class)
                 .verify();
     }
 
@@ -147,7 +148,7 @@ class FeedbackServiceTest {
         when(ratingsRepository.existsByGrievanceId("g1")).thenReturn(Mono.just(true));
 
         StepVerifier.create(feedbackService.submitRating(rating))
-                .expectError(ServiceException.class)
+                .expectError(ConflictException.class)
                 .verify();
     }
 

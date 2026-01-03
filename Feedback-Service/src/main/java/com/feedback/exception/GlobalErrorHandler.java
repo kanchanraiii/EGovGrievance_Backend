@@ -57,7 +57,8 @@ public class GlobalErrorHandler {
         return ResponseEntity.status(status)
                 .body(
                         Map.of(
-                                "message", message
+                                "message", message,
+                                "details", details
                         )
                 );
     }

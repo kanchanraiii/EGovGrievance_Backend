@@ -10,12 +10,14 @@ import java.util.concurrent.CompletableFuture;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 
+import com.grievance.event.GrievanceEvent;
 import com.grievance.model.Grievance;
 import com.grievance.model.GrievanceStatus;
 
@@ -57,5 +59,23 @@ class GrievanceEventPublisherTest {
 
         StepVerifier.create(publisher.publishStatusChange(grievance, GrievanceStatus.RESOLVED, "done"))
                 .verifyComplete();
+    }
+
+    @Test
+    void publishStatusChangeUsesDefaultMessageWhenRemarksBlank() {
+        Grievance grievance = new Grievance();
+        grievance.setId("g1");
+        grievance.setCitizenId("user1");
+
+        CompletableFuture<SendResult<String, Object>> future = CompletableFuture.completedFuture(null);
+        ArgumentCaptor<GrievanceEvent> eventCaptor = ArgumentCaptor.forClass(GrievanceEvent.class);
+
+        when(kafkaTemplate.send(any(String.class), eventCaptor.capture())).thenReturn(future);
+
+        StepVerifier.create(publisher.publishStatusChange(grievance, GrievanceStatus.CLOSED, "   "))
+                .verifyComplete();
+
+        GrievanceEvent sent = eventCaptor.getValue();
+        assertThat(sent.getMessage()).contains("grievance g1 is now closed").contains("keep you posted");
     }
 }
