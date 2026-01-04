@@ -11,6 +11,8 @@
     <name>EGovGrievance Backend</name>
 
     <modules>
+        <module>Api-Gateway</module>
+        <module>Auth-Service</module>
         <module>Eureka-Server</module>
         <module>Feedback-Service</module>
         <module>Grievance-Service</module>
