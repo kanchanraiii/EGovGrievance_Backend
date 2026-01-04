@@ -35,9 +35,22 @@ services:
     container_name: mongo
     restart: always
     ports:
-      - "27017:27017"
+      - "${MONGO_HOST_PORT:-27018}:27017"
     volumes:
       - mongo-data:/data/db
+    networks:
+      - backend
+
+  departments-json:
+    image: node:20-alpine
+    container_name: departments-json
+    working_dir: /data
+    command: >-
+      sh -c "npx -y json-server@0.17.4 --watch /data/departments-db.json --host 0.0.0.0 --port 3001"
+    volumes:
+      - ./departments-config/departments-db.json:/data/departments-db.json
+    ports:
+      - "3001:3001"
     networks:
       - backend
 
@@ -171,6 +184,7 @@ services:
   api-gateway:
     build: ./Api-Gateway
     container_name: api-gateway
+    entrypoint: ["sh","-c","sleep 20 && java -jar /app/app.jar"]
     environment:
       - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka

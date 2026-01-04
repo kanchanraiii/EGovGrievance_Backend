@@ -2,5 +2,5 @@ FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 ARG JAR_FILE=target/*.jar
 COPY ${JAR_FILE} app.jar
-EXPOSE 9004
+EXPOSE 9003
 ENTRYPOINT ["java","-jar","/app/app.jar"]
