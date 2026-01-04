@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Document(collection="feedback")
-@Builder
 @NoArgsConstructor
 public class Feedback {
 	
