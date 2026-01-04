@@ -1,0 +1,186 @@
+version: "3.9"
+
+services:
+  kafka:
+    image: bitnami/kafka:3.6
+    container_name: kafka
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_NODE_ID=1
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+      - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=1
+    ports:
+      - "9092:9092"
+    networks:
+      - backend
+
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - backend
+
+  config-server:
+    build: ./Config-Server
+    container_name: config-server
+    environment:
+      - SPRING_PROFILES_ACTIVE=native
+      - SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS=file:/config-repo
+    volumes:
+      - ./config-repo:/config-repo:ro
+    ports:
+      - "8888:8888"
+    networks:
+      - backend
+    depends_on:
+      - kafka
+      - mongo
+
+  eureka-server:
+    build: ./Eureka-Server
+    container_name: eureka-server
+    environment:
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+    ports:
+      - "8761:8761"
+    networks:
+      - backend
+    depends_on:
+      - config-server
+
+  auth-service:
+    build: ./Auth-Service
+    container_name: auth-service
+    environment:
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - MONGO_HOST=mongo
+      - MONGO_PORT=27017
+      - MONGO_DB=authDb
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - DEPARTMENTS_FILE=file:/data/departments-db.json
+    volumes:
+      - ./departments-config/departments-db.json:/data/departments-db.json:ro
+    ports:
+      - "9007:9007"
+    networks:
+      - backend
+    depends_on:
+      - eureka-server
+      - kafka
+      - mongo
+
+  grievance-service:
+    build: ./Grievance-Service
+    container_name: grievance-service
+    environment:
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - MONGO_HOST=mongo
+      - MONGO_PORT=27017
+      - MONGO_DB=grievanceDb
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    ports:
+      - "9001:9001"
+    networks:
+      - backend
+    depends_on:
+      - eureka-server
+      - kafka
+      - mongo
+
+  feedback-service:
+    build: ./Feedback-Service
+    container_name: feedback-service
+    environment:
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - MONGO_HOST=mongo
+      - MONGO_PORT=27017
+      - MONGO_DB=feedbackDb
+      - GRIEVANCE_URL=http://grievance-service:9001
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    ports:
+      - "9002:9002"
+    networks:
+      - backend
+    depends_on:
+      - eureka-server
+      - mongo
+
+  notification-service:
+    build: ./Notification-Service
+    container_name: notification-service
+    environment:
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - MONGO_HOST=mongo
+      - MONGO_PORT=27017
+      - MONGO_DB=notificationDb
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    ports:
+      - "9004:9004"
+    networks:
+      - backend
+    depends_on:
+      - eureka-server
+      - kafka
+      - mongo
+
+  storage-service:
+    build: ./Storage-Service
+    container_name: storage-service
+    environment:
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - MONGO_HOST=mongo
+      - MONGO_PORT=27017
+      - MONGO_DB=notificationDb
+      - GRIEVANCE_URL=http://grievance-service:9001
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    ports:
+      - "9003:9003"
+    networks:
+      - backend
+    depends_on:
+      - eureka-server
+      - mongo
+
+  api-gateway:
+    build: ./Api-Gateway
+    container_name: api-gateway
+    environment:
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    ports:
+      - "9005:9005"
+    networks:
+      - backend
+    depends_on:
+      - eureka-server
+      - grievance-service
+      - feedback-service
+      - notification-service
+      - storage-service
+      - auth-service
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  mongo-data:
