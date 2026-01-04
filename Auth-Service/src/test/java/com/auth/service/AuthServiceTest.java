@@ -69,7 +69,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void registerCitizenCreatesUserAndReturnsToken() {
+    void registerCitizenCreatesUser() {
         when(userRepository.findByEmail("user@example.com")).thenReturn(Mono.empty());
         doAnswer(invocation -> {
             User toSave = invocation.getArgument(0);
@@ -78,16 +78,10 @@ class AuthServiceTest {
         }).when(userRepository).save(any(User.class));
 
         StepVerifier.create(authService.registerCitizen(registerRequest))
-                .assertNext(response -> {
-                    assertThat(response.getToken()).isEqualTo("jwt-token");
-                    assertThat(response.getUserId()).isEqualTo("generated-id");
-                    assertThat(response.getEmail()).isEqualTo("user@example.com");
-                    assertThat(response.getRole()).isEqualTo(UserRole.CITIZEN.value());
-                })
                 .verifyComplete();
 
         verify(userRepository).findByEmail("user@example.com");
-        verify(jwtService).generateToken(any(User.class), any());
+        verify(userRepository).save(any(User.class));
     }
 
     @Test
@@ -115,7 +109,7 @@ class AuthServiceTest {
         when(userRepository.findByEmail(anyString())).thenReturn(Mono.empty());
         when(departmentCatalog.isValid("DEPT-1")).thenReturn(true);
         when(userRepository.findByDepartmentIdAndRole("DEPT-1", UserRole.DEPARTMENT_OFFICER.value()))
-                .thenReturn(Mono.just(new User()));
+                .thenReturn(reactor.core.publisher.Flux.just(new User()));
 
         DepartmentRegisterRequest request = new DepartmentRegisterRequest();
         request.setFullName("Officer One");

@@ -9,10 +9,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Document(collection="feedback")
 @Builder
+@NoArgsConstructor
 public class Feedback {
 	
 	@Id

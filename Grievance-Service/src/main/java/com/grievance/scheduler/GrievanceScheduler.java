@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.grievance.model.GrievanceStatus;
 import com.grievance.repository.GrievanceRepository;
@@ -13,6 +15,7 @@ import com.grievance.service.GrievanceService;
 @Component
 public class GrievanceScheduler {
 	
+	private static final Logger log = LoggerFactory.getLogger(GrievanceScheduler.class);
 	private final GrievanceRepository grievanceRepository;
 	private final GrievanceService grievanceService;
 
@@ -21,11 +24,12 @@ public class GrievanceScheduler {
 		this.grievanceService = grievanceService;
 	}
 	
-	// runs every five minutes
-	 @Scheduled(fixedDelay = 5*60* 1000)
+	// runs every 10 seconds (local test)
+	 @Scheduled(fixedDelay = 10 * 1000)
 	    public void checkSlaBreaches() {
 
-	        LocalDateTime threshold = LocalDateTime.now().minusDays(7);
+	        LocalDateTime threshold = LocalDateTime.now().minusMinutes(1);
+	        log.info("SLA check started. threshold={}", threshold);
 
 	        grievanceRepository
 	            .findByStatusInAndAssignedAtBeforeAndEscalatedFalse(
@@ -35,12 +39,17 @@ public class GrievanceScheduler {
 	                ),
 	                threshold
 	            )
+	            .doOnNext(grievance -> log.info("Escalating grievanceId={} status={} assignedAt={}",
+	                    grievance.getId(), grievance.getStatus(), grievance.getAssignedAt()))
 	            .flatMap(grievance ->
 	                grievanceService.escalateGrievance(
 	                    grievance.getId(),
 	                    "SYSTEM"
 	                )
 	            )
+	            .doOnNext(updated -> log.info("Escalated grievanceId={} status={} escalated={}",
+	                    updated.getId(), updated.getStatus(), updated.isEscalated()))
+	            .doOnError(error -> log.error("SLA escalation failed", error))
 	            .subscribe();
 	    }
 	}
