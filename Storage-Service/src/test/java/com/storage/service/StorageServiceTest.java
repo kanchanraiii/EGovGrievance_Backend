@@ -82,6 +82,27 @@ class StorageServiceTest {
     }
 
     @Test
+    void uploadAcceptsWhenContentLengthProvidedWithinLimit() {
+        FilePart file = mock(FilePart.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_JPEG);
+        headers.setContentLength(1024);
+        when(file.headers()).thenReturn(headers);
+        when(file.filename()).thenReturn("small.jpg");
+
+        DataBuffer buffer = new DefaultDataBufferFactory().wrap("data".getBytes());
+        when(file.content()).thenReturn(Flux.just(buffer));
+        when(grievanceClient.validateGrievance("g1")).thenReturn(Mono.empty());
+
+        ObjectId storedId = new ObjectId();
+        when(gridFsTemplate.store(any(Flux.class), eq("small.jpg"), any(Map.class))).thenReturn(Mono.just(storedId));
+
+        StepVerifier.create(storageService.upload(file, "g1", "user1"))
+                .expectNext(storedId.toHexString())
+                .verifyComplete();
+    }
+
+    @Test
     void uploadRejectsLargeFileViaHeader() {
         FilePart file = mock(FilePart.class);
         HttpHeaders headers = new HttpHeaders();
@@ -106,6 +127,64 @@ class StorageServiceTest {
 
         assertThrows(StorageException.class, () -> storageService.upload(file, "g1", "user1"));
         verifyNoInteractions(gridFsTemplate);
+    }
+
+    @Test
+    void uploadRejectsMissingContentType() {
+        FilePart file = mock(FilePart.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentLength(0);
+        when(file.headers()).thenReturn(headers);
+        when(file.filename()).thenReturn("file");
+        when(file.content()).thenReturn(Flux.empty());
+
+        assertThrows(StorageException.class, () -> storageService.upload(file, "g1", "user1"));
+    }
+
+    @Test
+    void uploadSupportsAllowedDocTypes() {
+        FilePart file = mock(FilePart.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentLength(0);
+        when(file.headers()).thenReturn(headers);
+        when(file.filename()).thenReturn("doc.pdf");
+
+        DataBuffer buffer = new DefaultDataBufferFactory().wrap("pdf".getBytes());
+        when(file.content()).thenReturn(Flux.just(buffer));
+        when(grievanceClient.validateGrievance("g1")).thenReturn(Mono.empty());
+
+        ObjectId storedId = new ObjectId();
+        when(gridFsTemplate.store(any(Flux.class), eq("doc.pdf"), any(Map.class))).thenReturn(Mono.just(storedId));
+
+        StepVerifier.create(storageService.upload(file, "g1", "user1"))
+                .expectNext(storedId.toHexString())
+                .verifyComplete();
+    }
+
+    @Test
+    void uploadRejectsWhenStreamExceedsSizeLimit() {
+        FilePart file = mock(FilePart.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_JPEG);
+        headers.setContentLength(0);
+        when(file.headers()).thenReturn(headers);
+        when(file.filename()).thenReturn("huge.jpg");
+        when(grievanceClient.validateGrievance("g1")).thenReturn(Mono.empty());
+        when(gridFsTemplate.store(any(Flux.class), eq("huge.jpg"), any(Map.class)))
+                .thenAnswer(invocation -> {
+                    Flux<DataBuffer> flux = invocation.getArgument(0);
+                    return flux.then(Mono.just(new ObjectId()));
+                });
+
+        byte[] chunk = new byte[15 * 1024 * 1024];
+        DataBuffer buffer1 = new DefaultDataBufferFactory().wrap(chunk);
+        DataBuffer buffer2 = new DefaultDataBufferFactory().wrap(chunk);
+        when(file.content()).thenReturn(Flux.just(buffer1, buffer2));
+
+        StepVerifier.create(storageService.upload(file, "g1", "user1"))
+                .expectError(StorageException.class)
+                .verify();
     }
 
     @Test
