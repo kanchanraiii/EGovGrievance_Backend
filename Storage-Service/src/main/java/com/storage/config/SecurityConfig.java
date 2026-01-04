@@ -33,7 +33,7 @@ public class SecurityConfig {
                         .hasRole("DEPARTMENT_OFFICER")
                         .pathMatchers("/api/departments/**").permitAll()
                         .anyExchange().authenticated())
-                .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(reactiveRoleConverter())))
+                .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
                 .build();
     }
 
@@ -45,7 +45,8 @@ public class SecurityConfig {
                 .build();
     }
 
-    private ReactiveJwtAuthenticationConverterAdapter reactiveRoleConverter() {
+    @Bean
+    public ReactiveJwtAuthenticationConverterAdapter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter delegate = new JwtGrantedAuthoritiesConverter();
         delegate.setAuthoritiesClaimName("role");
         delegate.setAuthorityPrefix("ROLE_");
