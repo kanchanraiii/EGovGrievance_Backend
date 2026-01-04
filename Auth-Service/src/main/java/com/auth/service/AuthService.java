@@ -1,14 +1,12 @@
 package com.auth.service;
 
 import java.time.Instant;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
-
 import com.auth.dto.AuthRequest;
 import com.auth.dto.AuthResponse;
 import com.auth.dto.RegisterRequest;
@@ -17,7 +15,6 @@ import com.auth.dto.UserProfileResponse;
 import com.auth.model.User;
 import com.auth.model.UserRole;
 import com.auth.repository.UserRepository;
-
 import reactor.core.publisher.Mono;
 
 @Service
@@ -51,12 +48,22 @@ public class AuthService {
         return registerWithRole(request, UserRole.CITIZEN);
     }
 
-    public Mono<Void> registerCaseWorker(RegisterRequest request) {
+    public Mono<Void> registerCaseWorker(DepartmentRegisterRequest request) {
         return registerWithRole(request, UserRole.CASE_WORKER);
     }
 
-    public Mono<Void> registerCaseWorker(DepartmentRegisterRequest request) {
-        return registerWithRole(request, UserRole.CASE_WORKER);
+    public Mono<Void> registerCaseWorkerForDepartment(RegisterRequest request, String departmentIdFromToken) {
+        if (!StringUtils.hasText(departmentIdFromToken)) {
+            return Mono.error(new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "departmentId missing for department officer"));
+        }
+        DepartmentRegisterRequest normalized = new DepartmentRegisterRequest();
+        normalized.setFullName(request.getFullName());
+        normalized.setEmail(request.getEmail());
+        normalized.setPhone(request.getPhone());
+        normalized.setPassword(request.getPassword());
+        normalized.setDepartmentId(departmentIdFromToken);
+        return registerCaseWorker(normalized);
     }
 
     public Mono<Void> registerAdmin(RegisterRequest request) {
@@ -65,10 +72,6 @@ public class AuthService {
 
     public Mono<Void> registerSupervisoryOfficer(RegisterRequest request) {
         return registerWithRole(request, UserRole.SUPERVISORY_OFFICER);
-    }
-
-    public Mono<Void> registerDepartmentOfficer(RegisterRequest request) {
-        return registerWithRole(request, UserRole.DEPARTMENT_OFFICER);
     }
 
     public Mono<Void> registerDepartmentOfficer(DepartmentRegisterRequest request) {

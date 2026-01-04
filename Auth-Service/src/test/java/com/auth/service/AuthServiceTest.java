@@ -100,7 +100,7 @@ class AuthServiceTest {
                 .departmentId(null)
                 .build();
 
-        StepVerifier.create(authService.registerCaseWorker(request))
+        StepVerifier.create(authService.registerCaseWorkerForDepartment(request, null))
                 .expectErrorSatisfies(error -> {
                     assertThat(error).isInstanceOf(ResponseStatusException.class);
                     assertThat(((ResponseStatusException) error).getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);

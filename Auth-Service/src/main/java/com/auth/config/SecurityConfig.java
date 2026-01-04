@@ -45,7 +45,6 @@ public class SecurityConfig {
                                 "/api/auth/register",
                                 "/api/auth/citizen/register",
                                 "/api/auth/citizen/login",
-                                "/api/auth/case-worker/register",
                                 "/api/auth/case-worker/login",
                                 "/api/auth/admin/register",
                                 "/api/auth/admin/login",
@@ -59,6 +58,8 @@ public class SecurityConfig {
                                 "/api/auth/department-officer/register",
                                 "/api/auth/admin/**")
                         .hasRole("ADMIN")
+                        .pathMatchers("/api/auth/case-worker/register")
+                        .hasAnyRole("DEPARTMENT_OFFICER", "ADMIN")
                         .anyExchange().authenticated())
                 .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
                 .build();

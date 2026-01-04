@@ -76,10 +76,9 @@ class AuthControllerTest {
 
     @Test
     void registerDelegatesToService() {
-        when(authService.register(registerRequest)).thenReturn(Mono.just(authResponse));
+        when(authService.register(registerRequest)).thenReturn(Mono.empty());
 
         StepVerifier.create(authController.register(registerRequest))
-                .assertNext(response -> assertThat(response.getToken()).isEqualTo("token-1"))
                 .verifyComplete();
 
         verify(authService).register(registerRequest);
@@ -87,10 +86,9 @@ class AuthControllerTest {
 
     @Test
     void registerCitizenDelegatesToService() {
-        when(authService.registerCitizen(registerRequest)).thenReturn(Mono.just(authResponse));
+        when(authService.registerCitizen(registerRequest)).thenReturn(Mono.empty());
 
         StepVerifier.create(authController.registerCitizen(registerRequest))
-                .assertNext(response -> assertThat(response.getUserId()).isEqualTo("user-1"))
                 .verifyComplete();
 
         verify(authService).registerCitizen(registerRequest);
@@ -98,21 +96,21 @@ class AuthControllerTest {
 
     @Test
     void registerCaseWorkerDelegatesToService() {
-        when(authService.registerCaseWorker(departmentRequest)).thenReturn(Mono.just(authResponse));
+        Jwt jwt = mock(Jwt.class);
+        when(jwt.getClaimAsString("departmentId")).thenReturn("DEPT-1");
+        when(authService.registerCaseWorkerForDepartment(registerRequest, "DEPT-1")).thenReturn(Mono.empty());
 
-        StepVerifier.create(authController.registerCaseWorker(departmentRequest))
-                .assertNext(response -> assertThat(response.getDepartmentId()).isEqualTo("DEPT-1"))
+        StepVerifier.create(authController.registerCaseWorker(jwt, registerRequest))
                 .verifyComplete();
 
-        verify(authService).registerCaseWorker(departmentRequest);
+        verify(authService).registerCaseWorkerForDepartment(registerRequest, "DEPT-1");
     }
 
     @Test
     void registerAdminDelegatesToService() {
-        when(authService.registerAdmin(registerRequest)).thenReturn(Mono.just(authResponse));
+        when(authService.registerAdmin(registerRequest)).thenReturn(Mono.empty());
 
         StepVerifier.create(authController.registerAdmin(registerRequest))
-                .expectNext(authResponse)
                 .verifyComplete();
 
         verify(authService).registerAdmin(registerRequest);
@@ -120,10 +118,9 @@ class AuthControllerTest {
 
     @Test
     void registerSupervisoryOfficerDelegatesToService() {
-        when(authService.registerSupervisoryOfficer(registerRequest)).thenReturn(Mono.just(authResponse));
+        when(authService.registerSupervisoryOfficer(registerRequest)).thenReturn(Mono.empty());
 
         StepVerifier.create(authController.registerSupervisoryOfficer(registerRequest))
-                .expectNext(authResponse)
                 .verifyComplete();
 
         verify(authService).registerSupervisoryOfficer(registerRequest);
@@ -131,10 +128,9 @@ class AuthControllerTest {
 
     @Test
     void registerDepartmentOfficerDelegatesToService() {
-        when(authService.registerDepartmentOfficer(departmentRequest)).thenReturn(Mono.just(authResponse));
+        when(authService.registerDepartmentOfficer(departmentRequest)).thenReturn(Mono.empty());
 
         StepVerifier.create(authController.registerDepartmentOfficer(departmentRequest))
-                .expectNext(authResponse)
                 .verifyComplete();
 
         verify(authService).registerDepartmentOfficer(departmentRequest);

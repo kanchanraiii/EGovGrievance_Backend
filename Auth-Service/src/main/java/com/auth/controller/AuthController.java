@@ -47,11 +47,13 @@ public class AuthController {
         return authService.registerCitizen(request);
     }
 
-    // register as case-worker
+    // register a case-worker; department is taken from the authenticated DO/Admin token
     @PostMapping("/case-worker/register")
+    @PreAuthorize("hasAnyRole('DEPARTMENT_OFFICER','ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<Void> registerCaseWorker(@Valid @RequestBody DepartmentRegisterRequest request) {
-        return authService.registerCaseWorker(request);
+    public Mono<Void> registerCaseWorker(@AuthenticationPrincipal Jwt jwt,
+                                         @Valid @RequestBody RegisterRequest request) {
+        return authService.registerCaseWorkerForDepartment(request, jwt.getClaimAsString("departmentId"));
     }
 
     // register as admin

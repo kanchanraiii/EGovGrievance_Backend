@@ -18,6 +18,7 @@ public interface GrievanceRepository  extends ReactiveMongoRepository<Grievance,
     Flux<Grievance> findByCitizenId(String citizenId);
 
     Flux<Grievance> findByStatus(String status);
+    Flux<Grievance> findByStatus(com.grievance.model.GrievanceStatus status);
 	
 	Mono<Grievance> findById(ObjectId objectId);
 

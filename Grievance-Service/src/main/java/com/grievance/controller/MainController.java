@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import com.grievance.model.Grievance;
 import com.grievance.model.GrievanceHistory;
+import com.grievance.model.EscalatedGrievanceView;
 import com.grievance.request.AssignmentRequest;
 import com.grievance.request.GrievanceCreateRequest;
 import com.grievance.request.StatusUpdateRequest;
@@ -100,7 +101,7 @@ public class MainController {
 		return grievanceService.getByDepartment(departmentId, jwt.getClaim("role"), jwt.getClaim(CLAIM_DEPARTMENT_ID));
 	}
 
-	// view grievances assigned to a specific case worker (department officer / supervisory officer / admin)
+	// view grievances assigned to a specific case worker
 	@GetMapping("/case-worker/{caseWorkerId}")
 	@ResponseStatus(HttpStatus.OK)
 	public Flux<Grievance> getByCaseWorker(@PathVariable String caseWorkerId, @AuthenticationPrincipal Jwt jwt) {
@@ -119,8 +120,54 @@ public class MainController {
 	@ResponseStatus(HttpStatus.OK)
 	public Mono<Map<String, List<String>>> getMyCaseWorkers(@AuthenticationPrincipal Jwt jwt) {
 		return grievanceService.getCaseWorkersForOfficer(jwt.getSubject(), jwt.getClaim("role"))
-				.collectList() 
-				.map(workers -> Map.of("caseWorkers", workers)); 
+				.collectList()
+				.map(workers -> Map.of("caseWorkers", workers));
 	}
+
+    // view grievances assigned to CURRENT case worker
+    @GetMapping("/my-assigned")
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<Grievance> getMyAssignedGrievances(@AuthenticationPrincipal Jwt jwt) {
+
+        String role = jwt.getClaim("role");
+        String caseWorkerId = jwt.getSubject();
+
+        if (!"CASE_WORKER".equals(role)) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Only case workers can access this endpoint");
+        }
+
+        return grievanceService.getByCaseWorkerSelf(
+                caseWorkerId,
+                jwt.getClaim("email"),
+                jwt.getClaim(CLAIM_DEPARTMENT_ID));
+    }
+	
+	// get ALL case workers in my department
+	@GetMapping("/department/case-workers")
+	@ResponseStatus(HttpStatus.OK)
+	public Mono<Map<String, List<String>>> getAllCaseWorkersInDepartment(
+	        @AuthenticationPrincipal Jwt jwt) {
+
+	    return grievanceService
+	            .getAllCaseWorkersInDepartment(
+	                    jwt.getClaim("role"),
+	                    jwt.getClaim(CLAIM_DEPARTMENT_ID)
+	            )
+	            .collectList()
+	            .map(workers -> Map.of("caseWorkers", workers));
+	}
+
+	// view escalated grievances (SO/Admin)
+	@GetMapping("/escalated")
+	@ResponseStatus(HttpStatus.OK)
+	public Flux<EscalatedGrievanceView> getEscalated(@AuthenticationPrincipal Jwt jwt) {
+		return grievanceService.getEscalatedForSupervisor(
+				jwt.getClaim("role"),
+				jwt.getClaim(CLAIM_DEPARTMENT_ID));
+	}
+
+
 
 }

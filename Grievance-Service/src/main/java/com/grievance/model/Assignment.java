@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString
 @Document(collection = "assignments")
-@Builder
 public class Assignment {
 
     @Id

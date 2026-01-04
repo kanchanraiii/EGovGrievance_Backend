@@ -5,6 +5,7 @@ import com.grievance.repository.AssignmentRepository;
 import com.grievance.repository.GrievanceRepository;
 import com.grievance.repository.StatusHistoryRepository;
 import com.grievance.request.GrievanceCreateRequest;
+import org.springframework.util.StringUtils;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -26,10 +27,10 @@ public class GrievanceService {
 	private static final String MSG_UNAUTHORIZED = "Unauthorized";
 
 	private final GrievanceRepository grievanceRepository;
-	private final AssignmentRepository assignmentRepository;
-	private final StatusHistoryRepository statusHistoryRepository;
+    private final AssignmentRepository assignmentRepository;
+    private final StatusHistoryRepository statusHistoryRepository;
     private final DepartmentValidationService departmentValidationService;
-	private final GrievanceEventPublisher grievanceEventPublisher;
+    private final GrievanceEventPublisher grievanceEventPublisher;
 
 	public GrievanceService(
 			GrievanceRepository grievanceRepository,
@@ -174,27 +175,47 @@ public class GrievanceService {
 		return grievanceRepository.findByDepartmentId(departmentId);
 	}
 
-	// list grievances assigned to a case worker (department officer / supervisory officer / admin)
-	public Flux<Grievance> getByCaseWorker(String caseWorkerId, String role, String requesterDepartmentId) {
-		if (caseWorkerId == null) {
-			return Flux.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "caseWorkerId is required"));
-		}
-		boolean allowedRole = role != null && (role.equalsIgnoreCase(ROLE_DEPARTMENT_OFFICER)
-				|| role.equalsIgnoreCase(ROLE_SUPERVISORY_OFFICER)
-				|| role.equalsIgnoreCase(ROLE_ADMIN));
-		if (!allowedRole) {
-			return Flux.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, MSG_UNAUTHORIZED));
-		}
+    // list grievances assigned to a case worker (department officer / supervisory officer / admin)
+    public Flux<Grievance> getByCaseWorker(String caseWorkerId, String role, String requesterDepartmentId) {
+        if (caseWorkerId == null) {
+            return Flux.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "caseWorkerId is required"));
+        }
+        boolean isCaseWorkerSelf = role != null && role.equalsIgnoreCase(ROLE_CASE_WORKER);
+        boolean allowedRole = role != null && (role.equalsIgnoreCase(ROLE_DEPARTMENT_OFFICER)
+                || role.equalsIgnoreCase(ROLE_SUPERVISORY_OFFICER)
+                || role.equalsIgnoreCase(ROLE_ADMIN));
+        if (!allowedRole && !isCaseWorkerSelf) {
+            return Flux.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, MSG_UNAUTHORIZED));
+        }
 
-		if (isDepartmentRestrictedRole(role)) {
-			if (requesterDepartmentId == null) {
-				return Flux.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, MSG_UNAUTHORIZED_DEPT));
-			}
-			return grievanceRepository.findByAssignedWokerId(caseWorkerId)
-					.filter(grievance -> isSameDepartment(requesterDepartmentId, grievance.getDepartmentId()));
-		}
-		return grievanceRepository.findByAssignedWokerId(caseWorkerId);
-	}
+        boolean enforceDepartment = isDepartmentRestrictedRole(role);
+        if (enforceDepartment && requesterDepartmentId == null) {
+            return Flux.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, MSG_UNAUTHORIZED_DEPT));
+        }
+
+        Flux<Grievance> base = grievanceRepository.findByAssignedWokerId(caseWorkerId);
+        if (enforceDepartment) {
+            return base.filter(grievance -> isSameDepartment(requesterDepartmentId, grievance.getDepartmentId()));
+        }
+        return base;
+    }
+
+    // list grievances for the authenticated case worker, tolerant to ids used during assignment (user id or email)
+    public Flux<Grievance> getByCaseWorkerSelf(String primaryId, String alternateId, String requesterDepartmentId) {
+        Flux<Grievance> primary = grievanceRepository.findByAssignedWokerId(primaryId);
+        Flux<Grievance> alternate = Flux.empty();
+        if (StringUtils.hasText(alternateId) && !alternateId.equalsIgnoreCase(primaryId)) {
+            alternate = grievanceRepository.findByAssignedWokerId(alternateId);
+        }
+
+        Flux<Grievance> combined = Flux.concat(primary, alternate).distinct(Grievance::getId);
+
+        if (StringUtils.hasText(requesterDepartmentId)) {
+            return combined.filter(grievance -> isSameDepartment(requesterDepartmentId, grievance.getDepartmentId()));
+        }
+
+        return combined;
+    }
 
 	// list grievances for the authenticated citizen
 	public Flux<Grievance> getByCitizen(String citizenId) {
@@ -303,6 +324,68 @@ public class GrievanceService {
 	                        .thenReturn(updated));
 	        });
 	}
+
+	
+    public Flux<String> getAllCaseWorkersInDepartment(String role, String departmentId) {
+
+        boolean allowed =
+                ROLE_DEPARTMENT_OFFICER.equalsIgnoreCase(role) ||
+                ROLE_SUPERVISORY_OFFICER.equalsIgnoreCase(role) ||
+                ROLE_ADMIN.equalsIgnoreCase(role);
+
+	    if (!allowed) {
+	        return Flux.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+	    }
+
+	    if (departmentId == null) {
+	        return Flux.error(new ResponseStatusException(
+	                HttpStatus.UNAUTHORIZED, "Department missing"));
+	    }
+
+            return grievanceRepository.findByDepartmentId(departmentId)
+                    .map(Grievance::getAssignedWokerId)
+                    .filter(workerId -> workerId != null && !workerId.isBlank())
+                    .distinct();
+    }
+
+    public Flux<EscalatedGrievanceView> getEscalatedForSupervisor(String role, String departmentId) {
+        boolean isAdmin = ROLE_ADMIN.equalsIgnoreCase(role);
+        if (!isAdmin && !ROLE_SUPERVISORY_OFFICER.equalsIgnoreCase(role)) {
+            return Flux.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, MSG_UNAUTHORIZED));
+        }
+
+        Flux<Grievance> base = grievanceRepository.findByStatus(GrievanceStatus.ESCALATED);
+
+        if (!isAdmin && StringUtils.hasText(departmentId)) {
+            base = base.filter(grievance -> isSameDepartment(departmentId, grievance.getDepartmentId()));
+        }
+
+        return base.flatMap(this::mapToEscalatedView);
+    }
+
+    private Mono<EscalatedGrievanceView> mapToEscalatedView(Grievance grievance) {
+        return assignmentRepository.findByGrievanceId(grievance.getId())
+                .collectList()
+                .map(assignments -> {
+                    Assignment latest = pickLatestAssignment(assignments);
+                    return new EscalatedGrievanceView(
+                            grievance.getId(),
+                            grievance.getDescription(),
+                            grievance.getDepartmentId(),
+                            latest != null ? latest.getAssignedTo() : grievance.getAssignedWokerId(),
+                            latest != null ? latest.getAssignedBy() : null,
+                            grievance.getStatus()
+                    );
+                });
+    }
+
+    private Assignment pickLatestAssignment(java.util.List<Assignment> assignments) {
+        return assignments.stream()
+                .filter(a -> a.getAssignedAt() != null)
+                .max(java.util.Comparator.comparing(Assignment::getAssignedAt))
+                .orElseGet(() -> assignments.isEmpty() ? null : assignments.get(assignments.size() - 1));
+    }
+
 
 
 }

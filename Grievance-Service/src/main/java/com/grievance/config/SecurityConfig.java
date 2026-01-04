@@ -39,15 +39,29 @@ public class SecurityConfig {
                         .pathMatchers("/api/grievances/my-case-workers")
                         .hasAnyRole(ROLE_DEPARTMENT_OFFICER, ROLE_SUPERVISORY_OFFICER, ROLE_ADMIN)
                         .pathMatchers("/api/grievances/history/**")
-                        .hasAnyRole(ROLE_CITIZEN, ROLE_CASE_WORKER, ROLE_DEPARTMENT_OFFICER, ROLE_SUPERVISORY_OFFICER, ROLE_ADMIN)
+                        .hasAnyRole(ROLE_CITIZEN, ROLE_CASE_WORKER, ROLE_DEPARTMENT_OFFICER, ROLE_SUPERVISORY_OFFICER,
+                                ROLE_ADMIN)
+                        .pathMatchers("/api/grievances/escalated")
+                        .hasAnyRole(ROLE_SUPERVISORY_OFFICER, ROLE_ADMIN)
                         .pathMatchers("/api/grievances/getAll", "/api/grievances/assign")
                         .hasAnyRole(ROLE_DEPARTMENT_OFFICER, ROLE_SUPERVISORY_OFFICER, ROLE_ADMIN)
                         .pathMatchers("/api/grievances/status")
                         .hasAnyRole(ROLE_CASE_WORKER, ROLE_DEPARTMENT_OFFICER, ROLE_SUPERVISORY_OFFICER, ROLE_ADMIN)
                         .pathMatchers("/api/grievances/department/**")
-                        .hasAnyRole(ROLE_DEPARTMENT_OFFICER, ROLE_CASE_WORKER, ROLE_ADMIN)
+                        .hasAnyRole(ROLE_SUPERVISORY_OFFICER, ROLE_ADMIN)
+                        .pathMatchers("/api/grievances/my-assigned")
+                        .hasRole(ROLE_CASE_WORKER)
+
+                        .pathMatchers("/api/grievances/case-worker/**")
+                        .hasAnyRole(
+                                ROLE_CASE_WORKER,
+                                ROLE_DEPARTMENT_OFFICER)
+                        .pathMatchers("/api/grievances/department/case-workers")
+                        .hasAnyRole(ROLE_DEPARTMENT_OFFICER, ROLE_SUPERVISORY_OFFICER, ROLE_ADMIN)
+
                         .anyExchange().authenticated())
-                .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
+                .oauth2ResourceServer(
+                        oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
                 .build();
     }
 
