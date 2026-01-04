@@ -41,7 +41,12 @@ public class NotificationLogs {
 	public void setLoggedAt(LocalDateTime loggedAt) {
 		this.loggedAt = loggedAt;
 	}
-    
-   
+
+	/**
+	 * Allows subclasses to veto equality in tests.
+	 */
+	protected boolean canEqual(Object other) {
+		return other instanceof NotificationLogs;
+	}
     
 }

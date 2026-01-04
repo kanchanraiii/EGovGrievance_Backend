@@ -57,5 +57,12 @@ public class Notifications {
 	public void setCreatedAt(LocalDateTime createdAt) {
 		this.createdAt = createdAt;
 	}
+
+	/**
+	 * Allows subclasses to veto equality in tests.
+	 */
+	protected boolean canEqual(Object other) {
+		return other instanceof Notifications;
+	}
 	
 }

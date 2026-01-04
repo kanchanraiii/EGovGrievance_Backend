@@ -2,11 +2,11 @@ package com.feedback.requests;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-@Builder
+@NoArgsConstructor
 public class FeedbackRequest {
 
     @NotBlank(message = "Grievance ID is required")

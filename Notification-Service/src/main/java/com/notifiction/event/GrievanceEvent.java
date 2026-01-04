@@ -35,6 +35,11 @@ public class GrievanceEvent {
 		this.eventType = eventType;
 	}
     
-    
+	/**
+	 * Allows subclasses to veto equality in tests.
+	 */
+	protected boolean canEqual(Object other) {
+		return other instanceof GrievanceEvent;
+	}
 	
 }
