@@ -11,45 +11,47 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final String MESSAGE_KEY = "message";
+
     @ExceptionHandler(WebExchangeBindException.class)
     public ResponseEntity<Map<String, String>> handleValidation(WebExchangeBindException ex) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("message", "Validation error", "details", ex.getMessage()));
+                .body(Map.of(MESSAGE_KEY, "Validation error", "details", ex.getMessage()));
     }
 
     @ExceptionHandler(StorageException.class)
     public ResponseEntity<Map<String, String>> handleStorage(StorageException ex) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("message", ex.getMessage()));
+                .body(Map.of(MESSAGE_KEY, ex.getMessage()));
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleNotFound(ResourceNotFoundException ex) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(Map.of("message", ex.getMessage()));
+                .body(Map.of(MESSAGE_KEY, ex.getMessage()));
     }
 
     @ExceptionHandler(ServiceException.class)
     public ResponseEntity<Map<String, String>> handleService(ServiceException ex) {
         return ResponseEntity
                 .status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body(Map.of("message", ex.getMessage()));
+                .body(Map.of(MESSAGE_KEY, ex.getMessage()));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException ex) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("message", ex.getMessage()));
+                .body(Map.of(MESSAGE_KEY, ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleGeneric(Exception ex) {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("message", "Internal server error"));
+                .body(Map.of(MESSAGE_KEY, "Internal server error"));
     }
 }

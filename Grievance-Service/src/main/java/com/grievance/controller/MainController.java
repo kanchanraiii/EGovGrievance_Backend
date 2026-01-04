@@ -1,6 +1,5 @@
 package com.grievance.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,8 +28,13 @@ import org.springframework.http.HttpStatus;
 @RequestMapping("api/grievances")
 public class MainController {
 
-	@Autowired
-	private GrievanceService grievanceService;
+	private static final String CLAIM_DEPARTMENT_ID = "departmentId";
+
+	private final GrievanceService grievanceService;
+
+	public MainController(GrievanceService grievanceService) {
+		this.grievanceService = grievanceService;
+	}
 
 	// create a grievance
 	@PostMapping("/create")
@@ -53,7 +57,7 @@ public class MainController {
 	@GetMapping("/getAll")
 	@ResponseStatus(HttpStatus.OK)
 	public Flux<Grievance> getAllGrievances(@AuthenticationPrincipal Jwt jwt) {
-		return grievanceService.getAllForRole(jwt.getClaim("role"), jwt.getClaim("departmentId"));
+		return grievanceService.getAllForRole(jwt.getClaim("role"), jwt.getClaim(CLAIM_DEPARTMENT_ID));
 	}
 
 	// to assign a grievance
@@ -63,7 +67,7 @@ public class MainController {
 		String actorId = jwt.getSubject();
 		return grievanceService
 				.assignGrievance(request.getGrievanceId(), actorId, request.getAssignedTo(), jwt.getClaim("role"),
-						jwt.getClaim("departmentId"))
+						jwt.getClaim(CLAIM_DEPARTMENT_ID))
 				.map(updated -> Map.of(
 						"status", updated.getStatus().name(),
 						"assignedTo", updated.getAssignedWokerId()));
@@ -80,27 +84,27 @@ public class MainController {
 				actorId,
 				request.getRemarks(),
 				jwt.getClaim("role"),
-				jwt.getClaim("departmentId"));
+				jwt.getClaim(CLAIM_DEPARTMENT_ID));
 	}
 
 	// to get status history of grievances
 	@GetMapping("/history/{id}")
 	public Flux<GrievanceHistory> getStatusHistory(@PathVariable String id, @AuthenticationPrincipal Jwt jwt) {
-		return grievanceService.getStatusHistory(id, jwt.getClaim("role"), jwt.getClaim("departmentId"));
+		return grievanceService.getStatusHistory(id, jwt.getClaim("role"), jwt.getClaim(CLAIM_DEPARTMENT_ID));
 	}
 
 	// view grievances by department (department officer / case worker / admin)
 	@GetMapping("/department/{departmentId}")
 	@ResponseStatus(HttpStatus.OK)
 	public Flux<Grievance> getByDepartment(@PathVariable String departmentId, @AuthenticationPrincipal Jwt jwt) {
-		return grievanceService.getByDepartment(departmentId, jwt.getClaim("role"), jwt.getClaim("departmentId"));
+		return grievanceService.getByDepartment(departmentId, jwt.getClaim("role"), jwt.getClaim(CLAIM_DEPARTMENT_ID));
 	}
 
 	// view grievances assigned to a specific case worker (department officer / supervisory officer / admin)
 	@GetMapping("/case-worker/{caseWorkerId}")
 	@ResponseStatus(HttpStatus.OK)
 	public Flux<Grievance> getByCaseWorker(@PathVariable String caseWorkerId, @AuthenticationPrincipal Jwt jwt) {
-		return grievanceService.getByCaseWorker(caseWorkerId, jwt.getClaim("role"), jwt.getClaim("departmentId"));
+		return grievanceService.getByCaseWorker(caseWorkerId, jwt.getClaim("role"), jwt.getClaim(CLAIM_DEPARTMENT_ID));
 	}
 
 	// view grievances for current citizen

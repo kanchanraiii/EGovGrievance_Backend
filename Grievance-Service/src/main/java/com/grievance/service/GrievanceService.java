@@ -6,7 +6,6 @@ import com.grievance.repository.GrievanceRepository;
 import com.grievance.repository.StatusHistoryRepository;
 import com.grievance.request.GrievanceCreateRequest;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -18,20 +17,32 @@ import java.time.LocalDateTime;
 @Service
 public class GrievanceService {
 
-	@Autowired
-	private GrievanceRepository grievanceRepository;
+	private static final String ROLE_DEPARTMENT_OFFICER = "DEPARTMENT_OFFICER";
+	private static final String ROLE_SUPERVISORY_OFFICER = "SUPERVISORY_OFFICER";
+	private static final String ROLE_ADMIN = "ADMIN";
+	private static final String ROLE_CASE_WORKER = "CASE_WORKER";
+	private static final String MSG_GRIEVANCE_NOT_FOUND = "Grievance not found";
+	private static final String MSG_UNAUTHORIZED_DEPT = "Unauthorized for this department";
+	private static final String MSG_UNAUTHORIZED = "Unauthorized";
 
-	@Autowired
-	private AssignmentRepository assignmentRepository;
+	private final GrievanceRepository grievanceRepository;
+	private final AssignmentRepository assignmentRepository;
+	private final StatusHistoryRepository statusHistoryRepository;
+    private final DepartmentValidationService departmentValidationService;
+	private final GrievanceEventPublisher grievanceEventPublisher;
 
-	@Autowired
-	private StatusHistoryRepository statusHistoryRepository;
-	
-    @Autowired
-    private DepartmentValidationService departmentValidationService;
-
-	@Autowired
-	private GrievanceEventPublisher grievanceEventPublisher;
+	public GrievanceService(
+			GrievanceRepository grievanceRepository,
+			AssignmentRepository assignmentRepository,
+			StatusHistoryRepository statusHistoryRepository,
+			DepartmentValidationService departmentValidationService,
+			GrievanceEventPublisher grievanceEventPublisher) {
+		this.grievanceRepository = grievanceRepository;
+		this.assignmentRepository = assignmentRepository;
+		this.statusHistoryRepository = statusHistoryRepository;
+		this.departmentValidationService = departmentValidationService;
+		this.grievanceEventPublisher = grievanceEventPublisher;
+	}
 
 	// to create a grievance
 	public Mono<Grievance> createGrievance(GrievanceCreateRequest request, String citizenId) {
@@ -76,7 +87,7 @@ public class GrievanceService {
 
 		return ensureCaseWorkerAvailable(assignedTo)
 				.then(grievanceRepository.findById(grievanceId))
-				.switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Grievance not found")))
+				.switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, MSG_GRIEVANCE_NOT_FOUND)))
 				.flatMap(grievance -> ensureSameDepartmentForRestrictedRole(requesterRole, requesterDepartmentId, grievance))
 				.flatMap(grievance -> {
 
@@ -111,7 +122,7 @@ public class GrievanceService {
 	public Mono<Grievance> updateStatus(String grievanceId, GrievanceStatus status, String updatedBy, String remarks, String requesterRole, String requesterDepartmentId) {
 
 		return grievanceRepository.findById(grievanceId)
-				.switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Grievance not found")))
+				.switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, MSG_GRIEVANCE_NOT_FOUND)))
 				.flatMap(grievance -> ensureSameDepartmentForRestrictedRole(requesterRole, requesterDepartmentId, grievance))
 				.flatMap(grievance -> {
 
@@ -129,14 +140,14 @@ public class GrievanceService {
 	// mono to get one object of grievance - get by id
 	public Mono<Grievance> getById(String grievanceId) {
 		return grievanceRepository.findById(grievanceId)
-				.switchIfEmpty(Mono.error(new RuntimeException("Grievance not found")));
+				.switchIfEmpty(Mono.error(new RuntimeException(MSG_GRIEVANCE_NOT_FOUND)));
 	}
 
 	// flux to get multiple objects - get all
 	public Flux<Grievance> getAllForRole(String role, String requesterDepartmentId) {
 		if (isDepartmentRestrictedRole(role)) {
 			if (requesterDepartmentId == null) {
-				return Flux.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized for this department"));
+				return Flux.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, MSG_UNAUTHORIZED_DEPT));
 			}
 			return grievanceRepository.findByDepartmentId(requesterDepartmentId);
 		}
@@ -146,16 +157,19 @@ public class GrievanceService {
 	// flux to get multiple objects - get status history
 	public Flux<GrievanceHistory> getStatusHistory(String grievanceId, String role, String requesterDepartmentId) {
 		return grievanceRepository.findById(grievanceId)
-				.switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Grievance not found")))
+				.switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, MSG_GRIEVANCE_NOT_FOUND)))
 				.flatMap(grievance -> ensureSameDepartmentForRestrictedRole(role, requesterDepartmentId, grievance))
 				.flatMapMany(grievance -> statusHistoryRepository.findByGrievanceIdOrderByUpdatedAtAsc(grievanceId)
-						.switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Grievance not found"))));
+						.switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, MSG_GRIEVANCE_NOT_FOUND))));
 	}
 
 	// list grievances by department with access control
 	public Flux<Grievance> getByDepartment(String departmentId, String role, String requesterDepartmentId) {
 		if (!isSupervisoryOfficer(role)) {
 			return Flux.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Only supervisory officers can view department grievances"));
+		}
+		if (requesterDepartmentId != null && !requesterDepartmentId.equalsIgnoreCase(departmentId) && !ROLE_ADMIN.equalsIgnoreCase(role)) {
+			return Flux.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, MSG_UNAUTHORIZED_DEPT));
 		}
 		return grievanceRepository.findByDepartmentId(departmentId);
 	}
@@ -165,16 +179,16 @@ public class GrievanceService {
 		if (caseWorkerId == null) {
 			return Flux.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "caseWorkerId is required"));
 		}
-		boolean allowedRole = role != null && (role.equalsIgnoreCase("DEPARTMENT_OFFICER")
-				|| role.equalsIgnoreCase("SUPERVISORY_OFFICER")
-				|| role.equalsIgnoreCase("ADMIN"));
+		boolean allowedRole = role != null && (role.equalsIgnoreCase(ROLE_DEPARTMENT_OFFICER)
+				|| role.equalsIgnoreCase(ROLE_SUPERVISORY_OFFICER)
+				|| role.equalsIgnoreCase(ROLE_ADMIN));
 		if (!allowedRole) {
-			return Flux.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized"));
+			return Flux.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, MSG_UNAUTHORIZED));
 		}
 
 		if (isDepartmentRestrictedRole(role)) {
 			if (requesterDepartmentId == null) {
-				return Flux.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized for this department"));
+				return Flux.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, MSG_UNAUTHORIZED_DEPT));
 			}
 			return grievanceRepository.findByAssignedWokerId(caseWorkerId)
 					.filter(grievance -> isSameDepartment(requesterDepartmentId, grievance.getDepartmentId()));
@@ -185,7 +199,7 @@ public class GrievanceService {
 	// list grievances for the authenticated citizen
 	public Flux<Grievance> getByCitizen(String citizenId) {
 		if (citizenId == null) {
-			return Flux.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized"));
+			return Flux.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, MSG_UNAUTHORIZED));
 		}
 		return grievanceRepository.findByCitizenId(citizenId);
 	}
@@ -193,13 +207,13 @@ public class GrievanceService {
 	// list distinct case workers assigned by the current department officer
 	public Flux<String> getCaseWorkersForOfficer(String officerId, String role) {
 		if (officerId == null) {
-			return Flux.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized"));
+			return Flux.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, MSG_UNAUTHORIZED));
 		}
-		boolean allowedRole = role != null && (role.equalsIgnoreCase("DEPARTMENT_OFFICER")
-				|| role.equalsIgnoreCase("SUPERVISORY_OFFICER")
-				|| role.equalsIgnoreCase("ADMIN"));
+		boolean allowedRole = role != null && (role.equalsIgnoreCase(ROLE_DEPARTMENT_OFFICER)
+				|| role.equalsIgnoreCase(ROLE_SUPERVISORY_OFFICER)
+				|| role.equalsIgnoreCase(ROLE_ADMIN));
 		if (!allowedRole) {
-			return Flux.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized"));
+			return Flux.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, MSG_UNAUTHORIZED));
 		}
 		return assignmentRepository.findByAssignedBy(officerId)
 				.flatMap(assignment -> Mono.justOrEmpty(assignment.getAssignedTo()))
@@ -222,18 +236,18 @@ public class GrievanceService {
 	
 	private Mono<Grievance> ensureSameDepartmentForRestrictedRole(String role, String requesterDepartmentId, Grievance grievance) {
 		if (isDepartmentRestrictedRole(role) && !isSameDepartment(requesterDepartmentId, grievance.getDepartmentId())) {
-			return Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized for this department"));
+			return Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, MSG_UNAUTHORIZED_DEPT));
 		}
 		return Mono.just(grievance);
 	}
 
 	private boolean isDepartmentRestrictedRole(String role) {
 		return role != null &&
-				(role.equalsIgnoreCase("DEPARTMENT_OFFICER") || role.equalsIgnoreCase("CASE_WORKER"));
+				(role.equalsIgnoreCase(ROLE_DEPARTMENT_OFFICER) || role.equalsIgnoreCase(ROLE_CASE_WORKER));
 	}
 
 	private boolean isSupervisoryOfficer(String role) {
-		return role != null && role.equalsIgnoreCase("SUPERVISORY_OFFICER");
+		return role != null && role.equalsIgnoreCase(ROLE_SUPERVISORY_OFFICER);
 	}
 
 	private boolean isCompletedStatus(GrievanceStatus status) {

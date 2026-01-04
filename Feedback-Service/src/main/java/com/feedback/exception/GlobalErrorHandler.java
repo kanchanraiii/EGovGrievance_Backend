@@ -9,7 +9,6 @@ import org.springframework.web.bind.support.WebExchangeBindException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalErrorHandler {
@@ -19,7 +18,7 @@ public class GlobalErrorHandler {
         List<String> errors = ex.getFieldErrors()
                 .stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .collect(Collectors.toList());
+                .toList();
 
         return build(HttpStatus.BAD_REQUEST, "Validation failed", errors);
     }

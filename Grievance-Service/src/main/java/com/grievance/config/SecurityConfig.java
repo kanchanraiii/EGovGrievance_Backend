@@ -26,6 +26,12 @@ import reactor.core.publisher.Mono;
 @EnableWebFluxSecurity
 public class SecurityConfig {
 
+    private static final String ROLE_CITIZEN = "CITIZEN";
+    private static final String ROLE_DEPARTMENT_OFFICER = "DEPARTMENT_OFFICER";
+    private static final String ROLE_SUPERVISORY_OFFICER = "SUPERVISORY_OFFICER";
+    private static final String ROLE_ADMIN = "ADMIN";
+    private static final String ROLE_CASE_WORKER = "CASE_WORKER";
+
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
@@ -33,18 +39,18 @@ public class SecurityConfig {
                 .authorizeExchange(exchange -> exchange
                         .pathMatchers("/actuator/**").permitAll()
                         .pathMatchers("/api/departments/**").permitAll()
-                        .pathMatchers("/api/grievances/create").hasRole("CITIZEN")
-                        .pathMatchers("/api/grievances/my").hasRole("CITIZEN")
+                        .pathMatchers("/api/grievances/create").hasRole(ROLE_CITIZEN)
+                        .pathMatchers("/api/grievances/my").hasRole(ROLE_CITIZEN)
                         .pathMatchers("/api/grievances/my-case-workers")
-                        .hasAnyRole("DEPARTMENT_OFFICER", "SUPERVISORY_OFFICER", "ADMIN")
+                        .hasAnyRole(ROLE_DEPARTMENT_OFFICER, ROLE_SUPERVISORY_OFFICER, ROLE_ADMIN)
                         .pathMatchers("/api/grievances/history/**")
-                        .hasAnyRole("CITIZEN", "CASE_WORKER", "DEPARTMENT_OFFICER", "SUPERVISORY_OFFICER", "ADMIN")
+                        .hasAnyRole(ROLE_CITIZEN, ROLE_CASE_WORKER, ROLE_DEPARTMENT_OFFICER, ROLE_SUPERVISORY_OFFICER, ROLE_ADMIN)
                         .pathMatchers("/api/grievances/getAll", "/api/grievances/assign")
-                        .hasAnyRole("DEPARTMENT_OFFICER", "SUPERVISORY_OFFICER", "ADMIN")
+                        .hasAnyRole(ROLE_DEPARTMENT_OFFICER, ROLE_SUPERVISORY_OFFICER, ROLE_ADMIN)
                         .pathMatchers("/api/grievances/status")
-                        .hasAnyRole("CASE_WORKER", "DEPARTMENT_OFFICER", "SUPERVISORY_OFFICER", "ADMIN")
+                        .hasAnyRole(ROLE_CASE_WORKER, ROLE_DEPARTMENT_OFFICER, ROLE_SUPERVISORY_OFFICER, ROLE_ADMIN)
                         .pathMatchers("/api/grievances/department/**")
-                        .hasAnyRole("DEPARTMENT_OFFICER", "CASE_WORKER", "ADMIN")
+                        .hasAnyRole(ROLE_DEPARTMENT_OFFICER, ROLE_CASE_WORKER, ROLE_ADMIN)
                         .anyExchange().authenticated())
                 .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
                 .build();

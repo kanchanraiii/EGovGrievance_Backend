@@ -2,7 +2,6 @@ package com.feedback.controller;
 
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +13,8 @@ import com.feedback.model.Feedback;
 import com.feedback.model.FeedbackStats;
 import com.feedback.model.Ratings;
 import com.feedback.model.ReopenRequest;
+import com.feedback.requests.FeedbackRequest;
+import com.feedback.requests.RatingsRequest;
 import com.feedback.service.FeedbackService;
 
 import jakarta.validation.Valid;
@@ -25,15 +26,22 @@ import org.springframework.http.HttpStatus;
 @RequestMapping("/api/feedback")
 public class MainController {
 
-	@Autowired
-	private FeedbackService feedbackService;
+	private final FeedbackService feedbackService;
+
+	public MainController(FeedbackService feedbackService) {
+		this.feedbackService = feedbackService;
+	}
 
 	
 	// to add a feedback
 	@PostMapping("/add-feedback")
 	@ResponseStatus(HttpStatus.CREATED)
-	public Mono<Feedback> submitFeedback(@Valid @RequestBody Feedback feedback) {
-		return feedbackService.submitFeedback(feedback);
+	public Mono<Feedback> submitFeedback(@Valid @RequestBody FeedbackRequest feedback) {
+		Feedback entity = new Feedback();
+		entity.setGrievanceId(feedback.getGrievanceId());
+		entity.setCitizenId(feedback.getCitizenId());
+		entity.setComments(feedback.getComments());
+		return feedbackService.submitFeedback(entity);
 	}
 
 	
@@ -47,15 +55,21 @@ public class MainController {
 	// to add ratings
 	@PostMapping("/ratings")
 	@ResponseStatus(HttpStatus.CREATED)
-	public Mono<Ratings> submitRating(@Valid @RequestBody Ratings rating) {
-		return feedbackService.submitRating(rating);
+	public Mono<Ratings> submitRating(@Valid @RequestBody RatingsRequest rating) {
+		Ratings entity = new Ratings();
+		entity.setGrievanceId(rating.getGrievanceId());
+		entity.setScore(rating.getScore());
+		return feedbackService.submitRating(entity);
 	}
 
 	// to reopen a request
 	@PostMapping("/reopen-requests")
 	@ResponseStatus(HttpStatus.CREATED)
-	public Mono<Map<String, String>> requestReopen(@Valid @RequestBody ReopenRequest reopenRequest) {
-		return feedbackService.requestReopen(reopenRequest)
+	public Mono<Map<String, String>> requestReopen(@Valid @RequestBody com.feedback.requests.ReopenRequest reopenRequest) {
+		ReopenRequest entity = new ReopenRequest();
+		entity.setGrievanceId(reopenRequest.getGrievanceId());
+		entity.setReason(reopenRequest.getReason());
+		return feedbackService.requestReopen(entity)
 				.map(saved -> Map.of("reopenRequestId", saved.getId()));
 	}
 

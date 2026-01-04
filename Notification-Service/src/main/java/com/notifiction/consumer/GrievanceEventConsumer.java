@@ -15,12 +15,17 @@ import reactor.core.publisher.Mono;
 @Component
 public class GrievanceEventConsumer {
 
-    @org.springframework.beans.factory.annotation.Autowired
-	private NotificationRepository notificationRepository;
-    @org.springframework.beans.factory.annotation.Autowired
-    private NotificationLogRepository logRepository;
-    @org.springframework.beans.factory.annotation.Autowired
-    private NotificationSender notificationSender;
+    private final NotificationRepository notificationRepository;
+    private final NotificationLogRepository logRepository;
+    private final NotificationSender notificationSender;
+
+    public GrievanceEventConsumer(NotificationRepository notificationRepository,
+                                  NotificationLogRepository logRepository,
+                                  NotificationSender notificationSender) {
+        this.notificationRepository = notificationRepository;
+        this.logRepository = logRepository;
+        this.notificationSender = notificationSender;
+    }
 
     @KafkaListener(
         topics = "grievance-events",

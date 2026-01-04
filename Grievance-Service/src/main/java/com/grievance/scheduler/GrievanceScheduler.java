@@ -3,7 +3,6 @@ package com.grievance.scheduler;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -14,11 +13,13 @@ import com.grievance.service.GrievanceService;
 @Component
 public class GrievanceScheduler {
 	
-	@Autowired
-	private GrievanceRepository grievanceRepository;
-	
-	@Autowired
-	private GrievanceService grievanceService;
+	private final GrievanceRepository grievanceRepository;
+	private final GrievanceService grievanceService;
+
+	public GrievanceScheduler(GrievanceRepository grievanceRepository, GrievanceService grievanceService) {
+		this.grievanceRepository = grievanceRepository;
+		this.grievanceService = grievanceService;
+	}
 	
 	// runs every five minutes
 	 @Scheduled(fixedDelay = 5*60* 1000)
@@ -44,4 +45,3 @@ public class GrievanceScheduler {
 	    }
 	}
 	
-

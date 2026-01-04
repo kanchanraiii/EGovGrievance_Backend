@@ -43,10 +43,7 @@ class GrievanceEventConsumerTest {
         when(notificationSender.sendSms(any())).thenReturn(Mono.empty());
         when(notificationSender.sendEmail(any())).thenReturn(Mono.empty());
 
-        GrievanceEventConsumer consumer = new GrievanceEventConsumer();
-        ReflectionTestUtils.setField(consumer, "notificationRepository", notificationRepository);
-        ReflectionTestUtils.setField(consumer, "logRepository", logRepository);
-        ReflectionTestUtils.setField(consumer, "notificationSender", notificationSender);
+        GrievanceEventConsumer consumer = new GrievanceEventConsumer(notificationRepository, logRepository, notificationSender);
 
         GrievanceEvent event = new GrievanceEvent();
         event.setUserId("user-1");

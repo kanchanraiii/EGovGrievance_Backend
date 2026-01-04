@@ -12,7 +12,6 @@ import com.feedback.repository.FeedbackRepository;
 import com.feedback.repository.RatingsRepository;
 import com.feedback.repository.ReopenRequestRepository;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -23,17 +22,22 @@ import java.util.stream.Collectors;
 @Service
 public class FeedbackService {
 
-    @Autowired
-	private FeedbackRepository feedbackRepository;
-    
-    @Autowired
-    private RatingsRepository ratingRepository;
-    
-    @Autowired
-    private ReopenRequestRepository reopenRequestRepository;
-    
-    @Autowired
-    private GrievanceClient grievanceClient;
+    private final FeedbackRepository feedbackRepository;
+    private final RatingsRepository ratingRepository;
+    private final ReopenRequestRepository reopenRequestRepository;
+    private final GrievanceClient grievanceClient;
+
+    public FeedbackService(
+            FeedbackRepository feedbackRepository,
+            RatingsRepository ratingRepository,
+            ReopenRequestRepository reopenRequestRepository,
+            GrievanceClient grievanceClient
+    ) {
+        this.feedbackRepository = feedbackRepository;
+        this.ratingRepository = ratingRepository;
+        this.reopenRequestRepository = reopenRequestRepository;
+        this.grievanceClient = grievanceClient;
+    }
 
     // to submit a feedback only when a grievance is resolved 
     public Mono<Feedback> submitFeedback(Feedback feedback) {

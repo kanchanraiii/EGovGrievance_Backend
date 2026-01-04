@@ -51,7 +51,7 @@ class MainControllerTest {
 
 	@Test
 	void submitFeedback_returnsCreatedFeedback() {
-		Feedback request = new Feedback();
+		com.feedback.requests.FeedbackRequest request = new com.feedback.requests.FeedbackRequest();
 		request.setGrievanceId("g1");
 		request.setCitizenId("c1");
 		request.setComments("Thanks for resolving the issue quickly");
@@ -114,7 +114,7 @@ class MainControllerTest {
 
 	@Test
 	void submitRating_returnsCreatedRating() {
-		Ratings request = new Ratings();
+		com.feedback.requests.RatingsRequest request = new com.feedback.requests.RatingsRequest();
 		request.setGrievanceId("g2");
 		request.setScore(5);
 
@@ -143,7 +143,7 @@ class MainControllerTest {
 
 	@Test
 	void requestReopen_returnsGeneratedId() {
-		ReopenRequest request = new ReopenRequest();
+		com.feedback.requests.ReopenRequest request = new com.feedback.requests.ReopenRequest();
 		request.setGrievanceId("g3");
 		request.setReason("Need further investigation for this issue");
 

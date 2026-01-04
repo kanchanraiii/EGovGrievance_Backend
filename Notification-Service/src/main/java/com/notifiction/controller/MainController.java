@@ -2,7 +2,6 @@ package com.notifiction.controller;
 
 import com.notifiction.model.Notifications;
 import com.notifiction.repository.NotificationRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
@@ -10,8 +9,11 @@ import reactor.core.publisher.Flux;
 @RequestMapping("/api/notifications")
 public class MainController {
 
-    @Autowired
-	private NotificationRepository notificationRepository;
+    private final NotificationRepository notificationRepository;
+
+    public MainController(NotificationRepository notificationRepository) {
+        this.notificationRepository = notificationRepository;
+    }
 
     // Get all notifications for a user
     @GetMapping("/user/{userId}")

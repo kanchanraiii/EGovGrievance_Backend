@@ -336,7 +336,7 @@ class GrievanceServiceTest {
         Grievance grievance = grievanceWithDept("D1");
         when(grievanceRepository.findByDepartmentId("D1")).thenReturn(Flux.just(grievance));
 
-        StepVerifier.create(grievanceService.getByDepartment("D1", "SUPERVISORY_OFFICER", "IGNORED"))
+        StepVerifier.create(grievanceService.getByDepartment("D1", "SUPERVISORY_OFFICER", "D1"))
                 .expectNext(grievance)
                 .verifyComplete();
     }
