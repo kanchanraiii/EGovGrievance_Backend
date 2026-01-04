@@ -122,6 +122,17 @@ class FeedbackServiceTest {
     }
 
     @Test
+    void submitRating_rejectsBelowRange() {
+        Ratings rating = new Ratings();
+        rating.setGrievanceId("g1");
+        rating.setScore(0);
+
+        StepVerifier.create(feedbackService.submitRating(rating))
+                .expectError(ServiceException.class)
+                .verify();
+    }
+
+    @Test
     void submitRating_rejectsWhenNotResolved() {
         Ratings rating = new Ratings();
         rating.setGrievanceId("g1");
@@ -231,6 +242,21 @@ class FeedbackServiceTest {
         StepVerifier.create(feedbackService.requestReopen(existing))
                 .expectNext(existing)
                 .verifyComplete();
+    }
+
+    @Test
+    void requestReopen_existingMissingRecordThrowsConflict() {
+        ReopenRequest request = new ReopenRequest();
+        request.setGrievanceId("g1");
+        request.setReason("reason");
+
+        when(grievanceClient.getGrievanceById("g1")).thenReturn(Mono.just(resolvedGrievance()));
+        when(reopenRequestRepository.existsByGrievanceId("g1")).thenReturn(Mono.just(true));
+        when(reopenRequestRepository.findByGrievanceId("g1")).thenReturn(Mono.empty());
+
+        StepVerifier.create(feedbackService.requestReopen(request))
+                .expectError(com.feedback.exception.ConflictException.class)
+                .verify();
     }
 
     @Test

@@ -39,6 +39,13 @@ class GlobalErrorHandlerTest {
     }
 
     @Test
+    void handleConflictReturns409() {
+        var response = handler.handleConflict(new ConflictException("conflict"));
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).containsEntry("message", "conflict");
+    }
+
+    @Test
     void handleIllegalStateReturnsBadRequest() {
         var response = handler.handleIllegalState(new IllegalStateException("bad"));
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
