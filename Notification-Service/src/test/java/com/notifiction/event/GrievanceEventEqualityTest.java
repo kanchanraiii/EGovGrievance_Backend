@@ -20,8 +20,7 @@ class GrievanceEventEqualityTest {
         e2.setMessage("msg");
         e2.setEventType("SUBMITTED");
 
-        assertThat(e1).isEqualTo(e2);
-        assertThat(e1.hashCode()).isEqualTo(e2.hashCode());
+        assertThat(e1).isEqualTo(e2).hasSameHashCodeAs(e2);
         assertThat(e1.toString()).contains("g1");
 
         e2.setUserId("other");

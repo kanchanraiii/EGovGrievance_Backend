@@ -23,7 +23,7 @@ public class DepartmentValidationService {
         return departmentClient
                 .isValidDepartment(departmentCode, categoryCode, subCategoryCode)
                 .flatMap(valid -> {
-                    if (!valid) {
+                    if (!Boolean.TRUE.equals(valid)) {
                         return Mono.error(
                                 new ResourceNotFoundException(
                                         "Department / category / sub-category not found"));

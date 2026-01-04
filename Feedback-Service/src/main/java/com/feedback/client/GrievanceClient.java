@@ -1,5 +1,6 @@
 package com.feedback.client;
 
+import org.springframework.http.HttpStatusCode;
 import org.springframework.web.reactive.function.client.WebClient;
 import com.feedback.exception.ResourceNotFoundException;
 import com.feedback.exception.ServiceException;
@@ -27,12 +28,12 @@ public class GrievanceClient {
                 .uri("/api/grievances/{id}", grievanceId)
                 .retrieve()
                 .onStatus(
-                        status -> status.is4xxClientError(),
+                        HttpStatusCode::is4xxClientError,
                         response -> Mono.error(
                                 new ResourceNotFoundException("Grievance not found"))
                 )
                 .onStatus(
-                        status -> status.is5xxServerError(),
+                        HttpStatusCode::is5xxServerError,
                         response -> Mono.error(
                                 new ServiceException("Grievance service unavailable"))
                 )
@@ -60,11 +61,11 @@ public class GrievanceClient {
                 .body(BodyInserters.fromValue(payload))
                 .retrieve()
                 .onStatus(
-                        httpStatus -> httpStatus.is4xxClientError(),
+                        HttpStatusCode::is4xxClientError,
                         response -> Mono.error(new ResourceNotFoundException("Grievance not found"))
                 )
                 .onStatus(
-                        httpStatus -> httpStatus.is5xxServerError(),
+                        HttpStatusCode::is5xxServerError,
                         response -> Mono.error(new ServiceException("Grievance service unavailable"))
                 )
                 .bodyToMono(Void.class);

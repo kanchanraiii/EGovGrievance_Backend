@@ -11,12 +11,9 @@ class FileMetadataTest {
         FileMetadata m1 = populated();
         FileMetadata m2 = populated();
 
-        assertThat(m1).isEqualTo(m2);
-        assertThat(m1.hashCode()).isEqualTo(m2.hashCode());
+        assertThat(m1).isEqualTo(m2).hasSameHashCodeAs(m2);
         assertThat(m1.toString()).contains("file.png");
-        assertThat(m1).isEqualTo(m1);
-        assertThat(m1).isNotEqualTo(null);
-        assertThat(m1).isNotEqualTo("other");
+        assertThat(m1).isEqualTo(m1).isNotEqualTo(null).isNotEqualTo("other");
 
         m2.setUploadedBy("different");
         assertThat(m1).isNotEqualTo(m2);
@@ -57,8 +54,7 @@ class FileMetadataTest {
         nullId1.setId(null);
         FileMetadata nullId2 = populated();
         nullId2.setId(null);
-        assertThat(nullId1).isEqualTo(nullId2);
-        assertThat(nullId1.hashCode()).isEqualTo(nullId2.hashCode());
+        assertThat(nullId1).isEqualTo(nullId2).hasSameHashCodeAs(nullId2);
         assertThat(m1).isNotEqualTo(nullId1);
 
         FileMetadata nullUploader = populated();

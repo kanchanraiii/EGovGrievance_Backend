@@ -52,14 +52,14 @@ public class FeedbackService {
                     return feedbackRepository
                             .existsByGrievanceId(feedback.getGrievanceId())
                             .flatMap(exists -> {
-                                if (exists) {
+                                if (Boolean.TRUE.equals(exists)) {
                                     return Mono.error(new ConflictException("Feedback already submitted for this grievance"));
                                 }
 
                                 feedback.setSubmittedAt(LocalDateTime.now());
                                 return feedbackRepository.save(feedback);
                             });
-                });
+                    });
     }
 
     // to submit ratings
@@ -79,14 +79,14 @@ public class FeedbackService {
                     return ratingRepository
                             .existsByGrievanceId(rating.getGrievanceId())
                             .flatMap(exists -> {
-                                if (exists) {
+                                if (Boolean.TRUE.equals(exists)) {
                                     return Mono.error(new ConflictException("Rating already submitted for this grievance"));
                                 }
 
                                 rating.setSubmittedAt(LocalDateTime.now());
                                 return ratingRepository.save(rating);
                             });
-                });
+                    });
     }
 
     // to reopen requests
@@ -102,7 +102,7 @@ public class FeedbackService {
                     return reopenRequestRepository
                             .existsByGrievanceId(reopenRequest.getGrievanceId())
                             .flatMap(exists -> {
-                                if (exists) {
+                                if (Boolean.TRUE.equals(exists)) {
                                     return reopenRequestRepository.findByGrievanceId(reopenRequest.getGrievanceId())
                                             .flatMap(saved ->
                                                     grievanceClient
@@ -122,7 +122,7 @@ public class FeedbackService {
                                                         .thenReturn(saved)
                                         );
                             });
-                });
+                    });
     }
 
    // to get reopened request

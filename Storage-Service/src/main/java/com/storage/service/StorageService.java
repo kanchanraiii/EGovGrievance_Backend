@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicLong;
 @Service
 public class StorageService {
 
-    private static final long MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024;
+    private static final long MAX_FILE_SIZE_BYTES = 20L * 1024 * 1024;
     private static final Set<String> ALLOWED_DOC_TYPES = Set.of(
             "application/pdf",
             "application/msword",

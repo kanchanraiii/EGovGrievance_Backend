@@ -3,6 +3,7 @@ package com.storage.client;
 import com.storage.exception.ResourceNotFoundException;
 import com.storage.exception.ServiceException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
@@ -26,11 +27,11 @@ public class GrievanceClient {
                 .uri("/api/grievances/{id}", grievanceId)
                 .retrieve()
                 .onStatus(
-                        status -> status.is4xxClientError(),
+                        HttpStatusCode::is4xxClientError,
                         response -> Mono.error(new ResourceNotFoundException("Grievance not found"))
                 )
                 .onStatus(
-                        status -> status.is5xxServerError(),
+                        HttpStatusCode::is5xxServerError,
                         response -> Mono.error(new ServiceException("Grievance service unavailable"))
                 )
                 .bodyToMono(Void.class)

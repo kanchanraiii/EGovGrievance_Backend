@@ -1,8 +1,6 @@
 package com.grievance.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 import java.time.LocalDateTime;
 
@@ -33,9 +31,8 @@ class GrievanceHistoryEqualityTest {
         h2.setRemarks("remarks");
         h2.setUpdatedAt(now);
 
-        assertThat(h1).isEqualTo(h2);
-        assertThat(h1.hashCode()).isEqualTo(h2.hashCode());
-        assertThat(h1.toString()).contains("GrievanceHistory").contains("g1");
+        assertThat(h1).isEqualTo(h2).hasSameHashCodeAs(h2);
+        assertThat(h1.toString()).contains("GrievanceHistory", "g1");
 
         h2.setId("other");
         assertThat(h1).isNotEqualTo(h2);

@@ -1,7 +1,5 @@
 package com.feedback.requests;
 
-import java.util.function.IntPredicate;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;

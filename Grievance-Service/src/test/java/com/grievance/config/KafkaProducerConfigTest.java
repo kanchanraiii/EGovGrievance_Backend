@@ -20,7 +20,7 @@ class KafkaProducerConfigTest {
         ProducerFactory<String, Object> factory = config.producerFactory();
         Map<String, Object> props = ((DefaultKafkaProducerFactory<String, Object>) factory).getConfigurationProperties();
 
-        assertThat(props.get("bootstrap.servers")).isEqualTo("localhost:1234");
+        assertThat(props).containsEntry("bootstrap.servers", "localhost:1234");
         assertThat(props.get("key.serializer")).isNotNull();
         assertThat(props.get("value.serializer")).isNotNull();
     }

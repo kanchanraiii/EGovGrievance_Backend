@@ -12,17 +12,16 @@ class AssignmentRequestTest {
         request.setGrievanceId("g1");
         request.setAssignedTo("worker-1");
 
-        assertThat(request.getGrievanceId()).isEqualTo("g1");
-        assertThat(request.getAssignedTo()).isEqualTo("worker-1");
-        assertThat(request).isEqualTo(request);
-        assertThat(request).isNotEqualTo("other");
+        assertThat(request)
+                .extracting(AssignmentRequest::getGrievanceId, AssignmentRequest::getAssignedTo)
+                .containsExactly("g1", "worker-1");
+        assertThat(request).isEqualTo(request).isNotEqualTo("other");
 
         AssignmentRequest same = new AssignmentRequest();
         same.setGrievanceId("g1");
         same.setAssignedTo("worker-1");
 
-        assertThat(request).isEqualTo(same);
-        assertThat(request.hashCode()).isEqualTo(same.hashCode());
+        assertThat(request).isEqualTo(same).hasSameHashCodeAs(same);
 
         AssignmentRequest different = new AssignmentRequest();
         different.setGrievanceId("g1");
@@ -39,7 +38,7 @@ class AssignmentRequestTest {
         AssignmentRequest empty1 = new AssignmentRequest();
         AssignmentRequest empty2 = new AssignmentRequest();
         assertThat(empty1).isEqualTo(empty2);
-        assertThat(request.equals(null)).isFalse();
+        assertThat(request).isNotEqualTo(null);
 
         AssignmentRequest nullFields = new AssignmentRequest();
         assertThat(nullFields.hashCode()).isNotZero();

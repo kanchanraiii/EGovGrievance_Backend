@@ -11,7 +11,6 @@ import com.feedback.model.ReopenRequest;
 import com.feedback.repository.FeedbackRepository;
 import com.feedback.repository.RatingsRepository;
 import com.feedback.repository.ReopenRequestRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,7 +24,6 @@ import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -198,7 +196,7 @@ class FeedbackServiceTest {
             saved.setId("rr1");
             return Mono.just(saved);
         });
-        when(grievanceClient.markAsReopened(eq("g1"), any())).thenReturn(Mono.empty());
+        when(grievanceClient.markAsReopened("g1", "Need further review")).thenReturn(Mono.empty());
 
         StepVerifier.create(feedbackService.requestReopen(request))
                 .assertNext(saved -> {
@@ -207,7 +205,7 @@ class FeedbackServiceTest {
                 })
                 .verifyComplete();
 
-        verify(grievanceClient).markAsReopened(eq("g1"), eq("Need further review"));
+        verify(grievanceClient).markAsReopened("g1", "Need further review");
     }
 
     @Test

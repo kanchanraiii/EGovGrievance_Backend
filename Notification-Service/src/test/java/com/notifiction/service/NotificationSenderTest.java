@@ -122,8 +122,8 @@ class NotificationSenderTest {
                 .verifyComplete();
 
         verify(mailSender, times(1)).send(mimeMessage);
-        assertThat(mimeMessage.getAllRecipients()[0].toString()).isEqualTo("user@example.com");
-        assertThat(mimeMessage.getFrom()[0].toString()).isEqualTo("no-reply@example.com");
+        assertThat(mimeMessage.getAllRecipients()[0]).hasToString("user@example.com");
+        assertThat(mimeMessage.getFrom()[0]).hasToString("no-reply@example.com");
         assertThat(mimeMessage.getSubject()).contains("SUBMITTED");
     }
 
@@ -175,7 +175,7 @@ class NotificationSenderTest {
         // assert recipient and throw to hit catch block
         org.mockito.Mockito.doAnswer(invocation -> {
             MimeMessage msg = invocation.getArgument(0);
-            assertThat(msg.getAllRecipients()[0].toString()).isEqualTo("default@example.com");
+            assertThat(msg.getAllRecipients()[0]).hasToString("default@example.com");
             throw new RuntimeException("fail");
         }).when(mailSender).send(any(MimeMessage.class));
 
@@ -219,7 +219,7 @@ class NotificationSenderTest {
         StepVerifier.create(sender.sendEmail(event))
                 .verifyComplete();
 
-        assertThat(mimeMessage.getAllRecipients()[0].toString()).isEqualTo("fallback@example.com");
+        assertThat(mimeMessage.getAllRecipients()[0]).hasToString("fallback@example.com");
     }
 
     @Test

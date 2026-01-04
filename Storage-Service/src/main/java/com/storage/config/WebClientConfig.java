@@ -22,7 +22,7 @@ public class WebClientConfig {
     private ExchangeFilterFunction authorizationPropagationFilter() {
         return (request, next) -> ReactiveSecurityContextHolder.getContext()
                 .map(SecurityContext::getAuthentication)
-                .filter(authentication -> authentication instanceof JwtAuthenticationToken)
+                .filter(JwtAuthenticationToken.class::isInstance)
                 .map(JwtAuthenticationToken.class::cast)
                 .map(auth -> ClientRequest.from(request)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + auth.getToken().getTokenValue())

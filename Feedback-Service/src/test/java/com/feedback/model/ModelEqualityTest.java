@@ -17,8 +17,7 @@ class ModelEqualityTest {
         Feedback f1 = populatedFeedback(now);
         Feedback f2 = populatedFeedback(now);
 
-        assertThat(f1).isEqualTo(f2);
-        assertThat(f1.hashCode()).isEqualTo(f2.hashCode());
+        assertThat(f1).isEqualTo(f2).hasSameHashCodeAs(f2);
         assertThat(f1.toString()).contains("grievance");
 
         f2.setComments("different");
@@ -49,8 +48,7 @@ class ModelEqualityTest {
         Ratings r1 = populatedRating(now);
         Ratings r2 = populatedRating(now);
 
-        assertThat(r1).isEqualTo(r2);
-        assertThat(r1.hashCode()).isEqualTo(r2.hashCode());
+        assertThat(r1).isEqualTo(r2).hasSameHashCodeAs(r2);
         assertThat(r1.toString()).contains("score");
 
         r2.setScore(2);
@@ -75,8 +73,7 @@ class ModelEqualityTest {
         ReopenRequest r1 = populatedReopen(now);
         ReopenRequest r2 = populatedReopen(now);
 
-        assertThat(r1).isEqualTo(r2);
-        assertThat(r1.hashCode()).isEqualTo(r2.hashCode());
+        assertThat(r1).isEqualTo(r2).hasSameHashCodeAs(r2);
         assertThat(r1.toString()).contains("reason");
 
         r2.setReason("other");
@@ -113,8 +110,7 @@ class ModelEqualityTest {
         GrievanceResponse g1 = populatedGrievance("RESOLVED");
         GrievanceResponse g2 = populatedGrievance("RESOLVED");
 
-        assertThat(g1).isEqualTo(g2);
-        assertThat(g1.hashCode()).isEqualTo(g2.hashCode());
+        assertThat(g1).isEqualTo(g2).hasSameHashCodeAs(g2);
         assertThat(g1.toString()).contains("RESOLVED");
         assertThat(g1.isResolvedOrClosed()).isTrue();
 
@@ -139,8 +135,7 @@ class ModelEqualityTest {
         fr2.setGrievanceId("g1");
         fr2.setComments("long enough comment");
 
-        assertThat(fr1).isEqualTo(fr2);
-        assertThat(fr1.hashCode()).isEqualTo(fr2.hashCode());
+        assertThat(fr1).isEqualTo(fr2).hasSameHashCodeAs(fr2);
         fr2.setComments("other");
         assertThat(fr1).isNotEqualTo(fr2);
 
@@ -150,8 +145,7 @@ class ModelEqualityTest {
         RatingsRequest rr2 = new RatingsRequest();
         rr2.setGrievanceId("g1");
         rr2.setScore(5);
-        assertThat(rr1).isEqualTo(rr2);
-        assertThat(rr1.hashCode()).isEqualTo(rr2.hashCode());
+        assertThat(rr1).isEqualTo(rr2).hasSameHashCodeAs(rr2);
         rr2.setScore(4);
         assertThat(rr1).isNotEqualTo(rr2);
 
@@ -161,8 +155,7 @@ class ModelEqualityTest {
         com.feedback.requests.ReopenRequest reopen2 = new com.feedback.requests.ReopenRequest();
         reopen2.setGrievanceId("g1");
         reopen2.setReason("reason");
-        assertThat(reopen1).isEqualTo(reopen2);
-        assertThat(reopen1.hashCode()).isEqualTo(reopen2.hashCode());
+        assertThat(reopen1).isEqualTo(reopen2).hasSameHashCodeAs(reopen2);
         reopen2.setReason("different");
         assertThat(reopen1).isNotEqualTo(reopen2);
     }

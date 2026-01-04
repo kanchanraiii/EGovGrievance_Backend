@@ -27,8 +27,9 @@ class KafkaConfigTest {
 
         ConsumerFactory<String, GrievanceEvent> factory = config.consumerFactory();
         Map<String, Object> props = factory.getConfigurationProperties();
-        assertThat(props.get(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG)).isEqualTo("localhost:1234");
-        assertThat(props.get(ConsumerConfig.GROUP_ID_CONFIG)).isEqualTo("group-1");
+        assertThat(props)
+                .containsEntry(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:1234")
+                .containsEntry(ConsumerConfig.GROUP_ID_CONFIG, "group-1");
 
         var listenerFactory = config.kafkaListenerContainerFactory(factory);
         ConcurrentMessageListenerContainer<String, GrievanceEvent> container =

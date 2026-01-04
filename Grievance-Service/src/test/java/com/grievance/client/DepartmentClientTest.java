@@ -1,7 +1,5 @@
 package com.grievance.client;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 

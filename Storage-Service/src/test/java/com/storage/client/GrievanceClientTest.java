@@ -1,7 +1,6 @@
 package com.storage.client;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.net.URI;
@@ -55,7 +54,7 @@ class GrievanceClientTest {
     }
 
     @Test
-    void requestFailuresAreWrapped() throws Exception {
+    void requestFailuresAreWrapped() {
         WebClientRequestException requestException = new WebClientRequestException(
                 new IOException("boom"),
                 HttpMethod.GET,

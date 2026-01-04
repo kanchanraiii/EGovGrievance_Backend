@@ -1,11 +1,7 @@
 package com.grievance.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-
-import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,7 +55,7 @@ class MainControllerTest {
         when(grievanceService.createGrievance(request, "citizen-1")).thenReturn(Mono.just(saved));
 
         StepVerifier.create(controller.createGrievance(request, citizenJwt))
-                .assertNext(map -> assertThat(map.get("grievanceId")).isEqualTo("g1"))
+                .assertNext(map -> assertThat(map).containsEntry("grievanceId", "g1"))
                 .verifyComplete();
     }
 
@@ -79,8 +75,9 @@ class MainControllerTest {
 
         StepVerifier.create(controller.assignGrievance(request, officerJwt))
                 .assertNext(result -> {
-                    assertThat(result.get("status")).isEqualTo("ASSIGNED");
-                    assertThat(result.get("assignedTo")).isEqualTo("worker-1");
+                    assertThat(result)
+                            .containsEntry("status", "ASSIGNED")
+                            .containsEntry("assignedTo", "worker-1");
                 })
                 .verifyComplete();
     }

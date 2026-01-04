@@ -28,8 +28,7 @@ class ModelEqualityTest {
         n2.setStatus(NotificationStatus.SENT);
         n2.setCreatedAt(now);
 
-        assertThat(n1).isEqualTo(n2);
-        assertThat(n1.hashCode()).isEqualTo(n2.hashCode());
+        assertThat(n1).isEqualTo(n2).hasSameHashCodeAs(n2);
         assertThat(n1.toString()).contains("msg");
 
         n2.setMessage("other");
@@ -85,8 +84,7 @@ class ModelEqualityTest {
         l2.setResponse("ok");
         l2.setLoggedAt(now);
 
-        assertThat(l1).isEqualTo(l2);
-        assertThat(l1.hashCode()).isEqualTo(l2.hashCode());
+        assertThat(l1).isEqualTo(l2).hasSameHashCodeAs(l2);
         assertThat(l1.toString()).contains("ok");
         assertThat(l1).isEqualTo(l1);
 

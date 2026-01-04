@@ -257,16 +257,16 @@ public class GrievanceService {
 	}
 
 	private Mono<Void> ensureCaseWorkerAvailable(String caseWorkerId) {
-		return grievanceRepository.findByAssignedWokerId(caseWorkerId)
-				.filter(grievance -> !isCompletedStatus(grievance.getStatus()))
-				.hasElements()
-				.flatMap(hasActive -> {
-					if (hasActive) {
-						return Mono.error(new ResponseStatusException(HttpStatus.CONFLICT,
-								"Case worker already has an active assignment"));
-					}
-					return Mono.empty();
-				});
+			return grievanceRepository.findByAssignedWokerId(caseWorkerId)
+					.filter(grievance -> !isCompletedStatus(grievance.getStatus()))
+					.hasElements()
+					.flatMap(hasActive -> {
+						if (Boolean.TRUE.equals(hasActive)) {
+							return Mono.error(new ResponseStatusException(HttpStatus.CONFLICT,
+									"Case worker already has an active assignment"));
+						}
+						return Mono.empty();
+					});
 	}
 
 	private boolean isSameDepartment(String requesterDepartmentId, String targetDepartmentId) {

@@ -1,8 +1,6 @@
 package com.grievance.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,9 +25,8 @@ class RequestEqualityTest {
         r2.setSubCategoryCode("SUB");
         r2.setDescription("description");
 
-        assertThat(r1).isEqualTo(r2);
-        assertThat(r1.hashCode()).isEqualTo(r2.hashCode());
-        assertThat(r1.toString()).contains("GrievanceCreateRequest").contains("description");
+        assertThat(r1).isEqualTo(r2).hasSameHashCodeAs(r2);
+        assertThat(r1.toString()).contains("GrievanceCreateRequest", "description");
 
         r2.setSubCategoryCode("DIFF");
         assertThat(r1).isNotEqualTo(r2);
@@ -40,8 +37,7 @@ class RequestEqualityTest {
 
         GrievanceCreateRequest empty1 = new GrievanceCreateRequest();
         GrievanceCreateRequest empty2 = new GrievanceCreateRequest();
-        assertThat(empty1).isEqualTo(empty2);
-        assertThat(empty1.hashCode()).isEqualTo(empty2.hashCode());
+        assertThat(empty1).isEqualTo(empty2).hasSameHashCodeAs(empty2);
 
         GrievanceCreateRequest missingDepartment = new GrievanceCreateRequest();
         missingDepartment.setCategoryCode("CAT");
@@ -116,8 +112,7 @@ class RequestEqualityTest {
         a2.setGrievanceId("g1");
         a2.setAssignedTo("worker");
 
-        assertThat(a1).isEqualTo(a2);
-        assertThat(a1.hashCode()).isEqualTo(a2.hashCode());
+        assertThat(a1).isEqualTo(a2).hasSameHashCodeAs(a2);
 
         a2.setAssignedTo("other");
         assertThat(a1).isNotEqualTo(a2);
@@ -141,8 +136,7 @@ class RequestEqualityTest {
         s2.setUpdatedBy("worker");
         s2.setRemarks("working");
 
-        assertThat(s1).isEqualTo(s2);
-        assertThat(s1.hashCode()).isEqualTo(s2.hashCode());
+        assertThat(s1).isEqualTo(s2).hasSameHashCodeAs(s2);
 
         s2.setRemarks("done");
         assertThat(s1).isNotEqualTo(s2);

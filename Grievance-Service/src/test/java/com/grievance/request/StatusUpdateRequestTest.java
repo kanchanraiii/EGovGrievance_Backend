@@ -16,12 +16,11 @@ class StatusUpdateRequestTest {
         request.setUpdatedBy("officer-1");
         request.setRemarks("in review");
 
-        assertThat(request.getGrievanceId()).isEqualTo("g1");
-        assertThat(request.getStatus()).isEqualTo(GrievanceStatus.ASSIGNED);
-        assertThat(request.getUpdatedBy()).isEqualTo("officer-1");
-        assertThat(request.getRemarks()).isEqualTo("in review");
-        assertThat(request).isEqualTo(request);
-        assertThat(request).isNotEqualTo("other");
+        assertThat(request)
+                .extracting(StatusUpdateRequest::getGrievanceId, StatusUpdateRequest::getStatus,
+                        StatusUpdateRequest::getUpdatedBy, StatusUpdateRequest::getRemarks)
+                .containsExactly("g1", GrievanceStatus.ASSIGNED, "officer-1", "in review");
+        assertThat(request).isEqualTo(request).isNotEqualTo("other");
 
         StatusUpdateRequest same = new StatusUpdateRequest();
         same.setGrievanceId("g1");
@@ -29,8 +28,7 @@ class StatusUpdateRequestTest {
         same.setUpdatedBy("officer-1");
         same.setRemarks("in review");
 
-        assertThat(request).isEqualTo(same);
-        assertThat(request.hashCode()).isEqualTo(same.hashCode());
+        assertThat(request).isEqualTo(same).hasSameHashCodeAs(same);
 
         StatusUpdateRequest differentStatus = new StatusUpdateRequest();
         differentStatus.setGrievanceId("g1");
@@ -51,7 +49,7 @@ class StatusUpdateRequestTest {
         missingStatus.setStatus(null);
         missingStatus.setUpdatedBy("officer-1");
         assertThat(request).isNotEqualTo(missingStatus);
-        assertThat(request.equals(null)).isFalse();
+        assertThat(request).isNotEqualTo(null);
 
         StatusUpdateRequest empty1 = new StatusUpdateRequest();
         StatusUpdateRequest empty2 = new StatusUpdateRequest();
