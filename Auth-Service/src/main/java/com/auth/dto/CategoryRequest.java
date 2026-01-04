@@ -17,4 +17,30 @@ public class CategoryRequest {
 
     @Valid
     private List<SubCategoryRequest> subCategories;
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public List<SubCategoryRequest> getSubCategories() {
+		return subCategories;
+	}
+
+	public void setSubCategories(List<SubCategoryRequest> subCategories) {
+		this.subCategories = subCategories;
+	}
+
+	
 }

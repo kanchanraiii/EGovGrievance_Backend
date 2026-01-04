@@ -1,12 +1,14 @@
 package com.auth.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -33,39 +35,45 @@ public class AuthController {
 
     // register
     @PostMapping("/register")
-    public Mono<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public Mono<Void> register(@Valid @RequestBody RegisterRequest request) {
         return authService.register(request);
     }
 
     // register as citizen
     @PostMapping("/citizen/register")
-    public Mono<AuthResponse> registerCitizen(@Valid @RequestBody RegisterRequest request) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public Mono<Void> registerCitizen(@Valid @RequestBody RegisterRequest request) {
         return authService.registerCitizen(request);
     }
 
     // register as case-worker
     @PostMapping("/case-worker/register")
-    public Mono<AuthResponse> registerCaseWorker(@Valid @RequestBody DepartmentRegisterRequest request) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public Mono<Void> registerCaseWorker(@Valid @RequestBody DepartmentRegisterRequest request) {
         return authService.registerCaseWorker(request);
     }
 
     // register as admin
     @PostMapping("/admin/register")
-    public Mono<AuthResponse> registerAdmin(@Valid @RequestBody RegisterRequest request) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public Mono<Void> registerAdmin(@Valid @RequestBody RegisterRequest request) {
         return authService.registerAdmin(request);
     }
 
     // register as supervisory-officer
     @PostMapping("/supervisory-officer/register")
     @PreAuthorize("hasRole('ADMIN')")
-    public Mono<AuthResponse> registerSupervisoryOfficer(@Valid @RequestBody RegisterRequest request) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public Mono<Void> registerSupervisoryOfficer(@Valid @RequestBody RegisterRequest request) {
         return authService.registerSupervisoryOfficer(request);
     }
 
     // register as department-officer
     @PostMapping("/department-officer/register")
     @PreAuthorize("hasRole('ADMIN')")
-    public Mono<AuthResponse> registerDepartmentOfficer(@Valid @RequestBody DepartmentRegisterRequest request) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public Mono<Void> registerDepartmentOfficer(@Valid @RequestBody DepartmentRegisterRequest request) {
         return authService.registerDepartmentOfficer(request);
     }
 

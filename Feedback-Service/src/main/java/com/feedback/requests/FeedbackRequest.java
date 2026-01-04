@@ -2,9 +2,11 @@ package com.feedback.requests;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class FeedbackRequest {
 
     @NotBlank(message = "Grievance ID is required")
@@ -16,5 +18,31 @@ public class FeedbackRequest {
     @NotBlank(message = "Comments cannot be empty")
     @Size(min = 10, max = 2000, message = "Comment must be between 10 and 2000 characters")
     private String comments;
+
+	public String getGrievanceId() {
+		return grievanceId;
+	}
+
+	public void setGrievanceId(String grievanceId) {
+		this.grievanceId = grievanceId;
+	}
+
+	public String getCitizenId() {
+		return citizenId;
+	}
+
+	public void setCitizenId(String citizenId) {
+		this.citizenId = citizenId;
+	}
+
+	public String getComments() {
+		return comments;
+	}
+
+	public void setComments(String comments) {
+		this.comments = comments;
+	}
+    
+    
 
 }

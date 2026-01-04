@@ -17,7 +17,6 @@ import com.auth.dto.UserProfileResponse;
 import com.auth.model.User;
 import com.auth.model.UserRole;
 import com.auth.repository.UserRepository;
-import com.auth.service.DepartmentCatalog;
 
 import reactor.core.publisher.Mono;
 
@@ -30,47 +29,54 @@ public class AuthService {
     private final DepartmentCatalog departmentCatalog;
 
     @Autowired
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService, DepartmentCatalog departmentCatalog) {
+    public AuthService(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            JwtService jwtService,
+            DepartmentCatalog departmentCatalog) {
+
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.departmentCatalog = departmentCatalog;
     }
 
-    public Mono<AuthResponse> register(RegisterRequest request) {
+   
+    // register
+    public Mono<Void> register(RegisterRequest request) {
         return registerCitizen(request);
     }
 
-    
-    // add methods for login/register as per roles
-    public Mono<AuthResponse> registerCitizen(RegisterRequest request) {
+    public Mono<Void> registerCitizen(RegisterRequest request) {
         return registerWithRole(request, UserRole.CITIZEN);
     }
 
-    public Mono<AuthResponse> registerCaseWorker(RegisterRequest request) {
+    public Mono<Void> registerCaseWorker(RegisterRequest request) {
         return registerWithRole(request, UserRole.CASE_WORKER);
     }
 
-    public Mono<AuthResponse> registerCaseWorker(DepartmentRegisterRequest request) {
+    public Mono<Void> registerCaseWorker(DepartmentRegisterRequest request) {
         return registerWithRole(request, UserRole.CASE_WORKER);
     }
 
-    public Mono<AuthResponse> registerAdmin(RegisterRequest request) {
+    public Mono<Void> registerAdmin(RegisterRequest request) {
         return registerWithRole(request, UserRole.ADMIN);
     }
 
-    public Mono<AuthResponse> registerSupervisoryOfficer(RegisterRequest request) {
+    public Mono<Void> registerSupervisoryOfficer(RegisterRequest request) {
         return registerWithRole(request, UserRole.SUPERVISORY_OFFICER);
     }
 
-    public Mono<AuthResponse> registerDepartmentOfficer(RegisterRequest request) {
+    public Mono<Void> registerDepartmentOfficer(RegisterRequest request) {
         return registerWithRole(request, UserRole.DEPARTMENT_OFFICER);
     }
 
-    public Mono<AuthResponse> registerDepartmentOfficer(DepartmentRegisterRequest request) {
+    public Mono<Void> registerDepartmentOfficer(DepartmentRegisterRequest request) {
         return registerWithRole(request, UserRole.DEPARTMENT_OFFICER);
     }
 
+   
+    // login with jwt
     public Mono<AuthResponse> login(AuthRequest request) {
         return authenticate(request).flatMap(this::toAuthResponse);
     }
@@ -96,8 +102,8 @@ public class AuthService {
     }
 
     
-    // registering users with roles
-    private Mono<AuthResponse> registerWithRole(RegisterRequest request, UserRole role) {
+    // registration logic
+    private Mono<Void> registerWithRole(RegisterRequest request, UserRole role) {
         return registerInternal(
                 request.getEmail(),
                 request.getFullName(),
@@ -107,7 +113,7 @@ public class AuthService {
                 role);
     }
 
-    private Mono<AuthResponse> registerWithRole(DepartmentRegisterRequest request, UserRole role) {
+    private Mono<Void> registerWithRole(DepartmentRegisterRequest request, UserRole role) {
         return registerInternal(
                 request.getEmail(),
                 request.getFullName(),
@@ -117,9 +123,20 @@ public class AuthService {
                 role);
     }
 
-    private Mono<AuthResponse> registerInternal(String emailRaw, String fullNameRaw, String phoneRaw, String passwordRaw, String departmentIdRaw, UserRole role) {
-        if (!StringUtils.hasText(emailRaw) || !StringUtils.hasText(fullNameRaw) || !StringUtils.hasText(phoneRaw) || !StringUtils.hasText(passwordRaw)) {
-            return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing required fields"));
+    private Mono<Void> registerInternal(
+            String emailRaw,
+            String fullNameRaw,
+            String phoneRaw,
+            String passwordRaw,
+            String departmentIdRaw,
+            UserRole role) {
+
+        if (!StringUtils.hasText(emailRaw)
+                || !StringUtils.hasText(fullNameRaw)
+                || !StringUtils.hasText(phoneRaw)
+                || !StringUtils.hasText(passwordRaw)) {
+            return Mono.error(new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Missing required fields"));
         }
 
         String email = emailRaw.trim().toLowerCase();
@@ -129,17 +146,21 @@ public class AuthService {
 
         if (requiresDepartment(role)) {
             if (!StringUtils.hasText(departmentId)) {
-                return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "departmentId is required"));
+                return Mono.error(new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "departmentId is required"));
             }
             if (!departmentCatalog.isValid(departmentId)) {
-                return Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Department id not found"));
+                return Mono.error(new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Department id not found"));
             }
         }
 
         return userRepository.findByEmail(email)
                 .flatMap(existing -> Mono.<User>error(
-                        new ResponseStatusException(HttpStatus.CONFLICT, "User already exists")))
-                .switchIfEmpty(Mono.defer(() -> ensureDepartmentOfficerUnique(role, departmentId)))
+                        new ResponseStatusException(
+                                HttpStatus.CONFLICT, "User already exists")))
+                .switchIfEmpty(Mono.defer(() ->
+                        ensureDepartmentOfficerUnique(role, departmentId)))
                 .switchIfEmpty(Mono.defer(() -> {
                     User user = User.builder()
                             .fullName(fullName)
@@ -152,31 +173,19 @@ public class AuthService {
                             .build();
                     return userRepository.save(user);
                 }))
-                .onErrorMap(IllegalArgumentException.class, ex ->
-                        new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage(), ex))
-                .flatMap(this::toAuthResponse);
+                .then(); 
     }
 
-    public Mono<UserProfileResponse> currentUser(String userId) {
-        return userRepository.findById(userId)
-                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")))
-                .map(user -> new UserProfileResponse(
-                        user.getId(),
-                        user.getEmail(),
-                        user.getFullName(),
-                        user.getPhone(),
-                        user.getRole(),
-                        user.getDepartmentId()));
-    }
-
-    // authenticate user
+    
+    // authenticating users here 
     private Mono<User> authenticate(AuthRequest request) {
         String email = request.getEmail().trim().toLowerCase();
         return userRepository.findByEmail(email)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(
                         HttpStatus.UNAUTHORIZED, "Invalid credentials")))
                 .flatMap(user -> {
-                    if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+                    if (!passwordEncoder.matches(
+                            request.getPassword(), user.getPassword())) {
                         return Mono.error(new ResponseStatusException(
                                 HttpStatus.UNAUTHORIZED, "Invalid credentials"));
                     }
@@ -184,12 +193,15 @@ public class AuthService {
                 });
     }
 
-    private Mono<AuthResponse> loginWithRole(AuthRequest request, UserRole expectedRole) {
+    private Mono<AuthResponse> loginWithRole(
+            AuthRequest request, UserRole expectedRole) {
+
         return authenticate(request)
                 .flatMap(user -> {
                     if (!expectedRole.matches(user.getRole())) {
                         return Mono.error(new ResponseStatusException(
-                                HttpStatus.FORBIDDEN, "User is not " + expectedRole.value()));
+                                HttpStatus.FORBIDDEN,
+                                "User is not " + expectedRole.value()));
                     }
                     return toAuthResponse(user);
                 });
@@ -198,11 +210,23 @@ public class AuthService {
     private Mono<AuthResponse> toAuthResponse(User user) {
         Instant expiresAt = jwtService.buildExpiry();
         return jwtService.generateToken(user, expiresAt)
-                .onErrorMap(IllegalArgumentException.class, ex ->
-                        new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage(), ex))
                 .map(token -> new AuthResponse(
                         token,
                         expiresAt,
+                        user.getId(),
+                        user.getEmail(),
+                        user.getFullName(),
+                        user.getPhone(),
+                        user.getRole(),
+                        user.getDepartmentId()));
+    }
+
+    
+    public Mono<UserProfileResponse> currentUser(String userId) {
+        return userRepository.findById(userId)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "User not found")))
+                .map(user -> new UserProfileResponse(
                         user.getId(),
                         user.getEmail(),
                         user.getFullName(),
@@ -218,17 +242,25 @@ public class AuthService {
         return departmentId.trim().toUpperCase();
     }
 
-    private Mono<User> ensureDepartmentOfficerUnique(UserRole role, String departmentId) {
+    private Mono<User> ensureDepartmentOfficerUnique(
+            UserRole role, String departmentId) {
+
         if (role != UserRole.DEPARTMENT_OFFICER || departmentId == null) {
             return Mono.empty();
         }
-        return userRepository.findByDepartmentIdAndRole(departmentId, role.value())
-                .flatMap(existing -> Mono.<User>error(new ResponseStatusException(
-                        HttpStatus.CONFLICT, "Department officer already exists for department " + departmentId)))
+
+        return userRepository
+                .findByDepartmentIdAndRole(departmentId, role.value())
+                .flatMap(existing -> Mono.<User>error(
+                        new ResponseStatusException(
+                                HttpStatus.CONFLICT,
+                                "Department officer already exists for department "
+                                        + departmentId)))
                 .then(Mono.empty());
     }
 
     private boolean requiresDepartment(UserRole role) {
-        return role == UserRole.CASE_WORKER || role == UserRole.DEPARTMENT_OFFICER;
+        return role == UserRole.CASE_WORKER
+                || role == UserRole.DEPARTMENT_OFFICER;
     }
 }

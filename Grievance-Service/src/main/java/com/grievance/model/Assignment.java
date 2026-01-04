@@ -1,5 +1,6 @@
 package com.grievance.model;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString
 @Document(collection = "assignments")
+@Builder
 public class Assignment {
 
     @Id
@@ -30,6 +32,10 @@ public class Assignment {
     private String assignedTo;  // Case Worker ID 
 
     private LocalDateTime assignedAt;
+
+	public Assignment() {
+		
+	}
 
 	public String getId() {
 		return id;
@@ -70,6 +76,6 @@ public class Assignment {
 	public void setAssignedAt(LocalDateTime assignedAt) {
 		this.assignedAt = assignedAt;
 	}
-    
+
     
 }
