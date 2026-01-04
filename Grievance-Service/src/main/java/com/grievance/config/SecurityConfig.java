@@ -59,7 +59,8 @@ public class SecurityConfig {
                 .build();
     }
 
-    private ReactiveJwtAuthenticationConverterAdapter jwtAuthenticationConverter() {
+    @Bean
+    public ReactiveJwtAuthenticationConverterAdapter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter delegate = new JwtGrantedAuthoritiesConverter();
         delegate.setAuthoritiesClaimName("role");
         delegate.setAuthorityPrefix("ROLE_");
