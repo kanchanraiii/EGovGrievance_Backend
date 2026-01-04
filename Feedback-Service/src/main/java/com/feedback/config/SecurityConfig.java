@@ -7,20 +7,15 @@ import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.convert.converter.Converter;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter;
 import org.springframework.security.web.server.SecurityWebFilterChain;
-
-import reactor.core.publisher.Mono;
 
 @Configuration
 @EnableWebFluxSecurity
@@ -44,7 +39,7 @@ public class SecurityConfig {
                         .hasAnyRole("DEPARTMENT_OFFICER", "SUPERVISORY_OFFICER", "ADMIN")
                         .pathMatchers("/api/departments/**").permitAll()
                         .anyExchange().authenticated())
-                .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
+                .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(roleBasedConverter())))
                 .build();
     }
 
@@ -56,15 +51,12 @@ public class SecurityConfig {
                 .build();
     }
 
-    @Bean
-    public Converter<Jwt, Mono<AbstractAuthenticationToken>> jwtAuthenticationConverter() {
+    private ReactiveJwtAuthenticationConverterAdapter roleBasedConverter() {
         JwtGrantedAuthoritiesConverter delegate = new JwtGrantedAuthoritiesConverter();
         delegate.setAuthoritiesClaimName("role");
         delegate.setAuthorityPrefix("ROLE_");
-
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(delegate);
-
         return new ReactiveJwtAuthenticationConverterAdapter(converter);
     }
 }
