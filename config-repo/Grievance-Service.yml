@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: Grievance-Service
+  data:
+    mongodb:
+      database: grievanceDb
+
+server:
+  port: 9001
+
+eureka:
+  instance:
+    prefer-ip-address: true

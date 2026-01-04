@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: Auth-Service
+  data:
+    mongodb:
+      database: authDb
+
+server:
+  port: 9007
+
+eureka:
+  instance:
+    prefer-ip-address: true
+
+jwt:
+  secret: ${JWT_SECRET:change-this-auth-secret-key-please-32-chars}
+  expiration-minutes: ${JWT_EXPIRATION_MINUTES:120}
+
+departments:
+  file: classpath:departments-config/departments-db.json

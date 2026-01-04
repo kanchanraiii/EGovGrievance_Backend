@@ -16,6 +16,7 @@
         <module>Grievance-Service</module>
         <module>Notification-Service</module>
         <module>Storage-Service</module>
+        <module>Config-Server</module>
     </modules>
 
     <properties>

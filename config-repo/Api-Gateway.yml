@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: Api-Gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: GRIEVANCE-SERVICE
+          uri: lb://GRIEVANCE-SERVICE
+          predicates:
+            - Path=/grievances/**
+          filters:
+            - RewritePath=/grievances/(?<segment>.*),/api/grievances/${segment}
+        - id: FEEDBACK-SERVICE
+          uri: lb://FEEDBACK-SERVICE
+          predicates:
+            - Path=/feedback/**
+        - id: NOTIFICATION-SERVICE
+          uri: lb://NOTIFICATION-SERVICE
+          predicates:
+            - Path=/notifications/**
+        - id: STORAGE-SERVICE
+          uri: lb://STORAGE-SERVICE
+          predicates:
+            - Path=/storage/**
+        - id: AUTH-SERVICE
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/auth/**
+          filters:
+            - RewritePath=/auth/(?<segment>.*),/api/auth/${segment}
+
+server:
+  port: 9005

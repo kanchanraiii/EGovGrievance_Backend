@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: Feedback-Service
+  data:
+    mongodb:
+      database: feedbackDb
+
+server:
+  port: 9002
+
+grievance:
+  service:
+    url: ${GRIEVANCE_URL:http://localhost:9001}
