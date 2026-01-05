@@ -9,6 +9,7 @@ services:
       - "2181:2181"
     networks:
       - backend
+    restart: unless stopped
 
   kafka:
     image: public.ecr.aws/bitnami/kafka:3
@@ -29,6 +30,7 @@ services:
       - backend
     depends_on:
       - zookeeper
+    restart: unless stopped
 
   mongo:
     image: mongo:6
@@ -40,6 +42,7 @@ services:
       - mongo-data:/data/db
     networks:
       - backend
+    restart: unless stopped
 
   departments-json:
     build:
@@ -55,6 +58,7 @@ services:
       - "3006:3001"
     networks:
       - backend
+    restart: unless stopped
 
   config-server:
     build: ./Config-Server
@@ -71,6 +75,7 @@ services:
     depends_on:
       - kafka
       - mongo
+    restart: unless stopped
 
   eureka-server:
     build: ./Eureka-Server
@@ -84,6 +89,7 @@ services:
       - backend
     depends_on:
       - config-server
+    restart: unless stopped
 
   auth-service:
     build: ./Auth-Service
@@ -106,6 +112,7 @@ services:
       - eureka-server
       - kafka
       - mongo
+     restart: unless stopped
 
   grievance-service:
     build: ./Grievance-Service
@@ -126,6 +133,7 @@ services:
       - eureka-server
       - kafka
       - mongo
+     restart: unless stopped
 
   feedback-service:
     build: ./Feedback-Service
@@ -145,6 +153,7 @@ services:
     depends_on:
       - eureka-server
       - mongo
+     restart: unless stopped
 
   notification-service:
     build: ./Notification-Service
@@ -164,6 +173,7 @@ services:
       - eureka-server
       - kafka
       - mongo
+     restart: unless stopped
 
   storage-service:
     build: ./Storage-Service
@@ -183,6 +193,7 @@ services:
     depends_on:
       - eureka-server
       - mongo
+     restart: unless stopped
 
   api-gateway:
     build: ./Api-Gateway
@@ -203,6 +214,7 @@ services:
       - notification-service
       - storage-service
       - auth-service
+     restart: unless stopped
 
 networks:
   backend:
