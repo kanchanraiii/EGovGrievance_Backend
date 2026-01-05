@@ -111,7 +111,7 @@ services:
       - eureka-server
       - kafka
       - mongo
-     restart: unless-stopped
+    restart: unless-stopped
 
   grievance-service:
     build: ./Grievance-Service
@@ -132,7 +132,7 @@ services:
       - eureka-server
       - kafka
       - mongo
-     restart: unless-stopped
+    restart: unless-stopped
 
   feedback-service:
     build: ./Feedback-Service
@@ -152,7 +152,7 @@ services:
     depends_on:
       - eureka-server
       - mongo
-     restart: unless-stopped
+    restart: unless-stopped
 
   notification-service:
     build: ./Notification-Service
@@ -172,7 +172,7 @@ services:
       - eureka-server
       - kafka
       - mongo
-     restart: unless-stopped
+    restart: unless-stopped
 
   storage-service:
     build: ./Storage-Service
@@ -192,7 +192,7 @@ services:
     depends_on:
       - eureka-server
       - mongo
-     restart: unless-stopped
+    restart: unless-stopped
 
   api-gateway:
     build: ./Api-Gateway
@@ -213,7 +213,7 @@ services:
       - notification-service
       - storage-service
       - auth-service
-     restart: unless-stopped
+    restart: unless-stopped
 
 networks:
   backend:
