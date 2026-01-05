@@ -1,6 +1,9 @@
 // Configured according to Linux VM on Azure
 pipeline {
     agent any
+    triggers {
+        githubPush()
+    }
 
     tools {
         maven 'maven-3.9.0'
