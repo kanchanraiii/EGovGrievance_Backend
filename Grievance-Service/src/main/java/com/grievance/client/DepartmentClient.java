@@ -1,6 +1,7 @@
 package com.grievance.client;
 
 import com.grievance.exception.ServiceException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -12,8 +13,10 @@ public class DepartmentClient {
     private final WebClient webClient;
 
     // connecting to json server
-    public DepartmentClient(WebClient.Builder builder) {
-        this.webClient = builder.baseUrl("http://localhost:3000").build();
+    public DepartmentClient(
+            WebClient.Builder builder,
+            @Value("${departments.service.base-url:http://localhost:3001/}") String baseUrl) {
+        this.webClient = builder.baseUrl(baseUrl).build();
     }
 
     // to check if a dept is valid or exists

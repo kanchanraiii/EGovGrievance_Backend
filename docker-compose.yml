@@ -42,15 +42,17 @@ services:
       - backend
 
   departments-json:
-    image: node:20-alpine
+    build:
+      context: .
+      dockerfile: departments-config/Dockerfile.json-server
     container_name: departments-json
-    working_dir: /data
     command: >-
-      sh -c "npx -y json-server@0.17.4 --watch /data/departments-db.json --host 0.0.0.0 --port 3001"
+      json-server --watch /data/departments-db.json --host 0.0.0.0 --port 3001
     volumes:
       - ./departments-config/departments-db.json:/data/departments-db.json
     ports:
-      - "3001:3001"
+      # Expose on host 3006 to avoid conflicts with any local json-server already on 3001
+      - "3006:3001"
     networks:
       - backend
 
@@ -115,6 +117,7 @@ services:
       - MONGO_PORT=27017
       - MONGO_DB=grievanceDb
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - DEPARTMENTS_SERVICE_BASE_URL=http://departments-json:3001/
     ports:
       - "9001:9001"
     networks:

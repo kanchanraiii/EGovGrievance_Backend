@@ -139,12 +139,12 @@ class DepartmentClientTest {
                 .exchangeStrategies(ExchangeStrategies.builder()
                         .codecs(configurer -> configurer.defaultCodecs().jackson2JsonDecoder(new Jackson2JsonDecoder()))
                         .build());
-        return new DepartmentClient(builder);
+        return new DepartmentClient(builder, "http://localhost:3001/");
     }
 
     private DepartmentClient clientWithError() {
         ExchangeFunction exchange = request -> Mono.error(new RuntimeException("boom"));
         WebClient.Builder builder = WebClient.builder().exchangeFunction(exchange);
-        return new DepartmentClient(builder);
+        return new DepartmentClient(builder, "http://localhost:3001/");
     }
 }

@@ -11,3 +11,7 @@ server:
 eureka:
   instance:
     prefer-ip-address: true
+
+departments:
+  service:
+    base-url: http://departments-json:3001/
