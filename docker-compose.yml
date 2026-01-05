@@ -41,7 +41,7 @@ services:
       - mongo-data:/data/db
     networks:
       - backend
-    restart: unless stopped
+    restart: unless-stopped
 
   departments-json:
     build:
