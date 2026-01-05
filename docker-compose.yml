@@ -97,7 +97,7 @@ services:
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - DEPARTMENTS_FILE=file:/data/departments-db.json
     volumes:
-      - ./departments-config/departments-db.json:/data/departments-db.json:ro
+      - ./departments-config/departments-db.json:/data/departments-db.json
     ports:
       - "9007:9007"
     networks:
