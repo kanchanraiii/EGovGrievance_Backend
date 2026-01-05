@@ -32,6 +32,52 @@ spring:
             - Path=/auth/**
           filters:
             - RewritePath=/auth/(?<segment>.*),/api/auth/${segment}
+        - id: AUTH-SERVICE-DOCS
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/auth-docs/**
+          filters:
+            - StripPrefix=1
+        - id: GRIEVANCE-SERVICE-DOCS
+          uri: lb://GRIEVANCE-SERVICE
+          predicates:
+            - Path=/grievance-docs/**
+          filters:
+            - StripPrefix=1
+        - id: FEEDBACK-SERVICE-DOCS
+          uri: lb://FEEDBACK-SERVICE
+          predicates:
+            - Path=/feedback-docs/**
+          filters:
+            - StripPrefix=1
+        - id: NOTIFICATION-SERVICE-DOCS
+          uri: lb://NOTIFICATION-SERVICE
+          predicates:
+            - Path=/notification-docs/**
+          filters:
+            - StripPrefix=1
+        - id: STORAGE-SERVICE-DOCS
+          uri: lb://STORAGE-SERVICE
+          predicates:
+            - Path=/storage-docs/**
+          filters:
+            - StripPrefix=1
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    urls:
+      - name: auth-service
+        url: /auth-docs/v3/api-docs
+      - name: grievance-service
+        url: /grievance-docs/v3/api-docs
+      - name: feedback-service
+        url: /feedback-docs/v3/api-docs
+      - name: notification-service
+        url: /notification-docs/v3/api-docs
+      - name: storage-service
+        url: /storage-docs/v3/api-docs
 
 server:
   port: 9005

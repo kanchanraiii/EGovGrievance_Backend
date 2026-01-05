@@ -32,6 +32,8 @@ public class SecurityConfig {
                                 "/api/files/grievance/**")
                         .hasRole("DEPARTMENT_OFFICER")
                         .pathMatchers("/api/departments/**").permitAll()
+                        .pathMatchers("/v3/api-docs/**", "/v3/api-docs/swagger-config", "/webjars/**", "/swagger-resources/**",
+                                "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .anyExchange().authenticated())
                 .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
                 .build();

@@ -28,6 +28,8 @@ public class SecurityConfig {
                 .authorizeExchange(exchange -> exchange
                         .pathMatchers("/actuator/**").permitAll()
                         .pathMatchers("/api/departments/**").permitAll()
+                        .pathMatchers("/v3/api-docs/**", "/v3/api-docs/swagger-config", "/webjars/**", "/swagger-resources/**",
+                                "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .pathMatchers(
                                 "/api/feedback/add-feedback",
                                 "/api/feedback/ratings",

@@ -51,7 +51,13 @@ public class SecurityConfig {
                                 "/api/auth/supervisory-officer/login",
                                 "/api/auth/department-officer/login",
                                 "/api/auth/departments/**",
-                                "/actuator/**")
+                                "/actuator/**",
+                                "/v3/api-docs/**",
+                                "/v3/api-docs/swagger-config",
+                                "/webjars/**",
+                                "/swagger-resources/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html")
                         .permitAll()
                         .pathMatchers(
                                 "/api/auth/supervisory-officer/register",
