@@ -1,5 +1,11 @@
+// Configured according to Linux VM on Azure
 pipeline {
     agent any
+
+    tools {
+        maven 'maven-3.9'
+        jdk 'jdk-17'
+    }
 
     stages {
 
@@ -10,100 +16,43 @@ pipeline {
             }
         }
 
-        stage('Build Eureka Server') {
+        stage('Build All Services (Maven)') {
             steps {
-                dir('Eureka-Server') {
-                    bat 'mvn package'
-                }
+                sh '''
+                  mvn -f Eureka-Server/pom.xml package -DskipTests
+                  mvn -f Config-Server/pom.xml package -DskipTests
+                  mvn -f Api-Gateway/pom.xml package -DskipTests
+                  mvn -f Auth-Service/pom.xml package -DskipTests
+                  mvn -f Grievance-Service/pom.xml package -DskipTests
+                  mvn -f Feedback-Service/pom.xml package -DskipTests
+                  mvn -f Notification-Service/pom.xml package -DskipTests
+                  mvn -f Storage-Service/pom.xml package -DskipTests
+                '''
             }
         }
 
-        stage('Build Config Server') {
+        stage('Build Docker Images') {
             steps {
-                dir('Config-Server') {
-                    bat 'mvn package'
-                }
+                sh 'docker compose build'
             }
         }
 
-        stage('Build API Gateway') {
+        stage('Restart Containers') {
             steps {
-                dir('Api-Gateway') {
-                    bat 'mvn package'
-                }
-            }
-        }
-
-        stage('Build Auth Service') {
-            steps {
-                dir('Auth-Service') {
-                    bat 'mvn package'
-                }
-            }
-        }
-
-        stage('Build Grievance Service') {
-            steps {
-                dir('Grievance-Service') {
-                    bat 'mvn package'
-                }
-            }
-        }
-
-        stage('Build Feedback Service') {
-            steps {
-                dir('Feedback-Service') {
-                    bat 'mvn package'
-                }
-            }
-        }
-
-        stage('Build Notification Service') {
-            steps {
-                dir('Notification-Service') {
-                    bat 'mvn package'
-                }
-            }
-        }
-
-        stage('Build Storage Service') {
-            steps {
-                dir('Storage-Service') {
-                    bat 'mvn package -DskipTests'
-                }
-            }
-        }
-
-        stage('Docker Compose Build') {
-            steps {
-                echo 'Building Docker images using docker-compose'
-                bat 'docker compose build'
-            }
-        }
-
-        stage('Cleanup Existing Containers') {
-            steps {
-                echo 'Stopping any running containers'
-                bat 'docker compose down || exit 0'
-            }
-        }
-
-        stage('Docker Compose Up') {
-            steps {
-                echo 'Starting EGOV containers'
-                bat 'docker compose up -d'
+                sh '''
+                  docker compose down || true
+                  docker compose up -d
+                '''
             }
         }
     }
 
     post {
         always {
-            echo 'Archiving all built JARs'
             archiveArtifacts artifacts: '**/target/*.jar', allowEmptyArchive: true
         }
         failure {
-            echo 'Pipeline failed – stopping containers'
-            bat 'docker compose down || exit 0'
+            sh 'docker compose down || true'
         }
         success {
             echo 'EGOV Grievance Backend is UP and running'
