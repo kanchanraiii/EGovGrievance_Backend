@@ -14,6 +14,8 @@ import com.grievance.service.GrievanceService;
 
 @Component
 public class GrievanceScheduler {
+
+    private static final long CHECK_DELAY_MS = 10_000L; // run every 10 seconds
 	
 	private static final Logger log = LoggerFactory.getLogger(GrievanceScheduler.class);
 	private final GrievanceRepository grievanceRepository;
@@ -24,11 +26,10 @@ public class GrievanceScheduler {
 		this.grievanceService = grievanceService;
 	}
 	
-	// runs every 10 seconds (local test)
-	 @Scheduled(fixedDelay = 7L * 24 * 60 * 60 * 1000)
+	 @Scheduled(fixedDelay = CHECK_DELAY_MS)
 	    public void checkSlaBreaches() {
 
-	        LocalDateTime threshold = LocalDateTime.now().minusMinutes(1);
+	        LocalDateTime threshold = LocalDateTime.now().minusDays(7);
 	        log.info("SLA check started. threshold={}", threshold);
 
 	        grievanceRepository
