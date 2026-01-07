@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("java:S5838")
 class GrievanceHistoryEqualityTest {
 
     @Test
@@ -44,8 +45,8 @@ class GrievanceHistoryEqualityTest {
         h1.setId("h1");
         h1.setGrievanceId("g1");
 
-        assertThat(h1).isEqualTo(h1);
-        assertThat(h1).isNotEqualTo(null);
+        assertThat(h1).isEqualTo(h1)
+                .isNotEqualTo(null);
         assertThat(h1.canEqual(new Object())).isFalse();
 
         GrievanceHistory different = new GrievanceHistory();
@@ -65,10 +66,9 @@ class GrievanceHistoryEqualityTest {
 
         GrievanceHistory differentId = new GrievanceHistory();
         differentId.setId("h2");
-        assertThat(base).isNotEqualTo(differentId);
-
         GrievanceHistory nullId = new GrievanceHistory();
-        assertThat(base).isNotEqualTo(nullId);
+        assertThat(base).isNotEqualTo(differentId)
+                .isNotEqualTo(nullId);
 
         GrievanceHistory nullBase = new GrievanceHistory();
         GrievanceHistory withId = new GrievanceHistory();

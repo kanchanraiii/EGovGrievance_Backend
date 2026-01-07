@@ -36,6 +36,7 @@ public class GrievanceEventPublisher {
         GrievanceEvent event = new GrievanceEvent();
         event.setGrievanceId(grievance.getId());
         event.setUserId(grievance.getCitizenId());
+        event.setEmail(grievance.getCitizenEmail());
         event.setEventType(newStatus.name());
         event.setMessage(buildMessage(grievance.getId(), newStatus, remarks));
         return event;

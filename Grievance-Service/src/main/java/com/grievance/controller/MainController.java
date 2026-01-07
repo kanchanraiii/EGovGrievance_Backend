@@ -13,6 +13,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.util.List;
 import java.util.Map;
+import com.grievance.client.AuthClient;
 import com.grievance.model.Grievance;
 import com.grievance.model.GrievanceHistory;
 import com.grievance.model.EscalatedGrievanceView;
@@ -24,6 +25,7 @@ import jakarta.validation.Valid;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.StringUtils;
 
 @RestController
 @RequestMapping("api/grievances")
@@ -32,9 +34,11 @@ public class MainController {
 	private static final String CLAIM_DEPARTMENT_ID = "departmentId";
 
 	private final GrievanceService grievanceService;
+	private final AuthClient authClient;
 
-	public MainController(GrievanceService grievanceService) {
+	public MainController(GrievanceService grievanceService, AuthClient authClient) {
 		this.grievanceService = grievanceService;
+		this.authClient = authClient;
 	}
 
 	// create a grievance
@@ -42,8 +46,15 @@ public class MainController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public Mono<Map<String, String>> createGrievance(@Valid @RequestBody GrievanceCreateRequest request,
 			@AuthenticationPrincipal Jwt jwt) {
-		return grievanceService.createGrievance(request, jwt.getSubject())
-				.map(saved -> Map.of("grievanceId", saved.getId()));
+		String emailClaim = jwt.getClaim("email");
+		Mono<String> emailMono = StringUtils.hasText(emailClaim)
+				? Mono.just(emailClaim)
+				: authClient.fetchEmail(jwt.getTokenValue()).defaultIfEmpty(null);
+
+		return emailMono.flatMap(email ->
+				grievanceService.createGrievance(request, jwt.getSubject(), email)
+						.map(saved -> Map.of("grievanceId", saved.getId()))
+		);
 	}
 
 	// get grievance by id

@@ -117,12 +117,14 @@ class DepartmentClientTest {
     }
 
     private DepartmentClient clientWithResponses(List<DepartmentResponse> central, List<DepartmentResponse> state) {
-        AtomicInteger callIndex = new AtomicInteger();
         ObjectMapper mapper = new ObjectMapper();
         ExchangeFunction exchange = request -> {
-            List<DepartmentResponse> body = callIndex.getAndIncrement() == 0 ? central : state;
             try {
-                byte[] bytes = mapper.writeValueAsBytes(body);
+                DepartmentsResponse responseBody = new DepartmentsResponse();
+                responseBody.setCentralGovernmentDepartments(central);
+                responseBody.setStateGovernmentDepartments(state);
+
+                byte[] bytes = mapper.writeValueAsBytes(responseBody);
                 DataBuffer buffer = new DefaultDataBufferFactory().wrap(bytes);
                 ClientResponse response = ClientResponse.create(HttpStatus.OK)
                         .header("Content-Type", "application/json")
@@ -139,12 +141,12 @@ class DepartmentClientTest {
                 .exchangeStrategies(ExchangeStrategies.builder()
                         .codecs(configurer -> configurer.defaultCodecs().jackson2JsonDecoder(new Jackson2JsonDecoder()))
                         .build());
-        return new DepartmentClient(builder, "http://localhost:3001/");
+        return new DepartmentClient(builder, "http://localhost:3001", "/api/auth/departments");
     }
 
     private DepartmentClient clientWithError() {
         ExchangeFunction exchange = request -> Mono.error(new RuntimeException("boom"));
         WebClient.Builder builder = WebClient.builder().exchangeFunction(exchange);
-        return new DepartmentClient(builder, "http://localhost:3001/");
+        return new DepartmentClient(builder, "http://localhost:3001", "/api/auth/departments");
     }
 }

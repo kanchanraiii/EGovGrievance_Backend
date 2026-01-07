@@ -1,0 +1,161 @@
+{
+  "info": {
+    "_postman_id": "3ed44ec2-75bd-4c1a-93d7-c78087ff70a6",
+    "name": "Supervisory Officer Endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "SignUp and Login",
+      "item": [
+        {
+          "name": "SO Login",
+          "id": "498ad36d-7b81-4920-a94b-0752343b9eb6",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{supervisoryofficerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\":\"so1@example.com\",\r\n    \"password\":\"strongPass123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:9005/auth/supervisory-officer/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "auth",
+                "supervisory-officer",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "bbb97dcd-f92d-4479-a41b-d329dcc83928"
+    },
+    {
+      "name": "View Grievances",
+      "item": [
+        {
+          "name": "View All Grievances",
+          "id": "723d1671-2c5f-4b73-9535-a94d22105087",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2OTU4ZjBjZjkwOWFhYjExYjg4NjFlMjQiLCJyb2xlIjoiU1VQRVJWSVNPUllfT0ZGSUNFUiIsInBob25lIjoiKzkxLTc2NTE4ODEzODIiLCJpc3MiOiJBdXRoLVNlcnZpY2UiLCJuYW1lIjoiU08zIiwiZXhwIjoxNzY3NTQ0ODk4LCJpYXQiOjE3Njc1Mzc2OTgsImVtYWlsIjoic28zQGV4YW1wbGUuY29tIn0.H_HIbKe0UXXsrbShAkATs7kGPcNWEXju8NtZ4yQDqAk",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:9005/grievance-service//api/grievances/getAll",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "grievance-service",
+                "",
+                "api",
+                "grievances",
+                "getAll"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "View Grievances in Dept",
+          "id": "cb4dc563-e413-446a-bf7b-a180f4eee39a",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2OTU4ZjBjZjkwOWFhYjExYjg4NjFlMjQiLCJyb2xlIjoiU1VQRVJWSVNPUllfT0ZGSUNFUiIsInBob25lIjoiKzkxLTc2NTE4ODEzODIiLCJpc3MiOiJBdXRoLVNlcnZpY2UiLCJuYW1lIjoiU08zIiwiZXhwIjoxNzY3NTQ0ODk4LCJpYXQiOjE3Njc1Mzc2OTgsImVtYWlsIjoic28zQGV4YW1wbGUuY29tIn0.H_HIbKe0UXXsrbShAkATs7kGPcNWEXju8NtZ4yQDqAk",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:9005/grievance-service/api/grievances/department/FINANCE",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "grievance-service",
+                "api",
+                "grievances",
+                "department",
+                "FINANCE"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "View escalated grievance",
+          "id": "f2bff90a-571b-4821-a930-4361b98e9c14",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2OTVhOTZmYWQ2Y2NhYzM2N2M4MWRiMTEiLCJyb2xlIjoiU1VQRVJWSVNPUllfT0ZGSUNFUiIsInBob25lIjoiKzkxLTc2NTE4ODEzODIiLCJpc3MiOiJBdXRoLVNlcnZpY2UiLCJuYW1lIjoiU08xIiwiZXhwIjoxNzY3NTUyMDg2LCJpYXQiOjE3Njc1NDQ4ODYsImVtYWlsIjoic28xQGV4YW1wbGUuY29tIn0.7glP_ibsN8k4LGPoSnWrApRhegJakN0HODqLBIGU37E",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:9005/grievance/escalated",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "grievance",
+                "escalated"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "4dad4943-fc7a-49f6-bdfd-7b9ebfc9d5ba"
+    }
+  ]
+}

@@ -30,6 +30,7 @@ class NotificationSenderTest {
     private GrievanceEvent sampleEvent() {
         GrievanceEvent event = new GrievanceEvent();
         event.setUserId("user@example.com");
+        event.setEmail("user@example.com");
         event.setEventType("SUBMITTED");
         event.setMessage("test message");
         return event;
@@ -44,8 +45,7 @@ class NotificationSenderTest {
                 "",
                 "",
                 "",
-                "",
-                "default@example.com"
+                ""
         );
 
         StepVerifier.create(sender.sendSms(sampleEvent()))
@@ -61,8 +61,7 @@ class NotificationSenderTest {
                 "auth",
                 "+100000",
                 "+200000",
-                "no-reply@example.com",
-                "default@example.com"
+                "no-reply@example.com"
         );
 
         AtomicReference<ClientRequest> capturedRequest = new AtomicReference<>();
@@ -89,8 +88,7 @@ class NotificationSenderTest {
                 "",
                 "",
                 "",
-                "",
-                "default@example.com"
+                ""
         );
 
         StepVerifier.create(sender.sendEmail(sampleEvent()))
@@ -112,8 +110,7 @@ class NotificationSenderTest {
                 "",
                 "",
                 "",
-                "no-reply@example.com",
-                "default@example.com"
+                "no-reply@example.com"
         );
 
         GrievanceEvent event = sampleEvent();
@@ -136,8 +133,7 @@ class NotificationSenderTest {
                 "auth",
                 "+100000",
                 "+200000",
-                "no-reply@example.com",
-                "default@example.com"
+                "no-reply@example.com"
         );
 
         ExchangeFunction exchangeFunction = request -> Mono.error(new RuntimeException("gateway down"));
@@ -157,8 +153,7 @@ class NotificationSenderTest {
                 "",              // missing auth token
                 "+100000",
                 "",
-                "",
-                "default@example.com"
+                ""
         );
 
         Object smsEnabled = ReflectionTestUtils.getField(sender, "smsEnabled");
@@ -168,16 +163,10 @@ class NotificationSenderTest {
     }
 
     @Test
-    void sendEmailUsesDefaultRecipientWhenUserEmailMissingAndHandlesException() throws Exception {
+    void sendEmailSkipsWhenRecipientInvalid() throws Exception {
         JavaMailSender mailSender = mock(JavaMailSender.class);
         MimeMessage mimeMessage = new MimeMessage((Session) null);
         when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
-        // assert recipient and throw to hit catch block
-        org.mockito.Mockito.doAnswer(invocation -> {
-            MimeMessage msg = invocation.getArgument(0);
-            assertThat(msg.getAllRecipients()[0]).hasToString("default@example.com");
-            throw new RuntimeException("fail");
-        }).when(mailSender).send(any(MimeMessage.class));
 
         NotificationSender sender = new NotificationSender(
                 mailSender,
@@ -185,41 +174,17 @@ class NotificationSenderTest {
                 "",
                 "",
                 "",
-                "no-reply@example.com",
-                "default@example.com"
+                "no-reply@example.com"
         );
 
         GrievanceEvent event = sampleEvent();
         event.setUserId("not-an-email");
-
-        StepVerifier.create(sender.sendEmail(event))
-                .verifyComplete();
-    }
-
-    @Test
-    void sendEmailDefaultsToConfiguredAddressWhenUserIdNull() throws Exception {
-        JavaMailSender mailSender = mock(JavaMailSender.class);
-        MimeMessage mimeMessage = new MimeMessage((Session) null);
-        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
-        org.mockito.Mockito.doNothing().when(mailSender).send(any(MimeMessage.class));
-
-        NotificationSender sender = new NotificationSender(
-                mailSender,
-                "disabled",
-                "",
-                "",
-                "",
-                "no-reply@example.com",
-                "fallback@example.com"
-        );
-
-        GrievanceEvent event = sampleEvent();
-        event.setUserId(null);
+        event.setEmail(""); // force no valid recipient
 
         StepVerifier.create(sender.sendEmail(event))
                 .verifyComplete();
 
-        assertThat(mimeMessage.getAllRecipients()[0]).hasToString("fallback@example.com");
+        verify(mailSender, times(0)).send(any(MimeMessage.class));
     }
 
     @Test
@@ -232,8 +197,7 @@ class NotificationSenderTest {
                 "auth-token",
                 "+111",
                 "+222",
-                "no-reply@example.com",
-                "default@example.com"
+                "no-reply@example.com"
         );
 
         assertThat(ReflectionTestUtils.getField(sender, "smsEnabled")).isEqualTo(false);
@@ -250,8 +214,7 @@ class NotificationSenderTest {
                 "auth-token",
                 "",
                 "+222",
-                "no-reply@example.com",
-                "default@example.com"
+                "no-reply@example.com"
         );
 
         assertThat(ReflectionTestUtils.getField(sender, "smsEnabled")).isEqualTo(false);
@@ -267,8 +230,7 @@ class NotificationSenderTest {
                 "auth-token",
                 "+111",
                 "",
-                "no-reply@example.com",
-                "default@example.com"
+                "no-reply@example.com"
         );
 
         assertThat(ReflectionTestUtils.getField(sender, "smsEnabled")).isEqualTo(false);
@@ -284,8 +246,7 @@ class NotificationSenderTest {
                 "auth-token",
                 "+111",
                 "+222",
-                "no-reply@example.com",
-                "default@example.com"
+                "no-reply@example.com"
         );
 
         assertThat(ReflectionTestUtils.getField(sender, "smsEnabled")).isEqualTo(false);

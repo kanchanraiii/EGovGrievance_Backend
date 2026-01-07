@@ -14,7 +14,7 @@ import java.util.Map;
 @Configuration
 public class KafkaProducerConfig {
     
-    @Value("${spring.kafka.bootstrap-servers:localhost:19092}")
+    @Value("${spring.kafka.bootstrap-servers:kafka:19092}")
     private String bootstrapServers;
 	
 	// kafka events are produced

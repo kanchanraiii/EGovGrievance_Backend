@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import com.grievance.model.GrievanceStatus;
 
+@SuppressWarnings("java:S5838")
 class StatusUpdateRequestTest {
 
     @Test
@@ -36,20 +37,20 @@ class StatusUpdateRequestTest {
         differentStatus.setUpdatedBy("officer-1");
         differentStatus.setRemarks("resolved");
 
-        assertThat(request).isNotEqualTo(differentStatus);
         StatusUpdateRequest differentUpdater = new StatusUpdateRequest();
         differentUpdater.setGrievanceId("g1");
         differentUpdater.setStatus(GrievanceStatus.ASSIGNED);
         differentUpdater.setUpdatedBy("officer-2");
         differentUpdater.setRemarks("in review");
-        assertThat(request).isNotEqualTo(differentUpdater);
 
         StatusUpdateRequest missingStatus = new StatusUpdateRequest();
         missingStatus.setGrievanceId("g1");
         missingStatus.setStatus(null);
         missingStatus.setUpdatedBy("officer-1");
-        assertThat(request).isNotEqualTo(missingStatus);
-        assertThat(request).isNotEqualTo(null);
+        assertThat(request).isNotEqualTo(differentStatus)
+                .isNotEqualTo(differentUpdater)
+                .isNotEqualTo(missingStatus)
+                .isNotEqualTo(null);
 
         StatusUpdateRequest empty1 = new StatusUpdateRequest();
         StatusUpdateRequest empty2 = new StatusUpdateRequest();

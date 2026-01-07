@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("java:S5838")
 class GrievanceEventTest {
 
     @Test
@@ -38,14 +39,15 @@ class GrievanceEventTest {
         e2.setEventType("SUBMITTED");
         e2.setMessage("message");
 
-        assertThat(e1).isEqualTo(e2).hasSameHashCodeAs(e2);
+        assertThat(e1)
+                .isEqualTo(e2)
+                .hasSameHashCodeAs(e2)
+                .isEqualTo(e1)
+                .isNotEqualTo(null);
         assertThat(e1.toString()).contains("g1", "SUBMITTED");
 
         e2.setGrievanceId("other-id");
         assertThat(e1).isNotEqualTo(e2);
-
-        assertThat(e1).isEqualTo(e1);
-        assertThat(e1).isNotEqualTo(null);
         assertThat(e1.canEqual(new Object())).isFalse();
 
         GrievanceEvent nullId = new GrievanceEvent();

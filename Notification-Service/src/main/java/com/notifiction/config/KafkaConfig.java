@@ -21,7 +21,7 @@ import com.notifiction.event.GrievanceEvent;
 @EnableKafka
 public class KafkaConfig {
 
-    @Value("${spring.kafka.bootstrap-servers:localhost:19092}")
+    @Value("${spring.kafka.bootstrap-servers:kafka:19092}")
     private String bootstrapServers;
 
     @Value("${spring.kafka.consumer.group-id:notification-group}")

@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import com.auth.dto.CategoryRequest;
 import com.auth.dto.DepartmentRequest;
-import com.auth.service.AuthService;
 import com.auth.service.DepartmentConfigService;
 
 import jakarta.validation.Valid;
@@ -26,14 +24,10 @@ public class AdminDepartmentController {
 	// end points to manage departments by admin
 
 	private final DepartmentConfigService departmentConfigService;
-
 	@Autowired
 	public AdminDepartmentController(DepartmentConfigService departmentConfigService) {
 		this.departmentConfigService = departmentConfigService;
 	}
-
-	@Autowired
-	private AuthService authService;
 
 	// add a new department
 	@PostMapping("/add-department")

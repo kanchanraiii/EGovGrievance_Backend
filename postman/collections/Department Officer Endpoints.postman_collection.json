@@ -1,0 +1,350 @@
+{
+  "info": {
+    "_postman_id": "edc6456b-b3f0-4d26-8918-d8069f0b9af0",
+    "name": "Department Officer Endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "SignUp and Login",
+      "item": [
+        {
+          "name": "DO Login",
+          "id": "1eb5cd9e-328c-498a-bb68-0d6e60911ee0",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{departmentOfficerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"do_10@example.com\",\r\n  \"password\": \"strongPass123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:9005/auth/department-officer/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "auth",
+                "department-officer",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "3da0cee6-845d-4f3f-a104-c98c67a5b625"
+    },
+    {
+      "name": "Manage Grievance",
+      "item": [
+        {
+          "name": "Assign Grievance",
+          "id": "c8da22bc-7aa5-44ee-9d0d-107875b03933",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{departmentOfficerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"grievanceId\": \"6958e1a786cd56154402a546\",\r\n  \"assignedTo\": \"CW_P1\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:9005/grievance-service/api/grievances/assign",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "grievance-service",
+                "api",
+                "grievances",
+                "assign"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All case workers in dept",
+          "id": "da30b148-825e-4112-822b-b0b1e05b811a",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{departmentOfficerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "http://localhost:9005/grievance-service/api/grievances/my-case-workers",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "grievance-service",
+                "api",
+                "grievances",
+                "my-case-workers"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Status of Grievance",
+          "id": "1f662233-6958-444e-9bd2-f09e5c5b3e29",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{departmentOfficerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"grievanceId\": \"695691f8cedc477ad1958857\",\r\n  \"status\": \"IN_PROGRESS\",\r\n  \"updatedBy\": \"CW_PWD1\",\r\n  \"remarks\": \"Investigating\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:9005/grievance-service/api/grievances/status",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "grievance-service",
+                "api",
+                "grievances",
+                "status"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "c4814060-f77e-4fa2-8e41-6a6e88aa57f8"
+    },
+    {
+      "name": "Manage Caseworkers",
+      "item": [
+        {
+          "name": "Get Grievance assigned to caseworkers",
+          "id": "a219a936-e22e-483c-8c6c-679d5f59becc",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{departmentOfficerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:9005/grievance-service/api/grievances/my-case-workers",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "grievance-service",
+                "api",
+                "grievances",
+                "my-case-workers"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register Case Worker",
+          "id": "e724b703-9e6b-4d0f-b863-d75fed7cd798",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"fullName\": \"CW_PWD2\",\r\n  \"email\": \"cw_pwd2@example.com\",\r\n  \"phone\": \"+91-7651881382\",\r\n  \"password\": \"strongPass123\",\r\n  \"departmentId\":\"STATE_PWD\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:9005/auth/case-worker/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "auth",
+                "case-worker",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "View Grievances assigned to a Case Worker",
+          "id": "4031dc9c-37f3-4fd2-b98e-b6ddafd0e7b8",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{departmentOfficerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "http://localhost:9005/grievance-service/api/grievances/case-worker/CW_PWD1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "grievance-service",
+                "api",
+                "grievances",
+                "case-worker",
+                "CW_PWD1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "View Grievances assigned to a Case Worker",
+          "id": "609d10eb-e571-49a6-a88d-1e91a2ff61f8",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{departmentOfficerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "http://localhost:9005/grievance-service/api/grievances/case-worker/CW_PWD1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "grievance-service",
+                "api",
+                "grievances",
+                "case-worker",
+                "CW_PWD1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "0bd1080f-4df8-452c-a035-5adb82833efa"
+    }
+  ]
+}

@@ -12,20 +12,19 @@ services:
     restart: unless-stopped
 
   kafka:
-    image: public.ecr.aws/bitnami/kafka:3
     image: confluentinc/cp-kafka:7.7.7
     container_name: kafka
     environment:
       - KAFKA_BROKER_ID=1
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
-      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092
-      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:19092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:19092
       - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
       - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
       - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
       - KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=0
     ports:
-      - "9092:9092"
+      - "19092:19092"
     networks:
       - backend
     depends_on:
@@ -39,22 +38,6 @@ services:
       - "${MONGO_HOST_PORT:-27018}:27017"
     volumes:
       - mongo-data:/data/db
-    networks:
-      - backend
-    restart: unless-stopped
-
-  departments-json:
-    build:
-      context: .
-      dockerfile: departments-config/Dockerfile.json-server
-    container_name: departments-json
-    command: >-
-      json-server --watch /data/departments-db.json --host 0.0.0.0 --port 3001
-    volumes:
-      - ./departments-config/departments-db.json:/data/departments-db.json
-    ports:
-      # Expose on host 3006 to avoid conflicts with any local json-server already on 3001
-      - "3006:3001"
     networks:
       - backend
     restart: unless-stopped
@@ -99,7 +82,7 @@ services:
       - MONGO_HOST=mongo
       - MONGO_PORT=27017
       - MONGO_DB=authDb
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:19092
       - DEPARTMENTS_FILE=file:/data/departments-db.json
     volumes:
       - ./departments-config/departments-db.json:/data/departments-db.json
@@ -122,8 +105,9 @@ services:
       - MONGO_HOST=mongo
       - MONGO_PORT=27017
       - MONGO_DB=grievanceDb
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - DEPARTMENTS_SERVICE_BASE_URL=http://departments-json:3001/
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:19092
+      - DEPARTMENTS_SERVICE_BASE_URL=http://auth-service:9007
+      - DEPARTMENTS_SERVICE_PATH=/api/auth/departments
     ports:
       - "9001:9001"
     networks:
@@ -143,8 +127,8 @@ services:
       - MONGO_HOST=mongo
       - MONGO_PORT=27017
       - MONGO_DB=feedbackDb
-      - GRIEVANCE_URL=http://grievance-service:9001
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - GRIEVANCE_SERVICE_URL=http://grievance-service:9001
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:19092
     ports:
       - "9002:9002"
     networks:
@@ -159,11 +143,14 @@ services:
     container_name: notification-service
     environment:
       - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_CONFIG_ADDITIONAL_LOCATION=file:/run/secrets/secrets.properties
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
       - MONGO_HOST=mongo
       - MONGO_PORT=27017
       - MONGO_DB=notificationDb
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:19092
+    volumes:
+      - ./secrets.properties:/run/secrets/secrets.properties:ro
     ports:
       - "9004:9004"
     networks:
@@ -174,26 +161,6 @@ services:
       - mongo
     restart: unless-stopped
 
-  storage-service:
-    build: ./Storage-Service
-    container_name: storage-service
-    environment:
-      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
-      - MONGO_HOST=mongo
-      - MONGO_PORT=27017
-      - MONGO_DB=notificationDb
-      - GRIEVANCE_URL=http://grievance-service:9001
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-    ports:
-      - "9003:9003"
-    networks:
-      - backend
-    depends_on:
-      - eureka-server
-      - mongo
-    restart: unless-stopped
-
   api-gateway:
     build: ./Api-Gateway
     container_name: api-gateway
@@ -201,7 +168,7 @@ services:
     environment:
       - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:19092
     ports:
       - "9005:9005"
     networks:
@@ -211,7 +178,6 @@ services:
       - grievance-service
       - feedback-service
       - notification-service
-      - storage-service
       - auth-service
     restart: unless-stopped
 

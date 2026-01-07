@@ -4,6 +4,11 @@ spring:
   data:
     mongodb:
       database: grievanceDb
+  webflux:
+    multipart:
+      max-in-memory-size: 20MB
+  codec:
+    max-in-memory-size: 20MB
 
 server:
   port: 9001
@@ -14,4 +19,10 @@ eureka:
 
 departments:
   service:
-    base-url: http://departments-json:3001/
+    base-url: http://auth-service:9007
+    path: /api/auth/departments
+
+auth:
+  service:
+    base-url: http://auth-service:9007
+    profile-path: /api/auth/profile

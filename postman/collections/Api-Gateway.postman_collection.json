@@ -1,0 +1,18 @@
+{
+  "info": {
+    "_postman_id": "d6ab4bce-0a22-4198-b97c-cf03dc5181b4",
+    "name": "Api-Gateway",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get grievance by id",
+      "id": "1d0ba5ad-22c5-4432-8151-31d38bbc0466",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    }
+  ]
+}

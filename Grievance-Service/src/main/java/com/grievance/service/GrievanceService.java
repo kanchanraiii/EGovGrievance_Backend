@@ -6,6 +6,7 @@ import com.grievance.repository.GrievanceRepository;
 import com.grievance.repository.StatusHistoryRepository;
 import com.grievance.request.GrievanceCreateRequest;
 import org.springframework.util.StringUtils;
+import org.springframework.util.StringUtils;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -46,7 +47,7 @@ public class GrievanceService {
 	}
 
 	// to create a grievance
-	public Mono<Grievance> createGrievance(GrievanceCreateRequest request, String citizenId) {
+	public Mono<Grievance> createGrievance(GrievanceCreateRequest request, String citizenId, String citizenEmail) {
 
 	    return departmentValidationService
 	            .validateDepartment(
@@ -58,6 +59,9 @@ public class GrievanceService {
 
 	                Grievance grievance = new Grievance();
 	                grievance.setCitizenId(citizenId);
+	                if (StringUtils.hasText(citizenEmail)) {
+	                    grievance.setCitizenEmail(citizenEmail);
+	                }
 	                grievance.setDepartmentId(request.getDepartmentId());
 	                grievance.setCategoryCode(request.getCategoryCode());
 	                grievance.setSubCategoryCode(request.getSubCategoryCode());

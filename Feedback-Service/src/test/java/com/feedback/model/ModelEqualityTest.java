@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@SuppressWarnings("java:S5838")
 class ModelEqualityTest {
 
     @Test
@@ -21,17 +22,16 @@ class ModelEqualityTest {
         assertThat(f1.toString()).contains("grievance");
 
         f2.setComments("different");
-        assertThat(f1).isNotEqualTo(f2);
-        assertThat(f1).isNotEqualTo(null);
-        assertThat(f1).isNotEqualTo("other");
+        assertThat(f1).isNotEqualTo(f2)
+                .isNotEqualTo(null)
+                .isNotEqualTo("other");
 
         Feedback empty1 = new Feedback();
         Feedback empty2 = new Feedback();
-        assertThat(empty1).isEqualTo(empty2);
-
         Feedback withIdOnly = new Feedback();
         withIdOnly.setId("id");
-        assertThat(empty1).isNotEqualTo(withIdOnly);
+        assertThat(empty1).isEqualTo(empty2)
+                .isNotEqualTo(withIdOnly);
 
         Feedback nullCitizen = populatedFeedback(now);
         nullCitizen.setCitizenId(null);
@@ -96,13 +96,14 @@ class ModelEqualityTest {
         stats.setAverageRating(3.5);
         stats.setTotalReopenRequests(4);
 
-        assertThat(stats.getTotalFeedbacks()).isEqualTo(1);
-        assertThat(stats.getTotalRatings()).isEqualTo(2);
-        assertThat(stats.getAverageRating()).isEqualTo(3.5);
-        assertThat(stats.getTotalReopenRequests()).isEqualTo(4);
+        assertThat(stats).extracting(FeedbackStats::getTotalFeedbacks, FeedbackStats::getTotalRatings,
+                        FeedbackStats::getAverageRating, FeedbackStats::getTotalReopenRequests)
+                .containsExactly(1L, 2L, 3.5, 4L);
 
         FeedbackStats allArgs = new FeedbackStats(5, 6, 4.5, 7);
-        assertThat(allArgs.getTotalFeedbacks()).isEqualTo(5);
+        assertThat(allArgs).extracting(FeedbackStats::getTotalFeedbacks, FeedbackStats::getTotalRatings,
+                        FeedbackStats::getAverageRating, FeedbackStats::getTotalReopenRequests)
+                .containsExactly(5L, 6L, 4.5, 7L);
     }
 
     @Test
@@ -119,19 +120,17 @@ class ModelEqualityTest {
 
         GrievanceResponse notResolved = populatedGrievance("OPEN");
         assertThat(notResolved.isResolvedOrClosed()).isFalse();
-        assertThat(g1).isNotEqualTo(notResolved);
-        assertThat(g1).isNotEqualTo(null);
-        assertThat(g1).isNotEqualTo("other");
+        assertThat(g1).isNotEqualTo(notResolved)
+                .isNotEqualTo(null)
+                .isNotEqualTo("other");
     }
 
     @Test
     void requestDtosEqualityAndHashCode() {
         FeedbackRequest fr1 = new FeedbackRequest();
-        fr1.setCitizenId("c1");
         fr1.setGrievanceId("g1");
         fr1.setComments("long enough comment");
         FeedbackRequest fr2 = new FeedbackRequest();
-        fr2.setCitizenId("c1");
         fr2.setGrievanceId("g1");
         fr2.setComments("long enough comment");
 

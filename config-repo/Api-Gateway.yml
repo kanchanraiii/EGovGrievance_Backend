@@ -22,10 +22,12 @@ spring:
           uri: lb://NOTIFICATION-SERVICE
           predicates:
             - Path=/notifications/**
-        - id: STORAGE-SERVICE
-          uri: lb://STORAGE-SERVICE
+        - id: GRIEVANCE-FILES
+          uri: lb://GRIEVANCE-SERVICE
           predicates:
             - Path=/storage/**
+          filters:
+            - RewritePath=/storage/(?<segment>.*),/api/files/${segment}
         - id: AUTH-SERVICE
           uri: lb://AUTH-SERVICE
           predicates:
@@ -56,12 +58,6 @@ spring:
             - Path=/notification-docs/**
           filters:
             - StripPrefix=1
-        - id: STORAGE-SERVICE-DOCS
-          uri: lb://STORAGE-SERVICE
-          predicates:
-            - Path=/storage-docs/**
-          filters:
-            - StripPrefix=1
 
 springdoc:
   api-docs:
@@ -76,8 +72,6 @@ springdoc:
         url: /feedback-docs/v3/api-docs
       - name: notification-service
         url: /notification-docs/v3/api-docs
-      - name: storage-service
-        url: /storage-docs/v3/api-docs
 
 server:
   port: 9005

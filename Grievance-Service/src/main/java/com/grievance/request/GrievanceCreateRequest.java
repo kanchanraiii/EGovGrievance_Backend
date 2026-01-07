@@ -29,41 +29,4 @@ public class GrievanceCreateRequest {
         grievance.setDescription(description);
         return grievance;
     }
-
-	
-	// getters and setters 
-	public String getDepartmentId() {
-		return departmentId;
-	}
-
-	public void setDepartmentId(String departmentId) {
-		this.departmentId = departmentId;
-	}
-
-	public String getCategoryCode() {
-		return categoryCode;
-	}
-
-	public void setCategoryCode(String categoryCode) {
-		this.categoryCode = categoryCode;
-	}
-
-	public String getSubCategoryCode() {
-		return subCategoryCode;
-	}
-
-	public void setSubCategoryCode(String subCategoryCode) {
-		this.subCategoryCode = subCategoryCode;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	
-	
 }

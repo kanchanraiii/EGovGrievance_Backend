@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("java:S5838")
 class GrievanceEventEqualityTest {
 
     @Test
@@ -24,10 +25,10 @@ class GrievanceEventEqualityTest {
         assertThat(e1.toString()).contains("g1");
 
         e2.setUserId("other");
-        assertThat(e1).isNotEqualTo(e2);
-        assertThat(e1).isEqualTo(e1);
-        assertThat(e1).isNotEqualTo(null);
-        assertThat(e1).isNotEqualTo("other");
+        assertThat(e1).isNotEqualTo(e2)
+                .isEqualTo(e1)
+                .isNotEqualTo(null)
+                .isNotEqualTo("other");
 
         GrievanceEvent empty1 = new GrievanceEvent();
         GrievanceEvent empty2 = new GrievanceEvent();
@@ -56,23 +57,21 @@ class GrievanceEventEqualityTest {
         GrievanceEvent base = populatedEvent("g1", "u1", "msg", "SUBMITTED");
 
         GrievanceEvent nullId = populatedEvent(null, "u1", "msg", "SUBMITTED");
-        assertThat(base).isNotEqualTo(nullId);
+        GrievanceEvent nullMessage = populatedEvent("g1", "u1", null, "SUBMITTED");
+        GrievanceEvent differentType = populatedEvent("g1", "u1", "msg", "ASSIGNED");
+        GrievanceEvent nullType = populatedEvent("g1", "u1", "msg", null);
+        assertThat(base).isNotEqualTo(nullId)
+                .isNotEqualTo(nullMessage)
+                .isNotEqualTo(differentType)
+                .isNotEqualTo(nullType);
 
         GrievanceEvent baseWithNullId = populatedEvent(null, "u1", "msg", "SUBMITTED");
         GrievanceEvent withId = populatedEvent("g1", "u1", "msg", "SUBMITTED");
         assertThat(baseWithNullId).isNotEqualTo(withId);
 
-        GrievanceEvent nullMessage = populatedEvent("g1", "u1", null, "SUBMITTED");
-        assertThat(base).isNotEqualTo(nullMessage);
         GrievanceEvent messageMissingOnBase = populatedEvent("g1", "u1", null, "SUBMITTED");
         GrievanceEvent withMessage = populatedEvent("g1", "u1", "msg", "SUBMITTED");
         assertThat(messageMissingOnBase).isNotEqualTo(withMessage);
-
-        GrievanceEvent differentType = populatedEvent("g1", "u1", "msg", "ASSIGNED");
-        assertThat(base).isNotEqualTo(differentType);
-
-        GrievanceEvent nullType = populatedEvent("g1", "u1", "msg", null);
-        assertThat(base).isNotEqualTo(nullType);
 
         GrievanceEvent nullTypeAsBase = populatedEvent("g1", "u1", "msg", null);
         GrievanceEvent withType = populatedEvent("g1", "u1", "msg", "SUBMITTED");

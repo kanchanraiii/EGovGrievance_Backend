@@ -1,0 +1,157 @@
+{
+  "info": {
+    "_postman_id": "8e87bea2-18ea-4012-8cac-2eb4c07c538d",
+    "name": "Feedback Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Post a feedback",
+      "id": "2e511b4c-a742-43d2-8933-5e02992e6d72",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"grievanceId\": \"695511cce0f61d1f22495ef3\",\r\n  \"citizenId\": \"CIT001\",\r\n  \"comments\": \"The issue was resolved quickly and the staff was helpful.\"\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:9002/api/feedback/add-feedback",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9002",
+          "path": [
+            "api",
+            "feedback",
+            "add-feedback"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Post a rating",
+      "id": "fb02c504-ec95-4e56-83ce-24535fd3c7d0",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2OTU3OGE5OTBjNTVhMzVhNjU1Y2RhZWIiLCJyb2xlIjoiQ0lUSVpFTiIsInBob25lIjoiKzkxLTc2NTE4ODEzODIiLCJpc3MiOiJBdXRoLVNlcnZpY2UiLCJuYW1lIjoiS2FuY2hhbiBSYWkiLCJleHAiOjE3NjczOTI5MjksImlhdCI6MTc2NzM4NTcyOSwiZW1haWwiOiJrYW5jaGFuQGV4YW1wbGUuY29tIn0.jUIQOu0EBqDFk3oydZaAFQAGOKKAIe3G6NAFZdGIcJ4",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"grievanceId\": \"695511cce0f61d1f22495ef3\",\r\n  \"score\": 4\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:9002/api/feedback/ratings",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9002",
+          "path": [
+            "api",
+            "feedback",
+            "ratings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Reopen Request",
+      "id": "463256c0-4121-4c3d-ab2e-8e1fcaeb6630",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"grievanceId\": \"695511cce0f61d1f22495ef3\",\r\n  \"reason\": \"The issue reappeared after two days.\"\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:9002/api/feedback/reopen-requests",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9002",
+          "path": [
+            "api",
+            "feedback",
+            "reopen-requests"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get feedback by ID",
+      "id": "1c940baa-0d36-474e-9e53-491346bc7e92",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9002/api/feedback/grievance/695291748cc6ed61e6fbadf8",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9002",
+          "path": [
+            "api",
+            "feedback",
+            "grievance",
+            "695291748cc6ed61e6fbadf8"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get stats",
+      "id": "af196311-1b6e-48e8-9056-4d032f319cf5",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9002/api/feedback/stats",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9002",
+          "path": [
+            "api",
+            "feedback",
+            "stats"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

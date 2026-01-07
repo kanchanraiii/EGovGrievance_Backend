@@ -213,6 +213,10 @@ public class AuthService {
     private Mono<AuthResponse> toAuthResponse(User user) {
         Instant expiresAt = jwtService.buildExpiry();
         return jwtService.generateToken(user, expiresAt)
+                .onErrorMap(ex -> new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        ex.getMessage(),
+                        ex))
                 .map(token -> new AuthResponse(
                         token,
                         expiresAt,

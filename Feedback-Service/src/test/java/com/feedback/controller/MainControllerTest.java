@@ -32,16 +32,16 @@ import static org.springframework.security.test.web.reactive.server.SecurityMock
 class MainControllerTest {
 
 	@Autowired
-	private WebTestClient webTestClient;
+    private WebTestClient webTestClient;
 
-	@MockBean
-	private FeedbackService feedbackService;
+    @MockBean
+    private FeedbackService feedbackService;
 
-	private WebTestClient citizenClient() {
-		return webTestClient.mutateWith(mockJwt()
-				.jwt(jwt -> jwt.claim("role", List.of("CITIZEN")))
-				.authorities(new SimpleGrantedAuthority("ROLE_CITIZEN")));
-	}
+    private WebTestClient citizenClient() {
+        return webTestClient.mutateWith(mockJwt()
+                .jwt(jwt -> jwt.subject("c1").claim("role", List.of("CITIZEN")))
+                .authorities(new SimpleGrantedAuthority("ROLE_CITIZEN")));
+    }
 
 	private WebTestClient adminClient() {
 		return webTestClient.mutateWith(mockJwt()
@@ -49,16 +49,15 @@ class MainControllerTest {
 				.authorities(new SimpleGrantedAuthority("ROLE_ADMIN")));
 	}
 
-	@Test
-	void submitFeedback_returnsCreatedFeedback() {
-		com.feedback.requests.FeedbackRequest request = new com.feedback.requests.FeedbackRequest();
-		request.setGrievanceId("g1");
-		request.setCitizenId("c1");
-		request.setComments("Thanks for resolving the issue quickly");
+    @Test
+    void submitFeedback_returnsCreatedFeedback() {
+        com.feedback.requests.FeedbackRequest request = new com.feedback.requests.FeedbackRequest();
+        request.setGrievanceId("g1");
+        request.setComments("Thanks for resolving the issue quickly");
 
-		Feedback saved = new Feedback();
-		saved.setId("f1");
-		saved.setGrievanceId("g1");
+        Feedback saved = new Feedback();
+        saved.setId("f1");
+        saved.setGrievanceId("g1");
 		saved.setCitizenId("c1");
 		saved.setComments(request.getComments());
 		saved.setSubmittedAt(LocalDateTime.now());

@@ -14,7 +14,7 @@ spring:
       host: ${MONGO_HOST:localhost}
       port: ${MONGO_PORT:27017}
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:19092}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:19092}
 
 management:
   endpoints:

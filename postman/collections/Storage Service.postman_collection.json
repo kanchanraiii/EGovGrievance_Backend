@@ -1,0 +1,81 @@
+{
+  "info": {
+    "_postman_id": "a182aded-f0d8-4a5a-b5e2-528f8152f523",
+    "name": "Storage Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Upload a file",
+      "id": "7a47b459-c673-4cde-ac19-52b5fef9acfa",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": "/C:/Users/kanch/Downloads/wpr-3 major _signed.pdf"
+            },
+            {
+              "key": "grievanceId",
+              "value": "695511cce0f61d1f22495ef3",
+              "type": "text"
+            },
+            {
+              "key": "uploadedBy",
+              "value": "CT001",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:9003/api/files/upload",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9003",
+          "path": [
+            "api",
+            "files",
+            "upload"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "List files by grievance",
+      "id": "7164b6d3-94b0-470e-bf18-ee5d87d66f5d",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"file\":\"C:\\Users\\kanch\\Downloads\\wpr-3 major _signed.pdf\",\r\n    \"grievanceId\":\"695511cce0f61d1f22495ef3\",\r\n    \"uploadedBy\":\"CT001\"\r\n    \r\n}"
+        },
+        "url": {
+          "raw": "http://localhost:9003/api/files/grievance/695511cce0f61d1f22495ef3",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9003",
+          "path": [
+            "api",
+            "files",
+            "grievance",
+            "695511cce0f61d1f22495ef3"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

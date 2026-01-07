@@ -1,0 +1,99 @@
+{
+  "info": {
+    "_postman_id": "1ff31b20-f35f-45e7-b3d9-6787e0ff321b",
+    "name": "Departments JSON Server",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Central Gov Depts",
+      "id": "951d6dea-0bb5-4ece-8749-707ae608aa9e",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3006/stateGovernmentDepartments",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3006",
+          "path": [
+            "stateGovernmentDepartments"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create a Department",
+      "id": "30872940-ff86-4618-ab44-63a688f70b10",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"id\": \"ST-TN-WATER-001\",\r\n  \"state\": \"Tamil Nadu\",\r\n  \"name\": \"Tamil Nadu Water Supply Department\",\r\n  \"level\": \"STATE\",\r\n  \"categories\": [\r\n    {\r\n      \"code\": \"WATER\",\r\n      \"name\": \"Water Supply\",\r\n      \"subCategories\": [\r\n        {\r\n          \"code\": \"NO_SUPPLY\",\r\n          \"name\": \"No Water Supply\"\r\n        },\r\n        {\r\n          \"code\": \"LOW_PRESSURE\",\r\n          \"name\": \"Low Pressure\"\r\n        },\r\n        {\r\n          \"code\": \"PIPE_DAMAGE\",\r\n          \"name\": \"Pipe Damage\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3006/stateGovernmentDepartments",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3006",
+          "path": [
+            "stateGovernmentDepartments"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Department wise listing",
+      "id": "34f736a7-3eab-4917-b638-b3a7e49221ea",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "\r\n"
+        },
+        "url": {
+          "raw": "http://localhost:9005/grievance-service/api/grievances/department/ROAD",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9005",
+          "path": [
+            "grievance-service",
+            "api",
+            "grievances",
+            "department",
+            "ROAD"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

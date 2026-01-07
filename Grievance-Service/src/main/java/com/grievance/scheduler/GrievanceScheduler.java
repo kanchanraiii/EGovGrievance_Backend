@@ -25,7 +25,7 @@ public class GrievanceScheduler {
 	}
 	
 	// runs every 10 seconds (local test)
-	 @Scheduled(fixedDelay = 10 * 1000)
+	 @Scheduled(fixedDelay = 7L * 24 * 60 * 60 * 1000)
 	    public void checkSlaBreaches() {
 
 	        LocalDateTime threshold = LocalDateTime.now().minusMinutes(1);

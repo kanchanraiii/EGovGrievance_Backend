@@ -43,6 +43,11 @@ public class SecurityConfig {
                         .pathMatchers("/api/grievances/history/**")
                         .hasAnyRole(ROLE_CITIZEN, ROLE_CASE_WORKER, ROLE_DEPARTMENT_OFFICER, ROLE_SUPERVISORY_OFFICER,
                                 ROLE_ADMIN)
+                        .pathMatchers(
+                                "/api/files/upload",
+                                "/api/files/grievance/**")
+                        .hasAnyRole(ROLE_CITIZEN, ROLE_DEPARTMENT_OFFICER)
+                        .pathMatchers("/api/files/**").authenticated()
                         .pathMatchers("/api/grievances/escalated")
                         .hasAnyRole(ROLE_SUPERVISORY_OFFICER, ROLE_ADMIN)
                         .pathMatchers("/api/grievances/getAll", "/api/grievances/assign")

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("java:S5838")
 class GrievanceEqualityTest {
 
     @Test
@@ -49,8 +50,8 @@ class GrievanceEqualityTest {
         g1.setId("g1");
         g1.setCitizenId("c1");
 
-        assertThat(g1).isEqualTo(g1);
-        assertThat(g1).isNotEqualTo(null);
+        assertThat(g1).isEqualTo(g1)
+                .isNotEqualTo(null);
         assertThat(g1.canEqual(new Object())).isFalse();
 
         Grievance differentCitizen = new Grievance();
@@ -70,10 +71,9 @@ class GrievanceEqualityTest {
 
         Grievance differentId = new Grievance();
         differentId.setId("g2");
-        assertThat(base).isNotEqualTo(differentId);
-
         Grievance nullId = new Grievance();
-        assertThat(base).isNotEqualTo(nullId);
+        assertThat(base).isNotEqualTo(differentId)
+                .isNotEqualTo(nullId);
 
         Grievance nullBase = new Grievance();
         Grievance withId = new Grievance();

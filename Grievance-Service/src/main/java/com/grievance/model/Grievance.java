@@ -21,6 +21,9 @@ public class Grievance {
 	
 	@NotBlank(message="Citizen ID is required")
 	private String citizenId;
+
+    // optional email captured from JWT to ensure notifications reach the user
+    private String citizenEmail;
 	
 	// Dept ID like water, electricity etc - Assigned Later
 	private String departmentId;
@@ -61,6 +64,12 @@ public class Grievance {
 	}
 	public void setCitizenId(String citizenId) {
 		this.citizenId = citizenId;
+	}
+	public String getCitizenEmail() {
+		return citizenEmail;
+	}
+	public void setCitizenEmail(String citizenEmail) {
+		this.citizenEmail = citizenEmail;
 	}
 	public String getDepartmentId() {
 		return departmentId;

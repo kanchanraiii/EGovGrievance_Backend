@@ -1,0 +1,376 @@
+{
+  "info": {
+    "_postman_id": "45915ab4-548d-4afe-aeed-0263eedf6610",
+    "name": "Admin Only Endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "SignUp and Login",
+      "item": [
+        {
+          "name": "Admin Register",
+          "id": "f528c6bc-fb61-4667-aa30-3815ce6c75d6",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"fullName\": \"Admin4\",\r\n  \"email\": \"admin4@example.com\",\r\n  \"phone\": \"+91-7651881382\",\r\n  \"password\": \"strongPass123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:9005/auth/admin/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "auth",
+                "admin",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Admin Login",
+          "id": "4a79cda1-5ac8-4b85-b2ac-49270bcba697",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"admin4@example.com\",\r\n  \"password\": \"strongPass123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:9005/auth/admin/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "auth",
+                "admin",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "8b52451a-7504-4421-bd55-bebba2694175"
+    },
+    {
+      "name": "Add other users",
+      "item": [
+        {
+          "name": "DO Register",
+          "id": "f47045d3-0386-495f-8659-50814db09c7a",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"fullName\": \"DO_02\",\r\n  \"email\": \"do_02@example.com\",\r\n  \"phone\": \"+91-7651881382\",\r\n  \"password\": \"strongPass123\",\r\n  \"departmentId\":\"FINANCE\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:9005/auth/department-officer/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "auth",
+                "department-officer",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "SO Register",
+          "id": "447d8d6f-ce22-46dd-a08f-b5c61b6cece5",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"fullName\": \"SO1\",\r\n  \"email\": \"so1@example.com\",\r\n  \"phone\": \"+91-7651881382\",\r\n  \"password\": \"strongPass123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:9005/auth/supervisory-officer/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "auth",
+                "supervisory-officer",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "dce38453-22cd-4f26-831c-3ecaa073b272"
+    },
+    {
+      "name": "Manage Departments",
+      "item": [
+        {
+          "name": "Get all departments",
+          "id": "38736c81-8b23-42dd-b506-87dd90a760c8",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"fullName\": \"SO1\",\r\n  \"email\": \"so1@example.com\",\r\n  \"phone\": \"+91-7651881382\",\r\n  \"password\": \"strongPass123\"\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:9005/auth/departments",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "auth",
+                "departments"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get categories and subcategories in a dept",
+          "id": "49548089-664a-4161-a743-210a86f5ce48",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:9005/auth/departments/UP_ROADS/categories",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "auth",
+                "departments",
+                "UP_ROADS",
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add a department",
+          "id": "e26a6e78-430f-4612-81c4-4406869a3699",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"id\": \"UP_ROADS\",\r\n  \"name\": \"Roads Department\",\r\n  \"level\": \"STATE\",\r\n  \"categories\": [\r\n    {\r\n      \"code\": \"MAINTENANCE\",\r\n      \"name\": \"Road Maintenance\",\r\n      \"subCategories\": [\r\n        { \"code\": \"POTHOLES\", \"name\": \"Pothole Repair\" },\r\n        { \"code\": \"SIGNAGE\", \"name\": \"Signage Issues\" }\r\n      ]\r\n    },\r\n    {\r\n      \"code\": \"SAFETY\",\r\n      \"name\": \"Road Safety\",\r\n      \"subCategories\": [\r\n        { \"code\": \"LIGHTING\", \"name\": \"Street Lighting\" },\r\n        { \"code\": \"CROSSING\", \"name\": \"Pedestrian Crossings\" }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:9005/auth/admin/departments/add-department",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "auth",
+                "admin",
+                "departments",
+                "add-department"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Dept",
+          "id": "c040c8f2-ee8b-4708-89d1-743ec0b9a698",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:9005/auth/admin/departments/UP_ROADS",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "auth",
+                "admin",
+                "departments",
+                "UP_ROADS"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Dept Categories",
+          "id": "2430f87e-9ab8-44ca-9e1b-d712c2757253",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:9005/auth/admin/departments/UP_ROADS/categories/SAFETY",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "auth",
+                "admin",
+                "departments",
+                "UP_ROADS",
+                "categories",
+                "SAFETY"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Profile",
+          "id": "70fa6d4a-c674-4df8-92f4-13c009080b01",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:9005/auth/profile",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "auth",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "8fe3e3b4-f5b2-4b9e-a34a-932bcb4a5ec7"
+    }
+  ]
+}

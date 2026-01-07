@@ -1,0 +1,39 @@
+{
+  "info": {
+    "_postman_id": "8b7d42a5-d585-412f-a0dd-1d85ddd313bd",
+    "name": "Notification-Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get notifications by user id",
+      "id": "2d67327f-4892-42a2-ab5e-3515920b3211",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n   \"citizenId\": \"CIT-123\",\r\n    \"departmentId\": \"POWER\",\r\n    \"categoryCode\": \"ELECTRICITY\",\r\n    \"subCategoryCode\": \"POWER_OUTAGE\",\r\n    \"description\": \"Power out in my area for 10 hours\"\r\n}\r\n"
+        },
+        "url": {
+          "raw": "http://localhost:9004/api/notifications/user/CIT-125",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9004",
+          "path": [
+            "api",
+            "notifications",
+            "user",
+            "CIT-125"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

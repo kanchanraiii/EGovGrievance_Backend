@@ -1,0 +1,143 @@
+{
+  "info": {
+    "_postman_id": "e90fd11c-3891-4fa3-ad25-e634111b2015",
+    "name": "Case Worker Endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Login",
+      "item": [
+        {
+          "name": "CW Login",
+          "id": "85847bfd-5604-4a09-a695-6afe831a435d",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{caseworkerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\":\"cw_pwd1@example.com\",\r\n    \"phone\":\"+91-7651881382\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:9005/auth/case-worker/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "auth",
+                "case-worker",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "5f607742-d5e4-4727-8a7d-a5d4ce9ea592"
+    },
+    {
+      "name": "Manage Grievance",
+      "item": [
+        {
+          "name": "Update Status",
+          "id": "eb3f42da-323b-4bdc-807b-c9baa63a13eb",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{cwToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"grievanceId\": \"6958eafd0540a73dcb1cd41a\",\r\n  \"status\": \"RESOLVED\",\r\n  \"updatedBy\": \"CW1\",\r\n  \"remarks\": \"Investigating\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:9001/api/grievances/status",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9001",
+              "path": [
+                "api",
+                "grievances",
+                "status"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "View Assigned",
+          "id": "90619ab8-6fe4-4bc7-aed1-e44ae40df3ff",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{cwToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "http://localhost:9005/grievance-service/api/grievances/my-assigned",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "grievance-service",
+                "api",
+                "grievances",
+                "my-assigned"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "b6800fea-4882-417d-a225-cc0479e47407"
+    }
+  ]
+}

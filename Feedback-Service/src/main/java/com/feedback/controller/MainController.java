@@ -21,6 +21,10 @@ import jakarta.validation.Valid;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.util.StringUtils;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/feedback")
@@ -36,10 +40,15 @@ public class MainController {
 	// to add a feedback
 	@PostMapping("/add-feedback")
 	@ResponseStatus(HttpStatus.CREATED)
-	public Mono<Feedback> submitFeedback(@Valid @RequestBody FeedbackRequest feedback) {
+	public Mono<Feedback> submitFeedback(@Valid @RequestBody FeedbackRequest feedback, @AuthenticationPrincipal Jwt jwt) {
+		String citizenId = jwt != null ? jwt.getSubject() : null;
+		if (!StringUtils.hasText(citizenId)) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Citizen ID missing in token");
+		}
+
 		Feedback entity = new Feedback();
 		entity.setGrievanceId(feedback.getGrievanceId());
-		entity.setCitizenId(feedback.getCitizenId());
+		entity.setCitizenId(citizenId);
 		entity.setComments(feedback.getComments());
 		return feedbackService.submitFeedback(entity);
 	}

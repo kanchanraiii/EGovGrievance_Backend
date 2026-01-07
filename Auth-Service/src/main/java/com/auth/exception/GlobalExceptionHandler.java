@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -29,6 +28,7 @@ public class GlobalExceptionHandler {
 
     private Map<String, Object> errorBody(int status, String message) {
         return Map.of(
+                "status", status,
                 "message", message == null ? "" : message
         );
     }

@@ -1,0 +1,147 @@
+{
+  "info": {
+    "_postman_id": "0a0c8927-6c2e-45cb-9dc2-31f6554dfc42",
+    "name": "Grievance Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create a grievance",
+      "id": "a0bb338b-27e8-4e3d-9ee6-64adca891441",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n   \"citizenId\": \"CIT-123\",\r\n    \"departmentId\": \"POWER\",\r\n    \"categoryCode\": \"ELECTRICITY\",\r\n    \"subCategoryCode\": \"POWER_OUTAGE\",\r\n    \"description\": \"Power out in my area for 10 hours\"\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:9001/api/grievances/create",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9001",
+          "path": [
+            "api",
+            "grievances",
+            "create"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get All Grievances",
+      "id": "5eb757e3-0177-4198-ab10-f3ee543e888f",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"citizenId\": \"CIT001\",\r\n  \"categoryCode\": \"WATER\",\r\n  \"subCategoryCode\": \"SUPPLY_DELAY\",\r\n  \"description\": \"No water supply in our area for the last 3 days.\",\r\n  \"priority\": \"HIGH\"\r\n}\r\n"
+        },
+        "url": {
+          "raw": "http://localhost:9001/api/grievances/getAll",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9001",
+          "path": [
+            "api",
+            "grievances",
+            "getAll"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Grievance by id",
+      "id": "1cb19de6-1cfc-49af-8ee0-0df7531b025d",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9001/api/grievances/69522dcd4f4ebfae0fd1f760",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9001",
+          "path": [
+            "api",
+            "grievances",
+            "69522dcd4f4ebfae0fd1f760"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Assign Grievance (DO -> CW)",
+      "id": "b07a8469-e704-4a29-b1d5-020c142d4cb2",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9001/api/grievances/assign/69522e864f4ebfae0fd1f76a?assignedBy=DO001&assignedTo=CW001",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9001",
+          "path": [
+            "api",
+            "grievances",
+            "assign",
+            "69522e864f4ebfae0fd1f76a"
+          ],
+          "query": [
+            {
+              "key": "assignedBy",
+              "value": "DO001"
+            },
+            {
+              "key": "assignedTo",
+              "value": "CW001"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Status History of grievance",
+      "id": "d5092683-540b-4f30-91e9-a0bc4639ede2",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9001/api/grievances/history/695291748cc6ed61e6fbadf8",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9001",
+          "path": [
+            "api",
+            "grievances",
+            "history",
+            "695291748cc6ed61e6fbadf8"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

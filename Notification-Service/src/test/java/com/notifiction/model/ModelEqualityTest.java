@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("java:S5838")
 class ModelEqualityTest {
 
     @Test
@@ -32,10 +33,10 @@ class ModelEqualityTest {
         assertThat(n1.toString()).contains("msg");
 
         n2.setMessage("other");
-        assertThat(n1).isNotEqualTo(n2);
-        assertThat(n1).isEqualTo(n1);
-        assertThat(n1).isNotEqualTo(null);
-        assertThat(n1).isNotEqualTo("other");
+        assertThat(n1).isNotEqualTo(n2)
+                .isEqualTo(n1)
+                .isNotEqualTo(null)
+                .isNotEqualTo("other");
 
         Notifications empty1 = new Notifications();
         Notifications empty2 = new Notifications();
@@ -89,9 +90,9 @@ class ModelEqualityTest {
         assertThat(l1).isEqualTo(l1);
 
         l2.setNotificationId("other");
-        assertThat(l1).isNotEqualTo(l2);
-        assertThat(l1).isNotEqualTo(null);
-        assertThat(l1).isNotEqualTo("other");
+        assertThat(l1).isNotEqualTo(l2)
+                .isNotEqualTo(null)
+                .isNotEqualTo("other");
 
         NotificationLogs empty1 = new NotificationLogs();
         NotificationLogs empty2 = new NotificationLogs();
@@ -131,7 +132,8 @@ class ModelEqualityTest {
 
         Notifications noId = populatedNotification(now);
         noId.setId(null);
-        assertThat(base).isNotEqualTo(noId);
+        Notifications differentId = populatedNotification(now);
+        differentId.setId("other");
 
         Notifications missingBaseId = new Notifications();
         missingBaseId.setUserId("user");
@@ -139,17 +141,10 @@ class ModelEqualityTest {
         otherWithId.setId("n1");
         assertThat(missingBaseId).isNotEqualTo(otherWithId);
 
-        Notifications differentId = populatedNotification(now);
-        differentId.setId("other");
-        assertThat(base).isNotEqualTo(differentId);
-
         Notifications differentUser = populatedNotification(now);
         differentUser.setUserId("another");
-        assertThat(base).isNotEqualTo(differentUser);
-
         Notifications messageNull = populatedNotification(now);
         messageNull.setMessage(null);
-        assertThat(base).isNotEqualTo(messageNull);
 
         Notifications messageMissingOnBase = populatedNotification(now);
         messageMissingOnBase.setMessage(null);
@@ -158,12 +153,8 @@ class ModelEqualityTest {
 
         Notifications typeChanged = populatedNotification(now);
         typeChanged.setType(NotificationType.IN_APP);
-        assertThat(base).isNotEqualTo(typeChanged);
-
         Notifications typeCleared = populatedNotification(now);
         typeCleared.setType(null);
-        assertThat(base).isNotEqualTo(typeCleared);
-
         Notifications typeMissingOnBase = populatedNotification(now);
         typeMissingOnBase.setType(null);
         Notifications withType = populatedNotification(now);
@@ -171,18 +162,22 @@ class ModelEqualityTest {
 
         Notifications statusChanged = populatedNotification(now);
         statusChanged.setStatus(NotificationStatus.FAILED);
-        assertThat(base).isNotEqualTo(statusChanged);
-
         Notifications nullCreatedAt = populatedNotification(now);
         nullCreatedAt.setCreatedAt(null);
-        assertThat(base).isNotEqualTo(nullCreatedAt);
-
         Notifications createdAtMissingOnBase = populatedNotification(null);
         Notifications withCreatedAt = populatedNotification(now);
         assertThat(createdAtMissingOnBase).isNotEqualTo(withCreatedAt);
 
         Notifications createdAtDifferent = populatedNotification(now.minusDays(1));
-        assertThat(base).isNotEqualTo(createdAtDifferent);
+        assertThat(base).isNotEqualTo(noId)
+                .isNotEqualTo(differentId)
+                .isNotEqualTo(differentUser)
+                .isNotEqualTo(messageNull)
+                .isNotEqualTo(typeChanged)
+                .isNotEqualTo(typeCleared)
+                .isNotEqualTo(statusChanged)
+                .isNotEqualTo(nullCreatedAt)
+                .isNotEqualTo(createdAtDifferent);
     }
 
     @Test
@@ -192,8 +187,6 @@ class ModelEqualityTest {
 
         NotificationLogs noId = populatedLog(now);
         noId.setId(null);
-        assertThat(base).isNotEqualTo(noId);
-
         NotificationLogs baseWithoutId = new NotificationLogs();
         baseWithoutId.setNotificationId("n1");
         NotificationLogs withOnlyId = new NotificationLogs();
@@ -202,16 +195,10 @@ class ModelEqualityTest {
 
         NotificationLogs differentId = populatedLog(now);
         differentId.setId("other");
-        assertThat(base).isNotEqualTo(differentId);
-
         NotificationLogs differentNotificationId = populatedLog(now);
         differentNotificationId.setNotificationId("other");
-        assertThat(base).isNotEqualTo(differentNotificationId);
-
         NotificationLogs nullResponse = populatedLog(now);
         nullResponse.setResponse(null);
-        assertThat(base).isNotEqualTo(nullResponse);
-
         NotificationLogs responseMissingOnBase = populatedLog(now);
         responseMissingOnBase.setResponse(null);
         NotificationLogs withResponse = populatedLog(now);
@@ -224,14 +211,17 @@ class ModelEqualityTest {
 
         NotificationLogs nullLoggedAt = populatedLog(now);
         nullLoggedAt.setLoggedAt(null);
-        assertThat(base).isNotEqualTo(nullLoggedAt);
-
         NotificationLogs loggedAtMissingOnBase = populatedLog(null);
         NotificationLogs withLoggedAt = populatedLog(now);
         assertThat(loggedAtMissingOnBase).isNotEqualTo(withLoggedAt);
 
         NotificationLogs loggedAtChanged = populatedLog(now.minusHours(1));
-        assertThat(base).isNotEqualTo(loggedAtChanged);
+        assertThat(base).isNotEqualTo(noId)
+                .isNotEqualTo(differentId)
+                .isNotEqualTo(differentNotificationId)
+                .isNotEqualTo(nullResponse)
+                .isNotEqualTo(nullLoggedAt)
+                .isNotEqualTo(loggedAtChanged);
     }
 
     @Test

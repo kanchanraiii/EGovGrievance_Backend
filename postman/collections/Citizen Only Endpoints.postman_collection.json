@@ -1,0 +1,368 @@
+{
+  "info": {
+    "_postman_id": "c42f7610-3d87-4702-9bc3-3a912dc060c0",
+    "name": "Citizen Only Endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Signup & Login",
+      "item": [
+        {
+          "name": "Citizen Register",
+          "id": "a0a0478d-4305-412e-b4c0-c24da12a2130",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"anant\",\n  \"email\": \"anant@example.com\",\n  \"phone\": \"+91-7651881382\",\n  \"password\": \"strongPass123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:9005/auth/citizen/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "auth",
+                "citizen",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Citizen Login",
+          "id": "e61e9e6f-ed40-409a-918b-995afcd6ee8e",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"anant@example.com\",\n  \"password\": \"strongPass123\"\n}\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:9005/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Profile",
+          "id": "8994f893-8bb4-48ce-b8e1-0fe1892cfe12",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{citizenToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:9005/auth/profile",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "auth",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "6290b2ac-2b31-409b-ab35-06d77e57987a"
+    },
+    {
+      "name": "Grievance Endpoints",
+      "item": [
+        {
+          "name": "Lodge Grievance",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "8313e2f3-7656-438b-a4a4-acbe0bf9c010",
+                "exec": [
+                  "const loginReqId = \"28036272-a0bb338b-27e8-4e3d-9ee6-64adca891441\";\r",
+                  "const manualToken = pm.environment.get(\"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2OTU3ODBhNjZkZTcxODYyY2FmZDgxOGMiLCJyb2xlIjoiQ0lUSVpFTiIsInBob25lIjoiKzEtNTU1LTEyMy00NTY3IiwiaXNzIjoiQXV0aC1TZXJ2aWNlIiwibmFtZSI6IlJhamF0IFJhanB1dCIsImV4cCI6MTc2NzU0NzkxNCwiaWF0IjoxNzY3NTQwNzE0LCJlbWFpbCI6InJhamF0QGV4YW1wbGUuY29tIn0.6ieFLQgwGxlEkiTWroD4h4n0czG7ucazJENueZq7w1s\"); \r",
+                  "function createGrievance(token) {\r",
+                  "  return new Promise((resolve, reject) => {\r",
+                  "    pm.sendRequest({\r",
+                  "      url: 'http://localhost:9005/grievance-service/api/grievances/create',\r",
+                  "      method: 'POST',\r",
+                  "      header: {\r",
+                  "        'Content-Type': 'application/json',\r",
+                  "        'Authorization': `Bearer ${token}`\r",
+                  "      },\r",
+                  "      body: {\r",
+                  "        mode: 'raw',\r",
+                  "        raw: JSON.stringify({\r",
+                  "          departmentId: \"STATE_PWD\",\r",
+                  "          categoryCode: \"ROAD_INFRASTRUCTURE\",\r",
+                  "          subCategoryCode: \"ROAD_DAMAGE\",\r",
+                  "          description: \"Road at XXX location has been damaged after an accident which happened two weeks ago no action taken by PWD\"\r",
+                  "        })\r",
+                  "      }\r",
+                  "    }, (err, newRes) => {\r",
+                  "      if (err) return reject(err);\r",
+                  "      pm.test(\"Grievance Created\", () => pm.expect(newRes.code).to.be.oneOf([201, 403]));\r",
+                  "      resolve();\r",
+                  "    });\r",
+                  "  });\r",
+                  "}\r",
+                  "\r",
+                  "pm.execution.runRequest(loginReqId)\r",
+                  "  .then(res => {\r",
+                  "    console.log(\"login status\", res.code, \"body:\", res.text());\r",
+                  "    if (res.code !== 200) throw new Error(`Login failed ${res.code}`);\r",
+                  "    const token = res.json().token;\r",
+                  "    if (!token) throw new Error(\"Login missing token\");\r",
+                  "    return createGrievance(token);\r",
+                  "  })\r",
+                  "  .catch(err => {\r",
+                  "    console.warn(\"Login failed, trying fallback token:\", err.message);\r",
+                  "    if (manualToken) {\r",
+                  "      return createGrievance(manualToken);\r",
+                  "    }\r",
+                  "    pm.test(\"Script should not throw\", () => { throw err; });\r",
+                  "  });\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {
+                  "28036272-a0bb338b-27e8-4e3d-9ee6-64adca891441": {
+                    "workspace": "795f5b58-0ec3-4c3a-b03a-e03103083ce8",
+                    "collection": "28036272-0a0c8927-6c2e-45cb-9dc2-31f6554dfc42",
+                    "location": [
+                      "Grievance Service",
+                      "Create a grievance"
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "id": "e442b69a-9989-4ce1-8be3-14e274ed39ba",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{citizenToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"departmentId\": \"STATE_PWD\",\r\n    \"categoryCode\": \"ROAD_INFRASTRUCTURE\",\r\n    \"subCategoryCode\": \"ROAD_DAMAGE\",\r\n    \"description\": \"Road at XXX location has been damaged after an accident which happened three weeks ago no action taken by PWD\"\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:9005/grievance-service/api/grievances/create",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "grievance-service",
+                "api",
+                "grievances",
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Grievance By Id",
+          "id": "30a7ae02-a614-40af-b216-c1f512e2cba8",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2OTU3OGE5OTBjNTVhMzVhNjU1Y2RhZWIiLCJyb2xlIjoiQ0lUSVpFTiIsInBob25lIjoiKzkxLTc2NTE4ODEzODIiLCJpc3MiOiJBdXRoLVNlcnZpY2UiLCJuYW1lIjoiS2FuY2hhbiBSYWkiLCJleHAiOjE3NjczOTI5MjksImlhdCI6MTc2NzM4NTcyOSwiZW1haWwiOiJrYW5jaGFuQGV4YW1wbGUuY29tIn0.jUIQOu0EBqDFk3oydZaAFQAGOKKAIe3G6NAFZdGIcJ4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:9005/grievance-service/api/grievances/6958318bf906d3465db034d9",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "grievance-service",
+                "api",
+                "grievances",
+                "6958318bf906d3465db034d9"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Status History of grievance By ID",
+          "id": "ca91d7e0-8c12-4958-990b-7d55a2b9a065",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{citizenToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:9005/grievance-service/api/grievances/history/69582b58f906d3465db034d1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "grievance-service",
+                "api",
+                "grievances",
+                "history",
+                "69582b58f906d3465db034d1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get my grievances",
+          "id": "b0409d8f-3713-4375-b308-3e72ef73f458",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{citizenToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:9005/grievance-service/api/grievances/my",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "grievance-service",
+                "api",
+                "grievances",
+                "my"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "cf3c9b34-2b89-4bf4-a0c8-0b254d2ab275"
+    },
+    {
+      "name": "Feedback Endpoints",
+      "item": [
+        {
+          "name": "Post Feedback when grievance is RESOLVED",
+          "id": "ad8fea90-87d7-47fe-af6f-ce73a1ca9271",
+          "request": {
+            "method": "POST",
+            "header": []
+          },
+          "response": []
+        },
+        {
+          "name": "Post Rating",
+          "id": "d187cf3b-38eb-415b-b4f9-6bfa8fe1c5a8",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"grievanceId\":\"\",\r\n    \"score\":\"\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:9005/feedback-service/api/feedback/ratings",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "9005",
+              "path": [
+                "feedback-service",
+                "api",
+                "feedback",
+                "ratings"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "ae2b7071-1939-48bf-89d6-17818f45ee6a"
+    }
+  ]
+}

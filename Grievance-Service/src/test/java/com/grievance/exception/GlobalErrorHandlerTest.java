@@ -73,4 +73,11 @@ class GlobalErrorHandlerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(response.getBody()).containsEntry("message", ex.getMessage());
     }
+
+    @Test
+    void handleStorageReturnsBadRequest() {
+        var response = handler.handleStorage(new StorageException("storage error"));
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).containsEntry("message", "storage error");
+    }
 }

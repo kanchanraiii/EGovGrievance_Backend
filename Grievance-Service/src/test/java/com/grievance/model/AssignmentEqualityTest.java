@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("java:S5838")
 class AssignmentEqualityTest {
 
     @Test
@@ -41,8 +42,8 @@ class AssignmentEqualityTest {
         Assignment a1 = new Assignment();
         a1.setId("a1");
 
-        assertThat(a1).isEqualTo(a1);
-        assertThat(a1).isNotEqualTo(null);
+        assertThat(a1).isEqualTo(a1)
+                .isNotEqualTo(null);
         assertThat(a1.canEqual(new Object())).isFalse();
 
         Assignment different = new Assignment();
@@ -61,10 +62,9 @@ class AssignmentEqualityTest {
 
         Assignment differentId = new Assignment();
         differentId.setId("a2");
-        assertThat(base).isNotEqualTo(differentId);
-
         Assignment nullId = new Assignment();
-        assertThat(base).isNotEqualTo(nullId);
+        assertThat(base).isNotEqualTo(differentId)
+                .isNotEqualTo(nullId);
 
         Assignment nullBase = new Assignment();
         Assignment withId = new Assignment();

@@ -1,6 +1,9 @@
 package com.grievance.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +29,8 @@ class MainControllerTest {
 
     @Mock
     private GrievanceService grievanceService;
+    @Mock
+    private com.grievance.client.AuthClient authClient;
 
     @InjectMocks
     private MainController controller;
@@ -52,7 +57,8 @@ class MainControllerTest {
         request.setSubCategoryCode("SUB");
         request.setDescription("description text");
 
-        when(grievanceService.createGrievance(request, "citizen-1")).thenReturn(Mono.just(saved));
+        when(grievanceService.createGrievance(any(GrievanceCreateRequest.class), anyString(), anyString()))
+                .thenReturn(Mono.just(saved));
 
         StepVerifier.create(controller.createGrievance(request, citizenJwt))
                 .assertNext(map -> assertThat(map).containsEntry("grievanceId", "g1"))
@@ -98,6 +104,17 @@ class MainControllerTest {
 
         StepVerifier.create(controller.updateStatus(request, officerJwt))
                 .expectNext(updated)
+                .verifyComplete();
+    }
+
+    @Test
+    void getByIdDelegatesToService() {
+        Grievance grievance = new Grievance();
+        grievance.setId("g1");
+        when(grievanceService.getById("g1")).thenReturn(Mono.just(grievance));
+
+        StepVerifier.create(controller.getGrievanceById("g1"))
+                .expectNext(grievance)
                 .verifyComplete();
     }
 
@@ -155,10 +172,63 @@ class MainControllerTest {
                 .verifyComplete();
     }
 
+    @Test
+    void getMyAssignedGrievancesAllowsCaseWorker() {
+        Grievance grievance = new Grievance();
+        grievance.setId("g1");
+        Jwt caseWorkerJwt = jwtWith("case-1", "CASE_WORKER", "D1");
+        when(grievanceService.getByCaseWorkerSelf(eq("case-1"), anyString(), eq("D1")))
+                .thenReturn(Flux.just(grievance));
+
+        StepVerifier.create(controller.getMyAssignedGrievances(caseWorkerJwt))
+                .expectNext(grievance)
+                .verifyComplete();
+    }
+
+    @Test
+    void getMyAssignedGrievancesRejectsNonCaseWorker() {
+        Jwt nonWorker = jwtWith("user-1", "CITIZEN", "D1");
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> controller.getMyAssignedGrievances(nonWorker))
+                .isInstanceOf(org.springframework.web.server.ResponseStatusException.class);
+    }
+
+    @Test
+    void getAllCaseWorkersInDepartmentDelegates() {
+        when(grievanceService.getAllCaseWorkersInDepartment("DEPARTMENT_OFFICER", "D1"))
+                .thenReturn(Flux.just("a", "b"));
+
+        StepVerifier.create(controller.getAllCaseWorkersInDepartment(officerJwt))
+                .assertNext(map -> assertThat(map.get("caseWorkers")).containsExactly("a", "b"))
+                .verifyComplete();
+    }
+
+    @Test
+    void getByCaseWorkerDelegatesWithContext() {
+        Grievance grievance = new Grievance();
+        grievance.setId("g1");
+        when(grievanceService.getByCaseWorker("cw-1", "DEPARTMENT_OFFICER", "D1"))
+                .thenReturn(Flux.just(grievance));
+
+        StepVerifier.create(controller.getByCaseWorker("cw-1", officerJwt))
+                .expectNext(grievance)
+                .verifyComplete();
+    }
+
+    @Test
+    void getEscalatedDelegatesToService() {
+        when(grievanceService.getEscalatedForSupervisor("DEPARTMENT_OFFICER", "D1"))
+                .thenReturn(Flux.empty());
+
+        StepVerifier.create(controller.getEscalated(officerJwt))
+                .verifyComplete();
+    }
+
     private Jwt jwtWith(String subject, String role, String departmentId) {
         return Jwt.withTokenValue("token")
                 .header("alg", "none")
                 .subject(subject)
+                .claim("email", subject + "@example.com")
                 .claim("role", role)
                 .claim("departmentId", departmentId)
                 .build();

@@ -10,8 +10,6 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -29,18 +27,21 @@ import reactor.core.publisher.Mono;
 @Service
 public class DepartmentConfigService {
 
+    private static final String NODE_CATEGORIES = "categories";
+    private static final String NODE_CENTRAL = "centralGovernmentDepartments";
+    private static final String NODE_STATE = "stateGovernmentDepartments";
+    private static final String MSG_DEPARTMENT_NOT_FOUND = "Department not found";
+    private static final String MSG_CATEGORY_EXISTS = "Category already exists";
+
     private final String departmentsFilePath;
-    private final ResourceLoader resourceLoader;
     private final ObjectMapper objectMapper;
     private final DepartmentCatalog departmentCatalog;
 
     public DepartmentConfigService(
             @Value("${departments.file:../departments-config/departments-db.json}") String departmentsFilePath,
-            ResourceLoader resourceLoader,
             ObjectMapper objectMapper,
             DepartmentCatalog departmentCatalog) {
         this.departmentsFilePath = departmentsFilePath;
-        this.resourceLoader = resourceLoader;
         this.objectMapper = objectMapper;
         this.departmentCatalog = departmentCatalog;
     }
@@ -79,16 +80,16 @@ public class DepartmentConfigService {
 
         ArrayNode target = selectArray(root, request.getLevel());
         ObjectNode newDepartment = objectMapper.createObjectNode();
-        newDepartment.put("id", departmentId);
-        newDepartment.put("name", request.getName().trim());
-        newDepartment.put("level", normalizeLevel(request.getLevel()));
+        newDepartment.set("id", objectMapper.getNodeFactory().textNode(departmentId));
+        newDepartment.set("name", objectMapper.getNodeFactory().textNode(request.getName().trim()));
+        newDepartment.set("level", objectMapper.getNodeFactory().textNode(normalizeLevel(request.getLevel())));
 
         ArrayNode categoriesNode = objectMapper.createArrayNode();
         if (request.getCategories() != null) {
             request.getCategories()
                     .forEach(category -> categoriesNode.add(buildCategoryNode(category)));
         }
-        newDepartment.set("categories", categoriesNode);
+        newDepartment.set(NODE_CATEGORIES, categoriesNode);
 
         target.add(newDepartment);
         writeRoot(root);
@@ -99,11 +100,11 @@ public class DepartmentConfigService {
         ObjectNode root = readRoot();
         String departmentId = normalizeId(departmentIdRaw);
 
-        boolean removed = removeFromArray(root.withArray("centralGovernmentDepartments"), departmentId)
-                || removeFromArray(root.withArray("stateGovernmentDepartments"), departmentId);
+        boolean removed = removeFromArray(root.withArray(NODE_CENTRAL), departmentId)
+                || removeFromArray(root.withArray(NODE_STATE), departmentId);
 
         if (!removed) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, MSG_DEPARTMENT_NOT_FOUND);
         }
 
         writeRoot(root);
@@ -116,14 +117,14 @@ public class DepartmentConfigService {
         String categoryCode = normalizeCode(request.getCode());
 
         ObjectNode department = findDepartment(root, departmentId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, MSG_DEPARTMENT_NOT_FOUND));
 
-        ArrayNode categories = department.withArray("categories");
+        ArrayNode categories = department.withArray(NODE_CATEGORIES);
         boolean exists = stream(categories)
                 .anyMatch(node -> categoryCode.equalsIgnoreCase(node.path("code").asText()));
 
         if (exists) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Category already exists");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, MSG_CATEGORY_EXISTS);
         }
 
         categories.add(buildCategoryNode(request, categoryCode));
@@ -136,9 +137,9 @@ public class DepartmentConfigService {
         String categoryCode = normalizeCode(categoryCodeRaw);
 
         ObjectNode department = findDepartment(root, departmentId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, MSG_DEPARTMENT_NOT_FOUND));
 
-        ArrayNode categories = department.withArray("categories");
+        ArrayNode categories = department.withArray(NODE_CATEGORIES);
         boolean removed = removeCategory(categories, categoryCode);
 
         if (!removed) {
@@ -153,9 +154,9 @@ public class DepartmentConfigService {
         String departmentId = normalizeId(departmentIdRaw);
 
         ObjectNode department = findDepartment(root, departmentId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, MSG_DEPARTMENT_NOT_FOUND));
 
-        return department.withArray("categories");
+        return department.withArray(NODE_CATEGORIES);
     }
 
     private ObjectNode readRoot() {
@@ -164,8 +165,8 @@ public class DepartmentConfigService {
             try {
                 Files.createDirectories(path.getParent());
                 ObjectNode newRoot = objectMapper.createObjectNode();
-                newRoot.set("centralGovernmentDepartments", objectMapper.createArrayNode());
-                newRoot.set("stateGovernmentDepartments", objectMapper.createArrayNode());
+                newRoot.set(NODE_CENTRAL, objectMapper.createArrayNode());
+                newRoot.set(NODE_STATE, objectMapper.createArrayNode());
                 writeRoot(newRoot);
                 return newRoot;
             } catch (IOException ex) {
@@ -206,22 +207,22 @@ public class DepartmentConfigService {
     }
 
     private Optional<ObjectNode> findDepartment(ObjectNode root, String departmentId) {
-        return stream(root.withArray("centralGovernmentDepartments"))
+        return stream(root.withArray(NODE_CENTRAL))
                 .filter(node -> departmentId.equalsIgnoreCase(node.path("id").asText()))
                 .findFirst()
-                .map(node -> (ObjectNode) node)
-                .or(() -> stream(root.withArray("stateGovernmentDepartments"))
+                .map(ObjectNode.class::cast)
+                .or(() -> stream(root.withArray(NODE_STATE))
                         .filter(node -> departmentId.equalsIgnoreCase(node.path("id").asText()))
                         .findFirst()
-                        .map(node -> (ObjectNode) node));
+                        .map(ObjectNode.class::cast));
     }
 
     private ArrayNode selectArray(ObjectNode root, String levelRaw) {
         String level = normalizeLevel(levelRaw);
         if ("STATE".equalsIgnoreCase(level)) {
-            return root.withArray("stateGovernmentDepartments");
+            return root.withArray(NODE_STATE);
         }
-        return root.withArray("centralGovernmentDepartments");
+        return root.withArray(NODE_CENTRAL);
     }
 
     private String normalizeId(String id) {
@@ -255,15 +256,15 @@ public class DepartmentConfigService {
 
     private ObjectNode buildCategoryNode(CategoryRequest request, String categoryCode) {
         ObjectNode category = objectMapper.createObjectNode();
-        category.put("code", categoryCode);
-        category.put("name", request.getName().trim());
+        category.set("code", objectMapper.getNodeFactory().textNode(categoryCode));
+        category.set("name", objectMapper.getNodeFactory().textNode(request.getName().trim()));
 
         ArrayNode subCategories = objectMapper.createArrayNode();
         if (request.getSubCategories() != null) {
             for (SubCategoryRequest sub : request.getSubCategories()) {
                 ObjectNode subNode = objectMapper.createObjectNode();
-                subNode.put("code", normalizeCode(sub.getCode()));
-                subNode.put("name", sub.getName().trim());
+                subNode.set("code", objectMapper.getNodeFactory().textNode(normalizeCode(sub.getCode())));
+                subNode.set("name", objectMapper.getNodeFactory().textNode(sub.getName().trim()));
                 subCategories.add(subNode);
             }
         }
@@ -294,8 +295,8 @@ public class DepartmentConfigService {
     }
 
     private void ensureArrays(ObjectNode root) {
-        root.withArray("centralGovernmentDepartments");
-        root.withArray("stateGovernmentDepartments");
+        root.withArray(NODE_CENTRAL);
+        root.withArray(NODE_STATE);
     }
 
     private Stream<JsonNode> stream(ArrayNode arrayNode) {

@@ -43,8 +43,7 @@ public class SecurityConfig {
                                 "/auth-docs/**",
                                 "/grievance-docs/**",
                                 "/feedback-docs/**",
-                                "/notification-docs/**",
-                                "/storage-docs/**")
+                                "/notification-docs/**")
                         .permitAll()
                         .anyExchange().authenticated())
                 .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))

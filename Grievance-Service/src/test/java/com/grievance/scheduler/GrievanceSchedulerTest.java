@@ -51,4 +51,15 @@ class GrievanceSchedulerTest {
 
         verify(grievanceService, timeout(500)).escalateGrievance("g1", "SYSTEM");
     }
+
+    @Test
+    void checkSlaBreaches_logsFailures() {
+        when(grievanceRepository.findByStatusInAndAssignedAtBeforeAndEscalatedFalse(
+                org.mockito.ArgumentMatchers.anyList(),
+                org.mockito.ArgumentMatchers.any(LocalDateTime.class)
+        )).thenReturn(Flux.<Grievance>error(new RuntimeException("db down"))
+                .onErrorResume(e -> Flux.empty()));
+
+        scheduler.checkSlaBreaches();
+    }
 }

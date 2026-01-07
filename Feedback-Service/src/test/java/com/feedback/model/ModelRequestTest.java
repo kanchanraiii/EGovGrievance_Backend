@@ -61,7 +61,6 @@ class ModelRequestTest {
     void requestDtosGettersWork() {
         FeedbackRequest feedbackRequest = new FeedbackRequest();
         feedbackRequest.setGrievanceId("g1");
-        feedbackRequest.setCitizenId("c1");
         feedbackRequest.setComments("Some comments long enough");
 
         RatingsRequest ratingsRequest = new RatingsRequest();
@@ -72,7 +71,6 @@ class ModelRequestTest {
         reopenRequest.setGrievanceId("g1");
         reopenRequest.setReason("Reopen reason");
 
-        assertThat(feedbackRequest.getCitizenId()).isEqualTo("c1");
         assertThat(feedbackRequest.getComments()).contains("Some comments");
         assertThat(ratingsRequest.getScore()).isEqualTo(5);
         assertThat(reopenRequest.getReason()).contains("Reopen");

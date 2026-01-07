@@ -1,6 +1,5 @@
 package com.grievance.model;
 
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -14,8 +13,8 @@ import java.time.LocalDateTime;
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString
-@Document(collection = "assignments")
-public class Assignment {
+	@Document(collection = "assignments")
+	public class Assignment {
 
     @Id
     @EqualsAndHashCode.Include
@@ -32,9 +31,9 @@ public class Assignment {
 
     private LocalDateTime assignedAt;
 
-	public Assignment() {
-		
-	}
+		public Assignment() {
+			// Required by Spring Data / Jackson for instantiation
+		}
 
 	public String getId() {
 		return id;

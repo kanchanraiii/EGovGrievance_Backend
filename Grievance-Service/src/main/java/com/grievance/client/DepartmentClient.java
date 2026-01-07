@@ -7,16 +7,21 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @Component
 public class DepartmentClient {
 
     private final WebClient webClient;
+    private final String departmentsPath;
 
-    // connecting to json server
+    // connecting to department service (Auth Service via gateway or direct)
     public DepartmentClient(
             WebClient.Builder builder,
-            @Value("${departments.service.base-url:http://localhost:3001/}") String baseUrl) {
-        this.webClient = builder.baseUrl(baseUrl).build();
+            @Value("${departments.service.base-url:http://localhost:9007}") String baseUrl,
+            @Value("${departments.service.path:/api/auth/departments}") String departmentsPath) {
+        this.webClient = builder.baseUrl(trimTrailingSlash(baseUrl)).build();
+        this.departmentsPath = ensureLeadingSlash(departmentsPath);
     }
 
     // to check if a dept is valid or exists
@@ -29,22 +34,32 @@ public class DepartmentClient {
             return Mono.just(false);
         }
 
-        return Flux.concat(
-                        fetchDepartments("/centralGovernmentDepartments"),
-                        fetchDepartments("/stateGovernmentDepartments"))
+        return fetchAllDepartments()
+                .flatMapMany(this::flattenDepartments)
                 .filter(department -> departmentCode.equalsIgnoreCase(department.getId()))
                 .next()
                 .map(department -> hasCategoryAndSubCategory(department, categoryCode, subCategoryCode))
                 .defaultIfEmpty(false)
-                .onErrorMap(ex -> new ServiceException("Department JSON Server unavailable"));
+                .onErrorMap(ex -> new ServiceException("Department service unavailable"));
     }
 
     // fetch dept
-    private Flux<DepartmentResponse> fetchDepartments(String path) {
+    private Mono<DepartmentsResponse> fetchAllDepartments() {
         return webClient.get()
-                .uri(path)
+                .uri(departmentsPath)
                 .retrieve()
-                .bodyToFlux(DepartmentResponse.class);
+                .bodyToMono(DepartmentsResponse.class);
+    }
+
+    private Flux<DepartmentResponse> flattenDepartments(DepartmentsResponse response) {
+        return Flux.concat(
+                Flux.fromIterable(nullSafe(response.getCentralGovernmentDepartments())),
+                Flux.fromIterable(nullSafe(response.getStateGovernmentDepartments()))
+        );
+    }
+
+    private List<DepartmentResponse> nullSafe(List<DepartmentResponse> departments) {
+        return departments == null ? List.of() : departments;
     }
 
     // check for category and subcategory
@@ -62,5 +77,22 @@ public class DepartmentClient {
                 .anyMatch(category -> category.getSubCategories() != null &&
                         category.getSubCategories().stream()
                                 .anyMatch(sub -> subCategoryCode.equalsIgnoreCase(sub.getCode())));
+    }
+
+    private String trimTrailingSlash(String baseUrl) {
+        if (baseUrl == null) {
+            return "";
+        }
+        if (baseUrl.endsWith("/")) {
+            return baseUrl.substring(0, baseUrl.length() - 1);
+        }
+        return baseUrl;
+    }
+
+    private String ensureLeadingSlash(String path) {
+        if (path == null || path.isBlank()) {
+            return "/api/auth/departments";
+        }
+        return path.startsWith("/") ? path : "/" + path;
     }
 }

@@ -3,11 +3,11 @@ package com.grievance.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -71,7 +71,7 @@ class GrievanceServiceTest {
         when(statusHistoryRepository.save(any(GrievanceHistory.class))).thenReturn(Mono.just(new GrievanceHistory()));
         when(grievanceEventPublisher.publishStatusChange(any(), any(), any())).thenReturn(Mono.empty());
 
-        StepVerifier.create(grievanceService.createGrievance(request, "citizen-1"))
+        StepVerifier.create(grievanceService.createGrievance(request, "citizen-1", "citizen@example.com"))
                 .assertNext(saved -> {
                     assertThat(saved.getId()).isEqualTo("g1");
                     assertThat(saved.getCitizenId()).isEqualTo("citizen-1");
@@ -354,6 +354,26 @@ class GrievanceServiceTest {
     }
 
     @Test
+    void getByDepartmentRejectsSupervisorFromOtherDepartment() {
+        StepVerifier.create(grievanceService.getByDepartment("D1", "SUPERVISORY_OFFICER", "OTHER"))
+                .expectErrorSatisfies(error -> {
+                    assertThat(error).isInstanceOf(ResponseStatusException.class);
+                    assertThat(((ResponseStatusException) error).getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+                })
+                .verify();
+    }
+
+    @Test
+    void getByDepartmentAllowsSupervisorWithoutRequesterDepartment() {
+        Grievance grievance = grievanceWithDept("D1");
+        when(grievanceRepository.findByDepartmentId("D1")).thenReturn(Flux.just(grievance));
+
+        StepVerifier.create(grievanceService.getByDepartment("D1", "SUPERVISORY_OFFICER", null))
+                .expectNext(grievance)
+                .verifyComplete();
+    }
+
+    @Test
     void getByCitizenReturnsGrievancesForSubject() {
         Grievance grievance = new Grievance();
         grievance.setId("g1");
@@ -490,6 +510,20 @@ class GrievanceServiceTest {
     }
 
     @Test
+    void getByCaseWorkerAllowsCaseWorkerWithDepartmentFilter() {
+        Grievance deptMatch = grievanceWithDept("D1");
+        deptMatch.setAssignedWokerId("cw-1");
+        Grievance otherDept = grievanceWithDept("D2");
+        otherDept.setAssignedWokerId("cw-1");
+
+        when(grievanceRepository.findByAssignedWokerId("cw-1")).thenReturn(Flux.just(deptMatch, otherDept));
+
+        StepVerifier.create(grievanceService.getByCaseWorker("cw-1", "CASE_WORKER", "D1"))
+                .expectNext(deptMatch)
+                .verifyComplete();
+    }
+
+    @Test
     void getByCaseWorkerRejectsNullRole() {
         StepVerifier.create(grievanceService.getByCaseWorker("cw-1", null, "D1"))
                 .expectError(ResponseStatusException.class)
@@ -504,6 +538,50 @@ class GrievanceServiceTest {
     }
 
     @Test
+    void getByCaseWorkerSelfSkipsAlternateWhenSameId() {
+        Grievance primary = grievanceWithDept("D1");
+        primary.setId("p1");
+
+        when(grievanceRepository.findByAssignedWokerId("cw-1")).thenReturn(Flux.just(primary));
+
+        StepVerifier.create(grievanceService.getByCaseWorkerSelf("cw-1", "cw-1", "D1"))
+                .expectNext(primary)
+                .verifyComplete();
+
+        verify(grievanceRepository, times(1)).findByAssignedWokerId("cw-1");
+    }
+
+    @Test
+    void getByCaseWorkerSelfFiltersAlternateIdsByDepartment() {
+        Grievance primary = grievanceWithDept("D1");
+        primary.setId("p1");
+        Grievance alternate = grievanceWithDept("D2");
+        alternate.setId("p2");
+
+        when(grievanceRepository.findByAssignedWokerId("cw-1")).thenReturn(Flux.just(primary));
+        when(grievanceRepository.findByAssignedWokerId("cw-alt")).thenReturn(Flux.just(alternate));
+
+        StepVerifier.create(grievanceService.getByCaseWorkerSelf("cw-1", "cw-alt", "D1"))
+                .expectNext(primary)
+                .verifyComplete();
+    }
+
+    @Test
+    void getByCaseWorkerSelfReturnsDistinctCombinedWhenNoDepartmentFilter() {
+        Grievance primary = grievanceWithDept("D1");
+        primary.setId("g1");
+        Grievance duplicate = grievanceWithDept("D2");
+        duplicate.setId("g1");
+
+        when(grievanceRepository.findByAssignedWokerId("cw-1")).thenReturn(Flux.just(primary));
+        when(grievanceRepository.findByAssignedWokerId("cw-alt")).thenReturn(Flux.just(duplicate));
+
+        StepVerifier.create(grievanceService.getByCaseWorkerSelf("cw-1", "cw-alt", null))
+                .expectNext(primary)
+                .verifyComplete();
+    }
+
+    @Test
     void getCaseWorkersForOfficerRejectsNullOfficer() {
         StepVerifier.create(grievanceService.getCaseWorkersForOfficer(null, "ADMIN"))
                 .expectError(ResponseStatusException.class)
@@ -513,6 +591,144 @@ class GrievanceServiceTest {
     @Test
     void getCaseWorkersForOfficerRejectsNullRole() {
         StepVerifier.create(grievanceService.getCaseWorkersForOfficer("officer-1", null))
+                .expectError(ResponseStatusException.class)
+                .verify();
+    }
+
+    @Test
+    void getAllCaseWorkersInDepartmentRequiresAuthorizedRole() {
+        StepVerifier.create(grievanceService.getAllCaseWorkersInDepartment("CITIZEN", "D1"))
+                .expectError(ResponseStatusException.class)
+                .verify();
+    }
+
+    @Test
+    void getAllCaseWorkersInDepartmentRequiresDepartment() {
+        StepVerifier.create(grievanceService.getAllCaseWorkersInDepartment("ADMIN", null))
+                .expectError(ResponseStatusException.class)
+                .verify();
+    }
+
+    @Test
+    void getAllCaseWorkersInDepartmentReturnsDistinctNonBlank() {
+        Grievance g1 = grievanceWithDept("D1");
+        g1.setAssignedWokerId("cw-1");
+        Grievance g2 = grievanceWithDept("D1");
+        g2.setAssignedWokerId(" ");
+        Grievance g3 = grievanceWithDept("D1");
+        g3.setAssignedWokerId("cw-2");
+
+        when(grievanceRepository.findByDepartmentId("D1")).thenReturn(Flux.just(g1, g2, g3));
+
+        StepVerifier.create(grievanceService.getAllCaseWorkersInDepartment("ADMIN", "D1"))
+                .expectNext("cw-1", "cw-2")
+                .verifyComplete();
+    }
+
+    @Test
+    void getAllCaseWorkersInDepartmentAllowsSupervisoryOfficer() {
+        Grievance g1 = grievanceWithDept("D1");
+        g1.setAssignedWokerId("cw-1");
+        Grievance g2 = grievanceWithDept("D1");
+        g2.setAssignedWokerId("cw-2");
+
+        when(grievanceRepository.findByDepartmentId("D1")).thenReturn(Flux.just(g1, g2));
+
+        StepVerifier.create(grievanceService.getAllCaseWorkersInDepartment("SUPERVISORY_OFFICER", "D1"))
+                .expectNext("cw-1", "cw-2")
+                .verifyComplete();
+    }
+
+    @Test
+    void getEscalatedForSupervisorFiltersByDepartmentForSupervisors() {
+        Grievance gDept1 = grievanceWithDept("D1");
+        gDept1.setId("g1");
+        gDept1.setStatus(GrievanceStatus.ESCALATED);
+        Grievance gDept2 = grievanceWithDept("D2");
+        gDept2.setId("g2");
+        gDept2.setStatus(GrievanceStatus.ESCALATED);
+
+        when(grievanceRepository.findByStatus(GrievanceStatus.ESCALATED)).thenReturn(Flux.just(gDept1, gDept2));
+        when(assignmentRepository.findByGrievanceId("g1")).thenReturn(Flux.empty());
+
+        StepVerifier.create(grievanceService.getEscalatedForSupervisor("SUPERVISORY_OFFICER", "D1"))
+                .expectNextMatches(view -> view.getGrievanceId().equals("g1"))
+                .verifyComplete();
+    }
+
+    @Test
+    void getEscalatedForSupervisorReturnsAllForAdmin() {
+        Grievance grievance = grievanceWithDept("D1");
+        grievance.setId("g1");
+        grievance.setStatus(GrievanceStatus.ESCALATED);
+        grievance.setAssignedWokerId("original");
+
+        Assignment oldAssignment = new Assignment();
+        oldAssignment.setAssignedTo("cw-old");
+        oldAssignment.setAssignedBy("mgr1");
+        oldAssignment.setAssignedAt(LocalDateTime.now().minusDays(2));
+
+        Assignment latest = new Assignment();
+        latest.setAssignedTo("cw-new");
+        latest.setAssignedBy("mgr2");
+        latest.setAssignedAt(LocalDateTime.now().minusDays(1));
+
+        when(grievanceRepository.findByStatus(GrievanceStatus.ESCALATED)).thenReturn(Flux.just(grievance));
+        when(assignmentRepository.findByGrievanceId("g1")).thenReturn(Flux.just(oldAssignment, latest));
+
+        StepVerifier.create(grievanceService.getEscalatedForSupervisor("ADMIN", null))
+                .assertNext(view -> {
+                    assertThat(view.getAssignedTo()).isEqualTo("cw-new");
+                    assertThat(view.getAssignedBy()).isEqualTo("mgr2");
+                    assertThat(view.getGrievanceId()).isEqualTo("g1");
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void getEscalatedForSupervisorUsesLastAssignmentWhenNoTimestamps() {
+        Grievance grievance = grievanceWithDept("D1");
+        grievance.setId("g2");
+        grievance.setStatus(GrievanceStatus.ESCALATED);
+        grievance.setAssignedWokerId("fallback");
+
+        Assignment first = new Assignment();
+        first.setAssignedTo("first");
+        Assignment last = new Assignment();
+        last.setAssignedTo("last");
+
+        when(grievanceRepository.findByStatus(GrievanceStatus.ESCALATED)).thenReturn(Flux.just(grievance));
+        when(assignmentRepository.findByGrievanceId("g2")).thenReturn(Flux.just(first, last));
+
+        StepVerifier.create(grievanceService.getEscalatedForSupervisor("ADMIN", null))
+                .assertNext(view -> {
+                    assertThat(view.getAssignedTo()).isEqualTo("last");
+                    assertThat(view.getAssignedBy()).isNull();
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void getEscalatedForSupervisorReturnsAllWhenDepartmentMissing() {
+        Grievance g1 = grievanceWithDept("D1");
+        g1.setId("g1");
+        g1.setStatus(GrievanceStatus.ESCALATED);
+        Grievance g2 = grievanceWithDept("D2");
+        g2.setId("g2");
+        g2.setStatus(GrievanceStatus.ESCALATED);
+
+        when(grievanceRepository.findByStatus(GrievanceStatus.ESCALATED)).thenReturn(Flux.just(g1, g2));
+        when(assignmentRepository.findByGrievanceId("g1")).thenReturn(Flux.empty());
+        when(assignmentRepository.findByGrievanceId("g2")).thenReturn(Flux.empty());
+
+        StepVerifier.create(grievanceService.getEscalatedForSupervisor("SUPERVISORY_OFFICER", ""))
+                .expectNextCount(2)
+                .verifyComplete();
+    }
+
+    @Test
+    void getEscalatedForSupervisorRejectsUnauthorizedRole() {
+        StepVerifier.create(grievanceService.getEscalatedForSupervisor("CITIZEN", "D1"))
                 .expectError(ResponseStatusException.class)
                 .verify();
     }

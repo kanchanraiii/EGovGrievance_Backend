@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.grievance.model.GrievanceStatus;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("java:S5838")
 class RequestEqualityTest {
 
     @Test
@@ -29,10 +30,9 @@ class RequestEqualityTest {
         assertThat(r1.toString()).contains("GrievanceCreateRequest", "description");
 
         r2.setSubCategoryCode("DIFF");
-        assertThat(r1).isNotEqualTo(r2);
-
-        assertThat(r1).isEqualTo(r1);
-        assertThat(r1).isNotEqualTo(null);
+        assertThat(r1).isNotEqualTo(r2)
+                .isEqualTo(r1)
+                .isNotEqualTo(null);
         assertThat(r1.canEqual(new Object())).isFalse();
 
         GrievanceCreateRequest empty1 = new GrievanceCreateRequest();
@@ -43,25 +43,22 @@ class RequestEqualityTest {
         missingDepartment.setCategoryCode("CAT");
         missingDepartment.setSubCategoryCode("SUB");
         missingDepartment.setDescription("description");
-        assertThat(r1).isNotEqualTo(missingDepartment);
-
         GrievanceCreateRequest missingCategory = new GrievanceCreateRequest();
         missingCategory.setDepartmentId("D1");
         missingCategory.setSubCategoryCode("SUB");
         missingCategory.setDescription("description");
-        assertThat(r1).isNotEqualTo(missingCategory);
-
         GrievanceCreateRequest missingSubCategory = new GrievanceCreateRequest();
         missingSubCategory.setDepartmentId("D1");
         missingSubCategory.setCategoryCode("CAT");
         missingSubCategory.setDescription("description");
-        assertThat(r1).isNotEqualTo(missingSubCategory);
-
         GrievanceCreateRequest missingDescription = new GrievanceCreateRequest();
         missingDescription.setDepartmentId("D1");
         missingDescription.setCategoryCode("CAT");
         missingDescription.setSubCategoryCode("SUB");
-        assertThat(r1).isNotEqualTo(missingDescription);
+        assertThat(r1).isNotEqualTo(missingDepartment)
+                .isNotEqualTo(missingCategory)
+                .isNotEqualTo(missingSubCategory)
+                .isNotEqualTo(missingDescription);
 
         GrievanceCreateRequest nullDepartmentBase = new GrievanceCreateRequest();
         nullDepartmentBase.setCategoryCode("CAT");
@@ -115,10 +112,9 @@ class RequestEqualityTest {
         assertThat(a1).isEqualTo(a2).hasSameHashCodeAs(a2);
 
         a2.setAssignedTo("other");
-        assertThat(a1).isNotEqualTo(a2);
-
-        assertThat(a1).isEqualTo(a1);
-        assertThat(a1).isNotEqualTo(null);
+        assertThat(a1).isNotEqualTo(a2)
+                .isEqualTo(a1)
+                .isNotEqualTo(null);
         assertThat(a1.canEqual(new Object())).isFalse();
     }
 
@@ -139,10 +135,9 @@ class RequestEqualityTest {
         assertThat(s1).isEqualTo(s2).hasSameHashCodeAs(s2);
 
         s2.setRemarks("done");
-        assertThat(s1).isNotEqualTo(s2);
-
-        assertThat(s1).isEqualTo(s1);
-        assertThat(s1).isNotEqualTo(null);
+        assertThat(s1).isNotEqualTo(s2)
+                .isEqualTo(s1)
+                .isNotEqualTo(null);
         assertThat(s1.canEqual(new Object())).isFalse();
     }
 }
