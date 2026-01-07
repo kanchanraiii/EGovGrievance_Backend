@@ -43,6 +43,7 @@ class MainControllerTest {
         MockitoAnnotations.openMocks(this);
         citizenJwt = jwtWith("citizen-1", "CITIZEN", "D1");
         officerJwt = jwtWith("officer-1", "DEPARTMENT_OFFICER", "D1");
+        when(authClient.fetchEmail(any())).thenReturn(Mono.empty());
     }
 
     @Test
@@ -177,7 +178,7 @@ class MainControllerTest {
         Grievance grievance = new Grievance();
         grievance.setId("g1");
         Jwt caseWorkerJwt = jwtWith("case-1", "CASE_WORKER", "D1");
-        when(grievanceService.getByCaseWorkerSelf(eq("case-1"), anyString(), eq("D1")))
+        when(grievanceService.getByCaseWorkerSelf(any(), any(), any(), any()))
                 .thenReturn(Flux.just(grievance));
 
         StepVerifier.create(controller.getMyAssignedGrievances(caseWorkerJwt))

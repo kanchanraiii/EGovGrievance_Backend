@@ -544,7 +544,7 @@ class GrievanceServiceTest {
 
         when(grievanceRepository.findByAssignedWokerId("cw-1")).thenReturn(Flux.just(primary));
 
-        StepVerifier.create(grievanceService.getByCaseWorkerSelf("cw-1", "cw-1", "D1"))
+        StepVerifier.create(grievanceService.getByCaseWorkerSelf("cw-1", "cw-1", null, "D1"))
                 .expectNext(primary)
                 .verifyComplete();
 
@@ -561,7 +561,7 @@ class GrievanceServiceTest {
         when(grievanceRepository.findByAssignedWokerId("cw-1")).thenReturn(Flux.just(primary));
         when(grievanceRepository.findByAssignedWokerId("cw-alt")).thenReturn(Flux.just(alternate));
 
-        StepVerifier.create(grievanceService.getByCaseWorkerSelf("cw-1", "cw-alt", "D1"))
+        StepVerifier.create(grievanceService.getByCaseWorkerSelf("cw-1", "cw-alt", null, "D1"))
                 .expectNext(primary)
                 .verifyComplete();
     }
@@ -576,7 +576,7 @@ class GrievanceServiceTest {
         when(grievanceRepository.findByAssignedWokerId("cw-1")).thenReturn(Flux.just(primary));
         when(grievanceRepository.findByAssignedWokerId("cw-alt")).thenReturn(Flux.just(duplicate));
 
-        StepVerifier.create(grievanceService.getByCaseWorkerSelf("cw-1", "cw-alt", null))
+        StepVerifier.create(grievanceService.getByCaseWorkerSelf("cw-1", "cw-alt", null, null))
                 .expectNext(primary)
                 .verifyComplete();
     }

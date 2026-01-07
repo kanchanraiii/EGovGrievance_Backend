@@ -149,10 +149,24 @@ public class MainController {
                     "Only case workers can access this endpoint");
         }
 
-        return grievanceService.getByCaseWorkerSelf(
-                caseWorkerId,
-                jwt.getClaim("email"),
-                jwt.getClaim(CLAIM_DEPARTMENT_ID));
+        String emailClaim = jwt.getClaim("email");
+        Mono<String> emailMono = Mono.justOrEmpty(emailClaim)
+                .switchIfEmpty(Mono.defer(() -> {
+                    Mono<String> fetched = authClient.fetchEmail(jwt.getTokenValue());
+                    return fetched == null ? Mono.empty() : fetched;
+                }))
+                .defaultIfEmpty("");
+
+        String displayName = jwt.getClaim("name");
+
+        return emailMono.flatMapMany(email -> {
+            Flux<Grievance> result = grievanceService.getByCaseWorkerSelf(
+                    caseWorkerId,
+                    email,
+                    displayName,
+                    jwt.getClaim(CLAIM_DEPARTMENT_ID));
+            return result != null ? result : Flux.empty();
+        });
     }
 	
 	// get ALL case workers in my department

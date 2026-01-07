@@ -5,16 +5,16 @@ import com.grievance.repository.AssignmentRepository;
 import com.grievance.repository.GrievanceRepository;
 import com.grievance.repository.StatusHistoryRepository;
 import com.grievance.request.GrievanceCreateRequest;
-import org.springframework.util.StringUtils;
-import org.springframework.util.StringUtils;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class GrievanceService {
@@ -204,15 +204,33 @@ public class GrievanceService {
         return base;
     }
 
-    // list grievances for the authenticated case worker, tolerant to ids used during assignment (user id or email)
+    // compatibility overload
     public Flux<Grievance> getByCaseWorkerSelf(String primaryId, String alternateId, String requesterDepartmentId) {
-        Flux<Grievance> primary = grievanceRepository.findByAssignedWokerId(primaryId);
-        Flux<Grievance> alternate = Flux.empty();
+        return getByCaseWorkerSelf(primaryId, alternateId, null, requesterDepartmentId);
+    }
+
+    // list grievances for the authenticated case worker, tolerant to ids used during assignment (user id, email, or display name) and case differences
+    public Flux<Grievance> getByCaseWorkerSelf(String primaryId, String alternateId, String displayName, String requesterDepartmentId) {
+        List<String> candidates = new ArrayList<>();
+        if (StringUtils.hasText(primaryId)) {
+            candidates.add(primaryId);
+            candidates.add(primaryId.toLowerCase());
+        }
         if (StringUtils.hasText(alternateId) && !alternateId.equalsIgnoreCase(primaryId)) {
-            alternate = grievanceRepository.findByAssignedWokerId(alternateId);
+            candidates.add(alternateId);
+            candidates.add(alternateId.toLowerCase());
+        }
+        if (StringUtils.hasText(displayName)
+                && !displayName.equalsIgnoreCase(primaryId)
+                && !displayName.equalsIgnoreCase(alternateId)) {
+            candidates.add(displayName);
+            candidates.add(displayName.toLowerCase());
         }
 
-        Flux<Grievance> combined = Flux.concat(primary, alternate).distinct(Grievance::getId);
+        Flux<Grievance> combined = Flux.fromIterable(candidates)
+                .distinct()
+                .flatMap(id -> grievanceRepository.findByAssignedWokerId(id))
+                .distinct(Grievance::getId);
 
         if (StringUtils.hasText(requesterDepartmentId)) {
             return combined.filter(grievance -> isSameDepartment(requesterDepartmentId, grievance.getDepartmentId()));
